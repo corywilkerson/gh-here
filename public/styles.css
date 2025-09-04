@@ -168,6 +168,20 @@ main {
   margin: 0 auto;
 }
 
+.directory-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  margin-right: 6px;
+  vertical-align: text-bottom;
+}
+
 .file-table {
   width: 100%;
   border-collapse: collapse;
@@ -633,32 +647,118 @@ main {
   border-color: var(--text-secondary);
 }
 
+.editor-with-line-numbers {
+  position: relative;
+  display: flex;
+  border: 1px solid var(--border-primary);
+  border-width: 0 1px 1px 1px;
+  border-radius: 0 0 5px 5px;
+  background: var(--bg-primary);
+}
+
+.editor-line-numbers {
+  padding: 16px 8px 16px 16px;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+  user-select: none;
+  white-space: pre;
+  min-width: 50px;
+  overflow: hidden;
+}
+
 .file-editor {
-  width: 100%;
+  flex: 1;
   height: 600px;
   padding: 16px;
   font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
   font-size: 12px;
   line-height: 1.5;
-  background: var(--bg-primary);
+  background: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  border-width: 0 1px 1px 1px;
-  border-radius: 0 0 5px 5px;
+  border: none;
   outline: none;
   resize: vertical;
   tab-size: 2;
   white-space: pre;
 }
 
-.file-editor:focus {
+.editor-with-line-numbers:focus-within {
   border-color: #0969da;
-  box-shadow: inset 0 1px 2px rgba(27, 31, 36, 0.075), 0 0 0 0.2em rgba(9, 105, 218, 0.3);
+  box-shadow: 0 0 0 0.2em rgba(9, 105, 218, 0.3);
 }
 
-[data-theme="dark"] .file-editor:focus {
+[data-theme="dark"] .editor-with-line-numbers:focus-within {
   border-color: #58a6ff;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.075), 0 0 0 0.2em rgba(88, 166, 255, 0.3);
+  box-shadow: 0 0 0 0.2em rgba(88, 166, 255, 0.3);
+}
+
+/* New file interface */
+.new-file-container {
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+}
+
+.new-file-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.filename-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.filename-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.new-filename-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.new-filename-input:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 0.2em rgba(9, 105, 218, 0.3);
+}
+
+[data-theme="dark"] .new-filename-input:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 0.2em rgba(88, 166, 255, 0.3);
+}
+
+.new-file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.new-file-editor {
+  /* No additional styling needed - uses existing .file-editor */
 }
 
 .line-number {

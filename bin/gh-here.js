@@ -70,6 +70,12 @@ app.get('/', (req, res) => {
   }
 });
 
+// Route for creating new files
+app.get('/new', (req, res) => {
+  const currentPath = req.query.path || '';
+  res.send(renderNewFile(currentPath));
+});
+
 // API endpoint to get file content for editing
 app.get('/api/file-content', (req, res) => {
   try {
@@ -106,6 +112,117 @@ app.post('/api/save-file', express.json(), (req, res) => {
   }
 });
 
+// API endpoint to create new file
+app.post('/api/create-file', express.json(), (req, res) => {
+  try {
+    const { path: dirPath, filename } = req.body;
+    const fullDirPath = path.join(process.cwd(), dirPath || '');
+    const fullFilePath = path.join(fullDirPath, filename);
+    
+    // Security checks
+    if (!fullDirPath.startsWith(process.cwd()) || !fullFilePath.startsWith(process.cwd())) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+    
+    // Check if file already exists
+    if (fs.existsSync(fullFilePath)) {
+      return res.status(400).json({ success: false, error: 'File already exists' });
+    }
+    
+    // Create the file with empty content
+    fs.writeFileSync(fullFilePath, '', 'utf-8');
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// API endpoint to create new folder
+app.post('/api/create-folder', express.json(), (req, res) => {
+  try {
+    const { path: dirPath, foldername } = req.body;
+    const fullDirPath = path.join(process.cwd(), dirPath || '');
+    const fullFolderPath = path.join(fullDirPath, foldername);
+    
+    // Security checks
+    if (!fullDirPath.startsWith(process.cwd()) || !fullFolderPath.startsWith(process.cwd())) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+    
+    // Check if folder already exists
+    if (fs.existsSync(fullFolderPath)) {
+      return res.status(400).json({ success: false, error: 'Folder already exists' });
+    }
+    
+    // Create the folder
+    fs.mkdirSync(fullFolderPath);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// API endpoint to delete file or folder
+app.post('/api/delete', express.json(), (req, res) => {
+  try {
+    const { path: itemPath } = req.body;
+    const fullPath = path.join(process.cwd(), itemPath);
+    
+    // Security check
+    if (!fullPath.startsWith(process.cwd())) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+    
+    // Check if item exists
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    
+    // Delete the item
+    const stats = fs.statSync(fullPath);
+    if (stats.isDirectory()) {
+      fs.rmSync(fullPath, { recursive: true, force: true });
+    } else {
+      fs.unlinkSync(fullPath);
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// API endpoint to rename file or folder
+app.post('/api/rename', express.json(), (req, res) => {
+  try {
+    const { path: oldPath, newName } = req.body;
+    const fullOldPath = path.join(process.cwd(), oldPath);
+    const dirPath = path.dirname(fullOldPath);
+    const fullNewPath = path.join(dirPath, newName);
+    
+    // Security checks
+    if (!fullOldPath.startsWith(process.cwd()) || !fullNewPath.startsWith(process.cwd())) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+    
+    // Check if old item exists
+    if (!fs.existsSync(fullOldPath)) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    
+    // Check if new name already exists
+    if (fs.existsSync(fullNewPath)) {
+      return res.status(400).json({ success: false, error: 'Name already exists' });
+    }
+    
+    // Rename the item
+    fs.renameSync(fullOldPath, fullNewPath);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 function renderDirectory(currentPath, items) {
   const breadcrumbs = generateBreadcrumbs(currentPath);
   const readmeFile = findReadmeFile(items);
@@ -128,6 +245,12 @@ function renderDirectory(currentPath, items) {
               ${octicons.download.toSVG({ class: 'quick-icon' })}
             </a>
           ` : ''}
+          <button class="quick-btn rename-btn" title="Rename" data-path="${item.path}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
+            ${octicons.pencil.toSVG({ class: 'quick-icon' })}
+          </button>
+          <button class="quick-btn delete-btn" title="Delete" data-path="${item.path}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
+            ${octicons.trash.toSVG({ class: 'quick-icon' })}
+          </button>
         </div>
       </td>
       <td class="size">
@@ -166,6 +289,11 @@ function renderDirectory(currentPath, items) {
       </header>
       <main>
         ${languageStats}
+        <div class="directory-actions">
+          <button id="new-file-btn" class="btn btn-secondary">
+            ${octicons['file-added'].toSVG({ class: 'btn-icon' })} New file
+          </button>
+        </div>
         <div class="file-table-container">
           <table class="file-table" id="file-table">
             <thead>
@@ -359,6 +487,9 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
             <h1 class="header-path">${breadcrumbs}</h1>
           </div>
           <div class="header-right">
+            <div id="filename-input-container" class="filename-input-container" style="display: none;">
+              <input type="text" id="filename-input" class="filename-input" placeholder="Name your file...">
+            </div>
             <button id="edit-btn" class="edit-btn" aria-label="Edit file">
               ${octicons.pencil.toSVG({ class: 'edit-icon' })}
             </button>
@@ -381,7 +512,60 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
               <button id="save-btn" class="btn btn-primary">Save</button>
             </div>
           </div>
-          <textarea id="file-editor" class="file-editor"></textarea>
+          <div class="editor-with-line-numbers">
+            <div class="editor-line-numbers" id="editor-line-numbers">1</div>
+            <textarea id="file-editor" class="file-editor"></textarea>
+          </div>
+        </div>
+      </main>
+    </body>
+    </html>
+  `;
+}
+
+function renderNewFile(currentPath) {
+  const breadcrumbs = generateBreadcrumbs(currentPath);
+  
+  return `
+    <!DOCTYPE html>
+    <html data-theme="dark">
+    <head>
+      <title>gh-here: Create new file</title>
+      <link rel="stylesheet" href="/static/styles.css?v=${Date.now()}">
+      <link rel="stylesheet" href="/static/highlight.css?v=${Date.now()}">
+      <script src="/static/app.js"></script>
+    </head>
+    <body>
+      <header>
+        <div class="header-content">
+          <div class="header-left">
+            <h1 class="header-path">${breadcrumbs}</h1>
+          </div>
+          <div class="header-right">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+              ${octicons.moon.toSVG({ class: 'theme-icon' })}
+            </button>
+          </div>
+        </div>
+      </header>
+      <main>
+        <div class="new-file-container">
+          <div class="new-file-header">
+            <div class="filename-section">
+              <span class="filename-label">Name your file...</span>
+              <input type="text" id="new-filename-input" class="new-filename-input" placeholder="README.md" autofocus>
+            </div>
+            <div class="new-file-actions">
+              <button id="cancel-new-file" class="btn btn-secondary">Cancel</button>
+              <button id="create-new-file" class="btn btn-primary">Create file</button>
+            </div>
+          </div>
+          <div class="new-file-editor">
+            <div class="editor-with-line-numbers">
+              <div class="editor-line-numbers" id="new-file-line-numbers">1</div>
+              <textarea id="new-file-content" class="file-editor" placeholder="Enter file contents here..."></textarea>
+            </div>
+          </div>
         </div>
       </main>
     </body>

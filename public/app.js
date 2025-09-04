@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const html = document.documentElement;
   const searchInput = document.getElementById('file-search');
   const fileTable = document.getElementById('file-table');
+  const fileEditor = document.getElementById('file-editor');
   
   let currentFocusIndex = -1;
   let fileRows = [];
@@ -46,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', function(e) {
     // Don't handle shortcuts when editor is active
     const editorContainer = document.getElementById('editor-container');
-    const fileEditor = document.getElementById('file-editor');
     if (editorContainer && editorContainer.style.display !== 'none' && 
         (document.activeElement === fileEditor || editorContainer.contains(document.activeElement))) {
       return;
@@ -58,6 +58,55 @@ document.addEventListener('DOMContentLoaded', function() {
       handleGlobalKeydown(e);
     }
   });
+
+  // New file and folder functionality
+  const newFileBtn = document.getElementById('new-file-btn');
+  const newFolderBtn = document.getElementById('new-folder-btn');
+
+  if (newFileBtn) {
+    newFileBtn.addEventListener('click', function() {
+      const currentUrl = new URL(window.location.href);
+      const currentPath = currentUrl.searchParams.get('path') || '';
+      
+      // Navigate to new file creation mode
+      const newFileUrl = `/new?path=${encodeURIComponent(currentPath)}`;
+      window.location.href = newFileUrl;
+    });
+  }
+
+  if (newFolderBtn) {
+    newFolderBtn.addEventListener('click', function() {
+      const foldername = prompt('Enter folder name:');
+      if (foldername && foldername.trim()) {
+        const currentUrl = new URL(window.location.href);
+        const currentPath = currentUrl.searchParams.get('path') || '';
+        
+        fetch('/api/create-folder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            path: currentPath,
+            foldername: foldername.trim()
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Refresh the current directory view
+            window.location.reload();
+          } else {
+            alert('Failed to create folder: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error creating folder:', error);
+          alert('Failed to create folder');
+        });
+      }
+    });
+  }
   
   // File row click navigation
   fileRows.forEach((row, index) => {
@@ -462,13 +511,71 @@ document.addEventListener('DOMContentLoaded', function() {
   // Editor functionality
   const editBtn = document.getElementById('edit-btn');
   const editorContainer = document.getElementById('editor-container');
-  const fileEditor = document.getElementById('file-editor');
   const saveBtn = document.getElementById('save-btn');
   const cancelBtn = document.getElementById('cancel-btn');
   const fileContent = document.querySelector('.file-content');
 
+  // Line numbers functionality
+  function updateLineNumbers(textarea, lineNumbersDiv) {
+    if (!textarea || !lineNumbersDiv) return;
+    
+    const lines = textarea.value.split('\n');
+    const lineNumbers = lines.map((_, index) => index + 1).join('\n');
+    lineNumbersDiv.textContent = lineNumbers || '1';
+  }
+
+  // Initialize and handle line numbers for both editors
+  const editorLineNumbers = document.getElementById('editor-line-numbers');
+  const newFileContent = document.getElementById('new-file-content');
+  const newFileLineNumbers = document.getElementById('new-file-line-numbers');
+
+  // Get fileEditor reference (declared earlier in the file)
+  if (document.getElementById('file-editor') && editorLineNumbers) {
+    const fileEditorElement = document.getElementById('file-editor');
+    fileEditorElement.addEventListener('input', () => updateLineNumbers(fileEditorElement, editorLineNumbers));
+    fileEditorElement.addEventListener('scroll', () => {
+      editorLineNumbers.scrollTop = fileEditorElement.scrollTop;
+    });
+  }
+
+  if (newFileContent && newFileLineNumbers) {
+    newFileContent.addEventListener('input', () => updateLineNumbers(newFileContent, newFileLineNumbers));
+    newFileContent.addEventListener('scroll', () => {
+      newFileLineNumbers.scrollTop = newFileContent.scrollTop;
+    });
+  }
+
   if (editBtn && editorContainer && fileEditor) {
     let originalContent = '';
+
+    // Editor keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (editorContainer && editorContainer.style.display !== 'none') {
+        // Cmd/Ctrl+S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          saveBtn.click();
+        }
+        // Escape to cancel
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cancelBtn.click();
+        }
+      }
+    });
+
+    // Auto-save functionality
+    function saveDraft(filePath, content) {
+      localStorage.setItem(`gh-here-draft-${filePath}`, content);
+    }
+    
+    function loadDraft(filePath) {
+      return localStorage.getItem(`gh-here-draft-${filePath}`);
+    }
+    
+    function clearDraft(filePath) {
+      localStorage.removeItem(`gh-here-draft-${filePath}`);
+    }
 
     editBtn.addEventListener('click', function() {
       // Get current file path
@@ -480,10 +587,31 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.text())
         .then(content => {
           originalContent = content;
-          fileEditor.value = content;
+          
+          // Check for draft
+          const draft = loadDraft(filePath);
+          if (draft && draft !== content) {
+            if (confirm('You have unsaved changes for this file. Load draft?')) {
+              fileEditor.value = draft;
+            } else {
+              fileEditor.value = content;
+              clearDraft(filePath);
+            }
+          } else {
+            fileEditor.value = content;
+          }
+          
           fileContent.style.display = 'none';
           editorContainer.style.display = 'block';
           fileEditor.focus();
+          
+          // Set up auto-save and update line numbers
+          fileEditor.addEventListener('input', function() {
+            saveDraft(filePath, fileEditor.value);
+          });
+          
+          // Update line numbers for loaded content
+          updateLineNumbers(fileEditor, editorLineNumbers);
         })
         .catch(error => {
           console.error('Error fetching file content:', error);
@@ -513,6 +641,8 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          // Clear draft on successful save
+          clearDraft(filePath);
           // Refresh the page to show updated content
           window.location.reload();
         } else {
@@ -523,6 +653,152 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error saving file:', error);
         alert('Failed to save file');
       });
+    });
+  }
+
+  // File operations (delete, rename)
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.delete-btn')) {
+      const btn = e.target.closest('.delete-btn');
+      const itemPath = btn.dataset.path;
+      const itemName = btn.dataset.name;
+      const isDirectory = btn.dataset.isDirectory === 'true';
+      
+      const confirmMessage = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?${isDirectory ? ' This will permanently delete the folder and all its contents.' : ''}`;
+      
+      if (confirm(confirmMessage)) {
+        fetch('/api/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            path: itemPath
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('Failed to delete: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting item:', error);
+          alert('Failed to delete item');
+        });
+      }
+    }
+    
+    if (e.target.closest('.rename-btn')) {
+      const btn = e.target.closest('.rename-btn');
+      const itemPath = btn.dataset.path;
+      const currentName = btn.dataset.name;
+      const isDirectory = btn.dataset.isDirectory === 'true';
+      
+      const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
+      if (newName && newName.trim() && newName !== currentName) {
+        fetch('/api/rename', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            path: itemPath,
+            newName: newName.trim()
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('Failed to rename: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error renaming item:', error);
+          alert('Failed to rename item');
+        });
+      }
+    }
+  });
+
+  // New file interface functionality
+  const newFilenameInput = document.getElementById('new-filename-input');
+  const createNewFileBtn = document.getElementById('create-new-file');
+  const cancelNewFileBtn = document.getElementById('cancel-new-file');
+
+  if (createNewFileBtn) {
+    createNewFileBtn.addEventListener('click', function() {
+      const filename = newFilenameInput.value.trim();
+      const content = newFileContent.value;
+      
+      if (!filename) {
+        alert('Please enter a filename');
+        newFilenameInput.focus();
+        return;
+      }
+      
+      const currentUrl = new URL(window.location.href);
+      const currentPath = currentUrl.searchParams.get('path') || '';
+      
+      fetch('/api/create-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: currentPath,
+          filename: filename
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // If there's content, save it
+          if (content.trim()) {
+            const filePath = currentPath ? `${currentPath}/${filename}` : filename;
+            return fetch('/api/save-file', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                path: filePath,
+                content: content
+              })
+            });
+          }
+          return { json: () => Promise.resolve({ success: true }) };
+        } else {
+          throw new Error(data.error);
+        }
+      })
+      .then(response => response.json ? response.json() : response)
+      .then(data => {
+        if (data.success) {
+          // Navigate back to the directory or to the new file
+          const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
+          window.location.href = redirectPath;
+        } else {
+          throw new Error(data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error creating file:', error);
+        alert('Failed to create file: ' + error.message);
+      });
+    });
+  }
+
+  if (cancelNewFileBtn) {
+    cancelNewFileBtn.addEventListener('click', function() {
+      const currentUrl = new URL(window.location.href);
+      const currentPath = currentUrl.searchParams.get('path') || '';
+      const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
+      window.location.href = redirectPath;
     });
   }
 
