@@ -8,9 +8,15 @@
     "gh-here": "./bin/gh-here.js"
   },
   "scripts": {
-    "start": "node bin/gh-here.js"
+    "start": "node bin/gh-here.js",
+    "test": "echo yolo no tests yet"
   },
-  "keywords": ["github", "file-browser", "code-viewer", "local"],
+  "keywords": [
+    "github",
+    "file-browser",
+    "code-viewer",
+    "local"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
