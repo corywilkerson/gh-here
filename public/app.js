@@ -35,10 +35,27 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize
   updateFileRows();
   
-  // Load saved theme or default to dark
-  const savedTheme = localStorage.getItem('gh-here-theme') || 'dark';
+  // Detect system theme preference
+  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const systemTheme = systemPrefersDark ? 'dark' : 'light';
+  
+  // Load saved theme or default to system preference
+  const savedTheme = localStorage.getItem('gh-here-theme') || systemTheme;
   html.setAttribute('data-theme', savedTheme);
   updateThemeIcon(savedTheme);
+  
+  // Listen for system theme changes (only if no manual override is saved)
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addListener(function(e) {
+      // Only auto-update if user hasn't manually set a theme
+      if (!localStorage.getItem('gh-here-theme')) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        html.setAttribute('data-theme', newTheme);
+        updateThemeIcon(newTheme);
+      }
+    });
+  }
   
   // Theme toggle functionality
   themeToggle.addEventListener('click', function() {
