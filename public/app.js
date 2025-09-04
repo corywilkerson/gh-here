@@ -30,18 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 4000);
   }
   
-  // Loading state utilities
-  function showLoadingState(element, originalText) {
-    element.disabled = true;
-    element.textContent = originalText + '...';
-    element.classList.add('loading');
-  }
-  
-  function hideLoadingState(element, originalText) {
-    element.disabled = false;
-    element.textContent = originalText;
-    element.classList.remove('loading');
-  }
+  // Removed loading state utilities - not needed for local operations
   
   // Initialize
   updateFileRows();
@@ -771,7 +760,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentUrl = new URL(window.location.href);
       const filePath = currentUrl.searchParams.get('path') || '';
       
-      showLoadingState(editBtn, 'Edit');
       
       // Fetch original file content
       fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`)
@@ -808,11 +796,9 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Update line numbers for loaded content
           updateLineNumbers(fileEditor, editorLineNumbers);
-          hideLoadingState(editBtn, 'Edit');
         })
         .catch(error => {
           console.error('Error fetching file content:', error);
-          hideLoadingState(editBtn, 'Edit');
           let errorMessage = 'Failed to load file content for editing';
           if (error.message.includes('HTTP 403')) {
             errorMessage = 'Access denied: Cannot read this file';
@@ -834,7 +820,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentUrl = new URL(window.location.href);
       const filePath = currentUrl.searchParams.get('path') || '';
       
-      showLoadingState(saveBtn, 'Save');
       
       fetch('/api/save-file', {
         method: 'POST',
@@ -856,18 +841,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           // Clear draft on successful save
           clearDraft(filePath);
-          hideLoadingState(saveBtn, 'Save');
           showNotification('File saved successfully', 'success');
           // Refresh the page to show updated content
           setTimeout(() => window.location.reload(), 800);
         } else {
-          hideLoadingState(saveBtn, 'Save');
           showNotification('Failed to save file: ' + data.error, 'error');
         }
       })
       .catch(error => {
         console.error('Error saving file:', error);
-        hideLoadingState(saveBtn, 'Save');
         let errorMessage = 'Failed to save file';
         if (error.message.includes('HTTP 403')) {
           errorMessage = 'Access denied: Cannot write to this file';
@@ -916,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="diff-close-btn" aria-label="Close diff viewer">&times;</button>
         </div>
         <div class="diff-viewer-content">
-          <div class="loading" style="padding: 40px; text-align: center;">Loading diff...</div>
+          <div style="padding: 40px; text-align: center;">Fetching diff...</div>
         </div>
       </div>
     `;
@@ -1099,7 +1081,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const confirmMessage = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?${isDirectory ? ' This will permanently delete the folder and all its contents.' : ''}`;
       
       if (confirm(confirmMessage)) {
-        showLoadingState(btn, '');
         btn.style.opacity = '0.5';
         
         fetch('/api/delete', {
@@ -1123,14 +1104,12 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => window.location.reload(), 600);
           } else {
             btn.style.opacity = '1';
-            hideLoadingState(btn, '');
             showNotification('Failed to delete: ' + data.error, 'error');
           }
         })
         .catch(error => {
           console.error('Error deleting item:', error);
           btn.style.opacity = '1';
-          hideLoadingState(btn, '');
           let errorMessage = 'Failed to delete item';
           if (error.message.includes('HTTP 403')) {
             errorMessage = 'Access denied: Cannot delete this item';
@@ -1152,7 +1131,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
       if (newName && newName.trim() && newName !== currentName) {
-        showLoadingState(btn, '');
         btn.style.opacity = '0.5';
         
         fetch('/api/rename', {
@@ -1177,14 +1155,12 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => window.location.reload(), 600);
           } else {
             btn.style.opacity = '1';
-            hideLoadingState(btn, '');
             showNotification('Failed to rename: ' + data.error, 'error');
           }
         })
         .catch(error => {
           console.error('Error renaming item:', error);
           btn.style.opacity = '1';
-          hideLoadingState(btn, '');
           let errorMessage = 'Failed to rename item';
           if (error.message.includes('HTTP 403')) {
             errorMessage = 'Access denied: Cannot rename this item';
@@ -1215,7 +1191,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      showLoadingState(createNewFileBtn, 'Create file');
       
       const currentUrl = new URL(window.location.href);
       const currentPath = currentUrl.searchParams.get('path') || '';
@@ -1260,7 +1235,6 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json ? response.json() : response)
       .then(data => {
         if (data.success) {
-          hideLoadingState(createNewFileBtn, 'Create file');
           showNotification(`File "${filename}" created successfully`, 'success');
           // Navigate back to the directory or to the new file
           const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
@@ -1271,7 +1245,6 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => {
         console.error('Error creating file:', error);
-        hideLoadingState(createNewFileBtn, 'Create file');
         let errorMessage = 'Failed to create file: ' + error.message;
         if (error.message.includes('HTTP 403')) {
           errorMessage = 'Access denied: Cannot create files in this directory';
