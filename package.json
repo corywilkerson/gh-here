@@ -2,6 +2,7 @@
   "name": "gh-here",
   "version": "1.0.0",
   "description": "A local GitHub-like file browser for viewing code",
+  "repository": "https://github.com/corywilkerson/gh-here",
   "main": "index.js",
   "bin": {
     "gh-here": "./bin/gh-here.js"
