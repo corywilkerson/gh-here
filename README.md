@@ -1,10 +1,14 @@
 # gh-here
 
-A local GitHub-like file browser for viewing code in your terminal. Launch it in any folder to get a beautiful web-based directory browser with syntax highlighting and powerful navigation features.
+A local GitHub-like file browser for viewing and exploring codebases in your browser. Launch it in any folder to get a beautiful web-based directory browser with syntax highlighting and powerful navigation features.
+
+## Why?
+
+TUIs (Terminal User Interfaces) like Claude Code, Google Gemini CLI, and Cursor are becoming very popular tools for working on codebases, but they don't provide a visual view into the directories and files themselves. gh-here exists to fill that gap, so you can easily explore your project files in a familiar GitHub-esque browser GUI.
 
 ## Installation
 
-You can run gh-here directly with npx (no installation required):
+Run gh-here directly with npx (no installation required):
 
 ```bash
 npx gh-here
