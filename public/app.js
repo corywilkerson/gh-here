@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+  
   const themeToggle = document.getElementById('theme-toggle');
   const html = document.documentElement;
   const searchInput = document.getElementById('file-search');
@@ -7,6 +8,40 @@ document.addEventListener('DOMContentLoaded', function() {
   
   let currentFocusIndex = -1;
   let fileRows = [];
+  
+  // Notification system
+  function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, 4000);
+  }
+  
+  // Loading state utilities
+  function showLoadingState(element, originalText) {
+    element.disabled = true;
+    element.textContent = originalText + '...';
+    element.classList.add('loading');
+  }
+  
+  function hideLoadingState(element, originalText) {
+    element.disabled = false;
+    element.textContent = originalText;
+    element.classList.remove('loading');
+  }
   
   // Initialize
   updateFileRows();
@@ -25,6 +60,25 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('gh-here-theme', newTheme);
     updateThemeIcon(newTheme);
   });
+
+  // Gitignore toggle functionality
+  const gitignoreToggle = document.getElementById('gitignore-toggle');
+  if (gitignoreToggle) {
+    gitignoreToggle.addEventListener('click', function() {
+      const currentUrl = new URL(window.location.href);
+      const currentGitignoreState = currentUrl.searchParams.get('gitignore');
+      const newGitignoreState = currentGitignoreState === 'false' ? null : 'false';
+      
+      if (newGitignoreState) {
+        currentUrl.searchParams.set('gitignore', newGitignoreState);
+      } else {
+        currentUrl.searchParams.delete('gitignore');
+      }
+      
+      // Navigate to the new URL
+      window.location.href = currentUrl.toString();
+    });
+  }
   
   // Search functionality
   if (searchInput) {
@@ -43,8 +97,131 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // Keyboard shortcuts help overlay
+  function showKeyboardHelp() {
+    // Remove existing help if present
+    const existingHelp = document.getElementById('keyboard-help');
+    if (existingHelp) {
+      existingHelp.remove();
+      return;
+    }
+
+    const helpOverlay = document.createElement('div');
+    helpOverlay.id = 'keyboard-help';
+    helpOverlay.className = 'keyboard-help-overlay';
+    
+    helpOverlay.innerHTML = `
+      <div class="keyboard-help-content">
+        <div class="keyboard-help-header">
+          <h2>Keyboard shortcuts</h2>
+          <button class="keyboard-help-close" aria-label="Close help">&times;</button>
+        </div>
+        <div class="keyboard-help-body">
+          <div class="shortcuts-container">
+            <div class="shortcut-section">
+              <h3>Repositories</h3>
+              <div class="shortcut-list">
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Go to parent directory</span>
+                  <div class="shortcut-keys"><kbd>H</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Toggle .gitignore filter</span>
+                  <div class="shortcut-keys"><kbd>I</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Create new file</span>
+                  <div class="shortcut-keys"><kbd>C</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Edit focused file</span>
+                  <div class="shortcut-keys"><kbd>E</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Refresh page</span>
+                  <div class="shortcut-keys"><kbd>R</kbd></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="shortcut-section">
+              <h3>Site-wide shortcuts</h3>
+              <div class="shortcut-list">
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Focus search</span>
+                  <div class="shortcut-keys"><kbd>S</kbd> or <kbd>/</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Focus search</span>
+                  <div class="shortcut-keys"><kbd>⌘</kbd> <kbd>K</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Toggle theme</span>
+                  <div class="shortcut-keys"><kbd>T</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Bring up this help dialog</span>
+                  <div class="shortcut-keys"><kbd>?</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Move selection down</span>
+                  <div class="shortcut-keys"><kbd>J</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Move selection up</span>
+                  <div class="shortcut-keys"><kbd>K</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Open selection</span>
+                  <div class="shortcut-keys"><kbd>O</kbd> or <kbd>↵</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Save file (in editor)</span>
+                  <div class="shortcut-keys"><kbd>⌘</kbd> <kbd>S</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Close help/cancel</span>
+                  <div class="shortcut-keys"><kbd>Esc</kbd></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(helpOverlay);
+    
+    // Close on click outside or escape
+    helpOverlay.addEventListener('click', function(e) {
+      if (e.target === helpOverlay) {
+        helpOverlay.remove();
+      }
+    });
+    
+    helpOverlay.querySelector('.keyboard-help-close').addEventListener('click', function() {
+      helpOverlay.remove();
+    });
+  }
+
   // Keyboard navigation
   document.addEventListener('keydown', function(e) {
+    // Handle help overlay first
+    if (e.key === '?' && document.activeElement !== searchInput && document.activeElement !== fileEditor) {
+      e.preventDefault();
+      showKeyboardHelp();
+      return;
+    }
+    
+    // Close help with Escape
+    if (e.key === 'Escape') {
+      const helpOverlay = document.getElementById('keyboard-help');
+      if (helpOverlay) {
+        helpOverlay.remove();
+        return;
+      }
+    }
+    
     // Don't handle shortcuts when editor is active
     const editorContainer = document.getElementById('editor-container');
     if (editorContainer && editorContainer.style.display !== 'none' && 
@@ -289,6 +466,47 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         showKeyboardHelp();
         break;
+      case 'c':
+        // Create new file
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+          const newFileBtn = document.getElementById('new-file-btn');
+          if (newFileBtn) {
+            newFileBtn.click();
+          }
+        }
+        break;
+      case 'e':
+        // Edit focused file
+        if (!e.ctrlKey && !e.metaKey && currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
+          e.preventDefault();
+          const focusedRow = visibleRows[currentFocusIndex];
+          const rowType = focusedRow.dataset.type;
+          
+          // If we're in a directory listing and focused on a file
+          if (rowType === 'file') {
+            const filePath = focusedRow.dataset.path;
+            // Navigate to the file and trigger edit mode
+            window.location.href = `/?path=${encodeURIComponent(filePath)}#edit`;
+          } else {
+            // If we're on a file page, use the edit button
+            const editBtn = document.getElementById('edit-btn');
+            if (editBtn && editBtn.style.display !== 'none') {
+              editBtn.click();
+            }
+          }
+        }
+        break;
+      case 'i':
+        // Toggle gitignore
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+          const gitignoreToggle = document.getElementById('gitignore-toggle');
+          if (gitignoreToggle) {
+            gitignoreToggle.click();
+          }
+        }
+        break;
     }
   }
   
@@ -360,62 +578,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  function showKeyboardHelp() {
-    const helpModal = document.createElement('div');
-    helpModal.className = 'keyboard-help-modal';
-    helpModal.innerHTML = `
-      <div class="keyboard-help-overlay"></div>
-      <div class="keyboard-help-content">
-        <div class="keyboard-help-header">
-          <h2>Keyboard Shortcuts</h2>
-          <button class="keyboard-help-close">&times;</button>
-        </div>
-        <div class="keyboard-help-body">
-          <div class="keyboard-shortcuts-grid">
-            <div class="shortcut-section">
-              <h3>Navigation</h3>
-              <div class="shortcut"><kbd>j</kbd> or <kbd>↓</kbd><span>Move down</span></div>
-              <div class="shortcut"><kbd>k</kbd> or <kbd>↑</kbd><span>Move up</span></div>
-              <div class="shortcut"><kbd>Enter</kbd> or <kbd>o</kbd><span>Open file/folder</span></div>
-              <div class="shortcut"><kbd>h</kbd><span>Go up directory</span></div>
-              <div class="shortcut"><kbd>Ctrl/Cmd + g</kbd><span>Go to top</span></div>
-              <div class="shortcut"><kbd>Shift + G</kbd><span>Go to bottom</span></div>
-            </div>
-            <div class="shortcut-section">
-              <h3>Search & Actions</h3>
-              <div class="shortcut"><kbd>/</kbd> or <kbd>s</kbd><span>Focus search</span></div>
-              <div class="shortcut"><kbd>Ctrl/Cmd + k</kbd><span>Focus search</span></div>
-              <div class="shortcut"><kbd>Esc</kbd><span>Clear search</span></div>
-              <div class="shortcut"><kbd>t</kbd><span>Toggle theme</span></div>
-              <div class="shortcut"><kbd>r</kbd><span>Refresh page</span></div>
-              <div class="shortcut"><kbd>?</kbd><span>Show this help</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(helpModal);
-    
-    // Close modal handlers
-    const closeBtn = helpModal.querySelector('.keyboard-help-close');
-    const overlay = helpModal.querySelector('.keyboard-help-overlay');
-    
-    function closeModal() {
-      document.body.removeChild(helpModal);
-    }
-    
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', closeModal);
-    
-    // Close with Escape key
-    document.addEventListener('keydown', function escHandler(e) {
-      if (e.key === 'Escape') {
-        closeModal();
-        document.removeEventListener('keydown', escHandler);
-      }
-    });
-  }
 
   function selectLine(lineNum) {
     const lineContainer = document.querySelector(`[data-line="${lineNum}"]`);
@@ -545,6 +707,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Auto-open editor if hash is #edit
+  if (window.location.hash === '#edit' && editBtn) {
+    // Remove hash and trigger edit
+    window.location.hash = '';
+    setTimeout(() => editBtn.click(), 100);
+  }
+
   if (editBtn && editorContainer && fileEditor) {
     let originalContent = '';
 
@@ -582,9 +751,16 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentUrl = new URL(window.location.href);
       const filePath = currentUrl.searchParams.get('path') || '';
       
+      showLoadingState(editBtn, 'Edit');
+      
       // Fetch original file content
       fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`)
-        .then(response => response.text())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.text();
+        })
         .then(content => {
           originalContent = content;
           
@@ -612,10 +788,20 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Update line numbers for loaded content
           updateLineNumbers(fileEditor, editorLineNumbers);
+          hideLoadingState(editBtn, 'Edit');
         })
         .catch(error => {
           console.error('Error fetching file content:', error);
-          alert('Failed to load file content for editing');
+          hideLoadingState(editBtn, 'Edit');
+          let errorMessage = 'Failed to load file content for editing';
+          if (error.message.includes('HTTP 403')) {
+            errorMessage = 'Access denied: Cannot read this file';
+          } else if (error.message.includes('HTTP 404')) {
+            errorMessage = 'File not found';
+          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error: Please check your connection';
+          }
+          showNotification(errorMessage, 'error');
         });
     });
 
@@ -628,6 +814,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentUrl = new URL(window.location.href);
       const filePath = currentUrl.searchParams.get('path') || '';
       
+      showLoadingState(saveBtn, 'Save');
+      
       fetch('/api/save-file', {
         method: 'POST',
         headers: {
@@ -638,23 +826,52 @@ document.addEventListener('DOMContentLoaded', function() {
           content: fileEditor.value
         })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           // Clear draft on successful save
           clearDraft(filePath);
+          hideLoadingState(saveBtn, 'Save');
+          showNotification('File saved successfully', 'success');
           // Refresh the page to show updated content
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 800);
         } else {
-          alert('Failed to save file: ' + data.error);
+          hideLoadingState(saveBtn, 'Save');
+          showNotification('Failed to save file: ' + data.error, 'error');
         }
       })
       .catch(error => {
         console.error('Error saving file:', error);
-        alert('Failed to save file');
+        hideLoadingState(saveBtn, 'Save');
+        let errorMessage = 'Failed to save file';
+        if (error.message.includes('HTTP 403')) {
+          errorMessage = 'Access denied: Cannot write to this file';
+        } else if (error.message.includes('HTTP 413')) {
+          errorMessage = 'File too large to save';
+        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+          errorMessage = 'Network error: Please check your connection';
+        }
+        showNotification(errorMessage, 'error');
       });
     });
   }
+
+  // Quick edit file functionality
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.edit-file-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const button = e.target.closest('.edit-file-btn');
+      const filePath = button.dataset.path;
+      // Navigate to the file and trigger edit mode
+      window.location.href = `/?path=${encodeURIComponent(filePath)}#edit`;
+    }
+  });
 
   // File operations (delete, rename)
   document.addEventListener('click', function(e) {
@@ -667,6 +884,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const confirmMessage = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?${isDirectory ? ' This will permanently delete the folder and all its contents.' : ''}`;
       
       if (confirm(confirmMessage)) {
+        showLoadingState(btn, '');
+        btn.style.opacity = '0.5';
+        
         fetch('/api/delete', {
           method: 'POST',
           headers: {
@@ -676,17 +896,35 @@ document.addEventListener('DOMContentLoaded', function() {
             path: itemPath
           })
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
-            window.location.reload();
+            showNotification(`${isDirectory ? 'Folder' : 'File'} "${itemName}" deleted successfully`, 'success');
+            setTimeout(() => window.location.reload(), 600);
           } else {
-            alert('Failed to delete: ' + data.error);
+            btn.style.opacity = '1';
+            hideLoadingState(btn, '');
+            showNotification('Failed to delete: ' + data.error, 'error');
           }
         })
         .catch(error => {
           console.error('Error deleting item:', error);
-          alert('Failed to delete item');
+          btn.style.opacity = '1';
+          hideLoadingState(btn, '');
+          let errorMessage = 'Failed to delete item';
+          if (error.message.includes('HTTP 403')) {
+            errorMessage = 'Access denied: Cannot delete this item';
+          } else if (error.message.includes('HTTP 404')) {
+            errorMessage = 'Item not found';
+          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error: Please check your connection';
+          }
+          showNotification(errorMessage, 'error');
         });
       }
     }
@@ -699,6 +937,9 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
       if (newName && newName.trim() && newName !== currentName) {
+        showLoadingState(btn, '');
+        btn.style.opacity = '0.5';
+        
         fetch('/api/rename', {
           method: 'POST',
           headers: {
@@ -709,17 +950,35 @@ document.addEventListener('DOMContentLoaded', function() {
             newName: newName.trim()
           })
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
-            window.location.reload();
+            showNotification(`${isDirectory ? 'Folder' : 'File'} renamed to "${newName.trim()}"`, 'success');
+            setTimeout(() => window.location.reload(), 600);
           } else {
-            alert('Failed to rename: ' + data.error);
+            btn.style.opacity = '1';
+            hideLoadingState(btn, '');
+            showNotification('Failed to rename: ' + data.error, 'error');
           }
         })
         .catch(error => {
           console.error('Error renaming item:', error);
-          alert('Failed to rename item');
+          btn.style.opacity = '1';
+          hideLoadingState(btn, '');
+          let errorMessage = 'Failed to rename item';
+          if (error.message.includes('HTTP 403')) {
+            errorMessage = 'Access denied: Cannot rename this item';
+          } else if (error.message.includes('HTTP 404')) {
+            errorMessage = 'Item not found';
+          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error: Please check your connection';
+          }
+          showNotification(errorMessage, 'error');
         });
       }
     }
@@ -736,10 +995,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const content = newFileContent.value;
       
       if (!filename) {
-        alert('Please enter a filename');
+        showNotification('Please enter a filename', 'error');
         newFilenameInput.focus();
         return;
       }
+      
+      showLoadingState(createNewFileBtn, 'Create file');
       
       const currentUrl = new URL(window.location.href);
       const currentPath = currentUrl.searchParams.get('path') || '';
@@ -754,7 +1015,12 @@ document.addEventListener('DOMContentLoaded', function() {
           filename: filename
         })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           // If there's content, save it
@@ -779,16 +1045,27 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json ? response.json() : response)
       .then(data => {
         if (data.success) {
+          hideLoadingState(createNewFileBtn, 'Create file');
+          showNotification(`File "${filename}" created successfully`, 'success');
           // Navigate back to the directory or to the new file
           const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
-          window.location.href = redirectPath;
+          setTimeout(() => window.location.href = redirectPath, 800);
         } else {
           throw new Error(data.error);
         }
       })
       .catch(error => {
         console.error('Error creating file:', error);
-        alert('Failed to create file: ' + error.message);
+        hideLoadingState(createNewFileBtn, 'Create file');
+        let errorMessage = 'Failed to create file: ' + error.message;
+        if (error.message.includes('HTTP 403')) {
+          errorMessage = 'Access denied: Cannot create files in this directory';
+        } else if (error.message.includes('HTTP 409') || error.message.includes('already exists')) {
+          errorMessage = 'File already exists';
+        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+          errorMessage = 'Network error: Please check your connection';
+        }
+        showNotification(errorMessage, 'error');
       });
     });
   }

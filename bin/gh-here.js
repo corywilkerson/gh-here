@@ -6,11 +6,144 @@ const fs = require('fs');
 const hljs = require('highlight.js');
 const marked = require('marked');
 const octicons = require('@primer/octicons');
+const { exec } = require('child_process');
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const openBrowser = args.includes('--open') || args.includes('-o');
+const helpRequested = args.includes('--help') || args.includes('-h');
+
+// Check for browser specification
+let specificBrowser = null;
+const browserArg = args.find(arg => arg.startsWith('--browser='));
+if (browserArg) {
+  specificBrowser = browserArg.split('=')[1];
+}
+
+if (helpRequested) {
+  console.log(`
+gh-here - GitHub-like local file browser
+
+Usage: npx gh-here [options]
+
+Options:
+  --open, -o              Open browser automatically
+  --browser=<name>        Specify browser (safari, chrome, firefox, arc)
+  --help, -h              Show this help message
+
+Examples:
+  npx gh-here                           Start server on available port
+  npx gh-here --open                    Start server and open browser
+  npx gh-here --open --browser=safari   Start server and open in Safari
+  npx gh-here --open --browser=arc      Start server and open in Arc
+`);
+  process.exit(0);
+}
 
 const app = express();
-const port = 3000;
-
 const workingDir = process.cwd();
+
+// .gitignore parsing functionality
+function parseGitignore(gitignorePath) {
+  try {
+    if (!fs.existsSync(gitignorePath)) {
+      return [];
+    }
+    
+    const content = fs.readFileSync(gitignorePath, 'utf8');
+    return content
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#'))
+      .map(pattern => {
+        // Convert gitignore patterns to regex-like matching
+        if (pattern.endsWith('/')) {
+          // Directory pattern
+          return { pattern: pattern.slice(0, -1), isDirectory: true };
+        }
+        return { pattern, isDirectory: false };
+      });
+  } catch (error) {
+    return [];
+  }
+}
+
+function isIgnoredByGitignore(filePath, gitignoreRules, isDirectory = false) {
+  if (!gitignoreRules || gitignoreRules.length === 0) {
+    return false;
+  }
+  
+  const relativePath = path.relative(workingDir, filePath).replace(/\\/g, '/');
+  const pathParts = relativePath.split('/');
+  
+  for (const rule of gitignoreRules) {
+    const { pattern, isDirectory: ruleIsDirectory } = rule;
+    
+    // Skip directory rules for files and vice versa (unless rule applies to both)
+    if (ruleIsDirectory && !isDirectory) {
+      continue;
+    }
+    
+    // Simple pattern matching (this is a basic implementation)
+    if (pattern.includes('*')) {
+      // Wildcard matching
+      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      if (regex.test(relativePath) || pathParts.some(part => regex.test(part))) {
+        return true;
+      }
+    } else {
+      // Exact matching
+      if (relativePath === pattern || 
+          relativePath.startsWith(pattern + '/') ||
+          pathParts.includes(pattern)) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+// Cache for gitignore rules
+let gitignoreCache = null;
+let gitignoreCacheTime = 0;
+
+function getGitignoreRules() {
+  const gitignorePath = path.join(workingDir, '.gitignore');
+  const now = Date.now();
+  
+  // Cache for 5 seconds to avoid excessive file reads
+  if (gitignoreCache && (now - gitignoreCacheTime) < 5000) {
+    return gitignoreCache;
+  }
+  
+  gitignoreCache = parseGitignore(gitignorePath);
+  gitignoreCacheTime = now;
+  return gitignoreCache;
+}
+
+// Function to find an available port
+async function findAvailablePort(startPort = 3000) {
+  const net = require('net');
+  
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        // Port is in use, try next one
+        findAvailablePort(startPort + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
 
 app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 app.use('/octicons', express.static(path.join(__dirname, '..', 'node_modules', '@primer', 'octicons', 'build')));
@@ -36,13 +169,16 @@ app.get('/download', (req, res) => {
 
 app.get('/', (req, res) => {
   const currentPath = req.query.path || '';
+  const showGitignored = req.query.gitignore === 'false'; // Default to hiding gitignored files
   const fullPath = path.join(workingDir, currentPath);
   
   try {
     const stats = fs.statSync(fullPath);
     
     if (stats.isDirectory()) {
-      const items = fs.readdirSync(fullPath).map(item => {
+      const gitignoreRules = getGitignoreRules();
+      
+      let items = fs.readdirSync(fullPath).map(item => {
         const itemPath = path.join(fullPath, item);
         const itemStats = fs.statSync(itemPath);
         return {
@@ -52,13 +188,24 @@ app.get('/', (req, res) => {
           size: itemStats.size,
           modified: itemStats.mtime
         };
-      }).sort((a, b) => {
+      });
+      
+      // Filter out gitignored files unless explicitly requested to show them
+      if (!showGitignored) {
+        items = items.filter(item => {
+          const itemFullPath = path.join(fullPath, item.name);
+          return !isIgnoredByGitignore(itemFullPath, gitignoreRules, item.isDirectory);
+        });
+      }
+      
+      // Sort items (directories first, then alphabetically)
+      items.sort((a, b) => {
         if (a.isDirectory && !b.isDirectory) return -1;
         if (!a.isDirectory && b.isDirectory) return 1;
         return a.name.localeCompare(b.name);
       });
       
-      res.send(renderDirectory(currentPath, items));
+      res.send(renderDirectory(currentPath, items, showGitignored));
     } else {
       const content = fs.readFileSync(fullPath, 'utf8');
       const ext = path.extname(fullPath).slice(1);
@@ -223,7 +370,7 @@ app.post('/api/rename', express.json(), (req, res) => {
   }
 });
 
-function renderDirectory(currentPath, items) {
+function renderDirectory(currentPath, items, showGitignored = false) {
   const breadcrumbs = generateBreadcrumbs(currentPath);
   const readmeFile = findReadmeFile(items);
   const readmePreview = readmeFile ? generateReadmePreview(currentPath, readmeFile) : '';
@@ -245,9 +392,15 @@ function renderDirectory(currentPath, items) {
               ${octicons.download.toSVG({ class: 'quick-icon' })}
             </a>
           ` : ''}
-          <button class="quick-btn rename-btn" title="Rename" data-path="${item.path}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
-            ${octicons.pencil.toSVG({ class: 'quick-icon' })}
-          </button>
+          ${!item.isDirectory ? `
+            <button class="quick-btn edit-file-btn" title="Edit file" data-path="${item.path}">
+              ${octicons.pencil.toSVG({ class: 'quick-icon' })}
+            </button>
+          ` : `
+            <button class="quick-btn rename-btn" title="Rename" data-path="${item.path}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
+              ${octicons.pencil.toSVG({ class: 'quick-icon' })}
+            </button>
+          `}
           <button class="quick-btn delete-btn" title="Delete" data-path="${item.path}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
             ${octicons.trash.toSVG({ class: 'quick-icon' })}
           </button>
@@ -281,6 +434,9 @@ function renderDirectory(currentPath, items) {
               ${octicons.search.toSVG({ class: 'search-icon' })}
               <input type="text" id="file-search" placeholder="Find files..." class="search-input">
             </div>
+            <button id="gitignore-toggle" class="gitignore-toggle ${showGitignored ? 'showing-ignored' : ''}" aria-label="Toggle .gitignore filtering" title="${showGitignored ? 'Hide' : 'Show'} gitignored files">
+              ${octicons.eye.toSVG({ class: 'gitignore-icon' })}
+            </button>
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
               ${octicons.moon.toSVG({ class: 'theme-icon' })}
             </button>
@@ -615,14 +771,17 @@ function getFileIcon(filename) {
     if (name === 'tsconfig.json' || name === 'jsconfig.json') {
       return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
     }
-    if (name === '.eslintrc' || name === '.eslintrc.json' || name === '.eslintrc.js') {
+    if (name === '.eslintrc' || name === '.eslintrc.json' || name === '.eslintrc.js' || name === '.eslintrc.yml') {
       return octicons.gear?.toSVG({ class: 'octicon-file text-purple' }) || octicons.file.toSVG({ class: 'octicon-file text-purple' });
     }
-    if (name === '.prettierrc' || name === 'prettier.config.js') {
+    if (name === '.prettierrc' || name === 'prettier.config.js' || name === '.prettierrc.json') {
       return octicons.gear?.toSVG({ class: 'octicon-file text-blue' }) || octicons.file.toSVG({ class: 'octicon-file text-blue' });
     }
-    if (name === 'webpack.config.js' || name === 'vite.config.js' || name === 'rollup.config.js') {
+    if (name === 'webpack.config.js' || name === 'vite.config.js' || name === 'rollup.config.js' || name === 'next.config.js' || name === 'nuxt.config.js' || name === 'svelte.config.js') {
       return octicons.gear?.toSVG({ class: 'octicon-file text-orange' }) || octicons.file.toSVG({ class: 'octicon-file text-orange' });
+    }
+    if (name === 'tailwind.config.js' || name === 'postcss.config.js' || name === 'babel.config.js' || name === '.babelrc') {
+      return octicons.gear?.toSVG({ class: 'octicon-file text-purple' }) || octicons.file.toSVG({ class: 'octicon-file text-purple' });
     }
     
     // Docker files
@@ -677,10 +836,25 @@ function getFileIcon(filename) {
         return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
       case '.vue':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-green' });
+      case '.svelte':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-orange' });
       case '.py':
+      case '.pyx':
+      case '.pyi':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
       case '.java':
+      case '.class':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-red' });
+      case '.c':
+      case '.h':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
+      case '.cpp':
+      case '.cxx':
+      case '.cc':
+      case '.hpp':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
+      case '.cs':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-purple' });
       case '.go':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
       case '.rs':
@@ -692,8 +866,20 @@ function getFileIcon(filename) {
       case '.swift':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-orange' });
       case '.kt':
+      case '.kts':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-purple' });
       case '.dart':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
+      case '.scala':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-red' });
+      case '.clj':
+      case '.cljs':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-green' });
+      case '.hs':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-purple' });
+      case '.elm':
+        return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
+      case '.r':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-blue' });
       case '.html':
         return octicons['file-code'].toSVG({ class: 'octicon-file text-orange' });
@@ -814,7 +1000,85 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-app.listen(port, () => {
-  console.log(`🚀 gh-here is running at http://localhost:${port}`);
-  console.log(`📂 Serving files from: ${workingDir}`);
-});
+// Function to open browser
+function openBrowserToUrl(url) {
+  let command;
+  
+  if (process.platform === 'win32') {
+    if (specificBrowser) {
+      // On Windows, try to use specific browser
+      const browserMap = {
+        'chrome': 'chrome.exe',
+        'firefox': 'firefox.exe',
+        'edge': 'msedge.exe',
+        'safari': 'safari.exe'
+      };
+      const browserExe = browserMap[specificBrowser.toLowerCase()] || `${specificBrowser}.exe`;
+      command = `start ${browserExe} ${url}`;
+    } else {
+      command = `start ${url}`;
+    }
+  } else if (process.platform === 'darwin') {
+    if (specificBrowser) {
+      // On macOS, use specific browser application
+      const browserMap = {
+        'safari': 'Safari',
+        'chrome': 'Google Chrome', 
+        'firefox': 'Firefox',
+        'arc': 'Arc',
+        'edge': 'Microsoft Edge'
+      };
+      const browserApp = browserMap[specificBrowser.toLowerCase()] || specificBrowser;
+      command = `open -a "${browserApp}" "${url}"`;
+      console.log(`🔗 Opening in ${browserApp}: ${url}`);
+    } else {
+      // Use default browser
+      command = `open "${url}"`;
+      console.log(`🔗 Opening in default browser: ${url}`);
+    }
+  } else {
+    // Linux
+    if (specificBrowser) {
+      command = `${specificBrowser} ${url}`;
+    } else {
+      command = `xdg-open ${url}`;
+    }
+  }
+  
+  exec(command, (error) => {
+    if (error) {
+      console.log(`⚠️  Could not open browser automatically: ${error.message}`);
+      if (specificBrowser) {
+        console.log(`   Make sure ${specificBrowser} is installed and accessible`);
+      }
+      console.log(`   Please open ${url} manually`);
+    } else {
+      console.log(`✅ Browser opened successfully`);
+    }
+  });
+}
+
+// Start server with automatic port selection
+async function startServer() {
+  try {
+    const port = await findAvailablePort();
+    const url = `http://localhost:${port}`;
+    
+    app.listen(port, () => {
+      console.log(`🚀 gh-here is running at ${url}`);
+      console.log(`📂 Serving files from: ${workingDir}`);
+      
+      if (openBrowser) {
+        console.log(`🌍 Opening browser...`);
+        setTimeout(() => openBrowserToUrl(url), 1000);
+      } else {
+        console.log(`💡 Tip: Use --open flag to launch browser automatically`);
+      }
+    });
+  } catch (error) {
+    console.error(`❌ Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+startServer();

@@ -13,10 +13,13 @@ npm install -g .
 Navigate to any directory and run:
 
 ```bash
-npx gh-here
+npx gh-here                           # Start server on available port
+npx gh-here --open                    # Start server and open browser
+npx gh-here --open --browser=safari   # Start server and open in Safari
+npx gh-here --open --browser=arc      # Start server and open in Arc
 ```
 
-The app will start a local server at `http://localhost:3000` and serve your current directory with a GitHub-like interface.
+The app will automatically find an available port starting from 3000 and serve your current directory with a GitHub-like interface.
 
 ## Features
 
@@ -24,29 +27,40 @@ The app will start a local server at `http://localhost:3000` and serve your curr
 - Beautiful directory browsing with specific file type icons
 - README preview with beautiful markdown rendering
 - Language statistics for project overview
-- Quick actions (copy path, download files)
+- Quick actions (copy path, download files, edit, rename, delete)
+- .gitignore support with toggle functionality
+- File and folder creation, editing, renaming, and deletion
 - Responsive design for mobile and desktop
 
-### 🎨 Code Viewing
+### 🎨 Code Viewing & Editing
 - GitHub-accurate syntax highlighting for 25+ languages
 - Line numbers with GitHub-style selection (click, shift-click, ctrl-click)
+- In-browser file editing with auto-save to localStorage
 - Raw and rendered markdown views
 - Shareable URLs with line selections (`#L10-L20`)
+- Syntax highlighting and line numbers in editor
 
 ### ⌨️ Keyboard Navigation
 - `j`/`k` or arrow keys to navigate files
 - `Enter` or `o` to open files/folders
+- `e` to edit focused file
+- `c` to create new file
 - `/` or `s` to focus search
 - `h` to go up directory
 - `t` to toggle theme
+- `i` to toggle .gitignore filter
 - `r` to refresh
 - `?` to show keyboard shortcuts
+- `Ctrl/Cmd + S` to save file (in editor)
+- `Esc` to close editor/dialogs
 
 ### 🌙 Themes & UI
 - GitHub dark and light themes
 - Smart header path (shows "gh-here" at root, path when browsing)
 - Search functionality with keyboard shortcuts
 - Breadcrumb navigation
+- Error handling and loading states
+- Notification system for user feedback
 
 ## Supported File Types
 
@@ -94,14 +108,19 @@ The app will start a local server at `http://localhost:3000` and serve your curr
 | `j` / `↓` | Move down |
 | `k` / `↑` | Move up |
 | `Enter` / `o` | Open file/folder |
+| `e` | Edit focused file |
+| `c` | Create new file |
 | `h` | Go up directory |
 | `/` / `s` | Focus search |
 | `Ctrl/Cmd + K` | Focus search |
 | `Ctrl/Cmd + G` | Go to top |
 | `Shift + G` | Go to bottom |
 | `t` | Toggle theme |
+| `i` | Toggle .gitignore filter |
 | `r` | Refresh page |
 | `?` | Show keyboard shortcuts |
+| `Ctrl/Cmd + S` | Save file (in editor) |
+| `Esc` | Close editor/dialogs |
 
 ## Line Selection (Code Files)
 
