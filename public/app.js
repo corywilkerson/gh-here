@@ -1,3 +1,26 @@
+// Octicons directly embedded for frontend use
+const octicons = {
+    'file-directory': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-file-directory" aria-hidden="true"><path d="M0 2.75C0 1.784.784 1 1.75 1H5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1h6.75c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25H7.5c-.55 0-1.07-.26-1.4-.7l-.9-1.2a.25.25 0 0 0-.2-.1Z"></path></svg>',
+    'git-commit': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-git-commit" aria-hidden="true"><path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path></svg>',
+    'diff': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-diff" aria-hidden="true"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg>',
+    'copy': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-copy" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>',
+    'download': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-download" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg>',
+    'pencil': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-pencil" aria-hidden="true"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path></svg>',
+    'x': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-x" aria-hidden="true"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>',
+    'check': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-check" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>',
+    
+    // Helper to get an icon with optional classes
+    get(name, options = {}) {
+      const svg = this[name];
+      if (!svg) return `<span class="missing-icon">[${name}]</span>`;
+      
+      if (options.class) {
+        return svg.replace('class="octicon', `class="${options.class} octicon`);
+      }
+      return svg;
+    }
+  };
+
 document.addEventListener('DOMContentLoaded', function() {
   
   const themeToggle = document.getElementById('theme-toggle');
@@ -8,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   let currentFocusIndex = -1;
   let fileRows = [];
-  
+
   // Notification system
   function showNotification(message, type = 'info') {
     // Remove existing notifications
@@ -1314,3 +1337,203 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
+
+// Simple commit modal functionality
+document.addEventListener('click', (e) => {
+  if (e.target.matches('#commit-btn') || e.target.closest('#commit-btn')) {
+    e.preventDefault();
+    showCommitModal();
+  }
+});
+
+async function showCommitModal() {
+  try {
+    // Get current path from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentPath = urlParams.get('path') || '';
+    
+    // Fetch git changes from current directory and subdirectories only
+    const response = await fetch(`/api/git-status?currentPath=${encodeURIComponent(currentPath)}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      showNotification('❌ Failed to load git changes', 'error');
+      return;
+    }
+    
+    const changedFiles = data.changes;
+    
+    if (changedFiles.length === 0) {
+      showNotification('ℹ️ No changes to commit', 'info');
+      return;
+    }
+    
+    showCommitModalWithFiles(changedFiles);
+  } catch (error) {
+    console.error('Error fetching git status:', error);
+    showNotification('❌ Failed to load git changes', 'error');
+  }
+}
+
+function groupFilesByDirectory(files) {
+  const groups = new Map();
+  
+  files.forEach(file => {
+    const parts = file.name.split('/');
+    if (parts.length === 1) {
+      // Root level file
+      if (!groups.has('')) {
+        groups.set('', { directory: null, files: [] });
+      }
+      groups.get('').files.push(file);
+    } else {
+      // File in subdirectory
+      const directory = parts.slice(0, -1).join('/');
+      if (!groups.has(directory)) {
+        groups.set(directory, { directory, files: [] });
+      }
+      groups.get(directory).files.push(file);
+    }
+  });
+  
+  // Convert to array and sort
+  const result = Array.from(groups.values());
+  result.sort((a, b) => {
+    if (!a.directory && b.directory) return -1; // Root files first
+    if (a.directory && !b.directory) return 1;
+    if (!a.directory && !b.directory) return 0;
+    return a.directory.localeCompare(b.directory);
+  });
+  
+  return result;
+}
+
+async function showCommitModalWithFiles(changedFiles) {
+  // Group files by directory for better display
+  const groupedFiles = groupFilesByDirectory(changedFiles);
+  
+  // Get octicons for the modal
+  const folderIcon = octicons.get('file-directory', { class: 'folder-icon' });
+
+  // Create modal
+  const modal = document.createElement('div');
+  modal.className = 'commit-modal-overlay';
+  modal.innerHTML = `
+    <div class="commit-modal">
+      <div class="commit-modal-header">
+        <h3>Commit Changes</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="commit-modal-body">
+        <div class="changed-files">
+          <h4>Changed Files (${changedFiles.length})</h4>
+          <ul class="file-list">
+            ${groupedFiles.map(group => `
+              ${group.directory ? `<li class="directory-group"><strong>${folderIcon} ${group.directory}/</strong></li>` : ''}
+              ${group.files.map(file => `
+                <li class="file-item ${group.directory ? 'indented' : ''}">
+                  <label class="file-checkbox-label">
+                    <input type="checkbox" class="file-checkbox" data-file="${file.name}" checked>
+                    <span class="file-status">${file.status}</span>
+                    <span class="file-name">${group.directory ? file.name.split('/').pop() : file.name}</span>
+                  </label>
+                </li>
+              `).join('')}
+            `).join('')}
+          </ul>
+        </div>
+        <div class="commit-message-section">
+          <textarea id="modal-commit-message" placeholder="Enter commit message..." rows="4"></textarea>
+        </div>
+      </div>
+      <div class="commit-modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-commit" disabled>Commit Changes</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Handle modal interactions
+  const messageInput = modal.querySelector('#modal-commit-message');
+  const commitBtn = modal.querySelector('.btn-commit');
+  const cancelBtn = modal.querySelector('.btn-cancel');
+  const closeBtn = modal.querySelector('.modal-close');
+
+  // Update commit button based on message and selected files
+  const updateCommitButton = () => {
+    const hasMessage = messageInput.value.trim();
+    const selectedFiles = modal.querySelectorAll('.file-checkbox:checked').length;
+    commitBtn.disabled = !hasMessage || selectedFiles === 0;
+    commitBtn.textContent = selectedFiles > 0 
+      ? `Commit ${selectedFiles} file${selectedFiles === 1 ? '' : 's'}` 
+      : 'No files selected';
+  };
+
+  messageInput.addEventListener('input', updateCommitButton);
+  
+  // Handle checkbox changes
+  modal.querySelectorAll('.file-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', updateCommitButton);
+  });
+  
+  // Initial button state
+  updateCommitButton();
+
+  // Close modal handlers
+  const closeModal = () => {
+    document.body.removeChild(modal);
+  };
+
+  cancelBtn.addEventListener('click', closeModal);
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Prevent keyboard shortcuts from interfering with the modal
+  modal.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+  });
+
+  // Commit handler
+  commitBtn.addEventListener('click', async () => {
+    const message = messageInput.value.trim();
+    const selectedCheckboxes = modal.querySelectorAll('.file-checkbox:checked');
+    const selectedFiles = Array.from(selectedCheckboxes).map(cb => cb.dataset.file);
+    
+    if (!message || selectedFiles.length === 0) return;
+
+    const originalText = commitBtn.textContent;
+    commitBtn.textContent = 'Committing...';
+    commitBtn.disabled = true;
+
+    try {
+      // Commit selected files
+      const response = await fetch('/api/git-commit-selected', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, files: selectedFiles })
+      });
+
+      if (response.ok) {
+        showNotification(`✅ Successfully committed ${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'}!`, 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        const error = await response.text();
+        showNotification(`❌ Commit failed: ${error}`, 'error');
+        commitBtn.textContent = originalText;
+        commitBtn.disabled = false;
+      }
+    } catch (err) {
+      showNotification('❌ Commit failed', 'error');
+      commitBtn.textContent = originalText;
+      commitBtn.disabled = false;
+    }
+  });
+
+  // Focus the message input
+  messageInput.focus();
+}

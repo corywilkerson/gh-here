@@ -2,6 +2,8 @@
 
 A local GitHub-like file browser for viewing code in your terminal. Launch it in any folder to get a beautiful web-based directory browser with syntax highlighting and powerful navigation features.
 
+<!-- Test change for commit interface -->
+
 ## Installation
 
 ```bash

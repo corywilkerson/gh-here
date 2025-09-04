@@ -252,6 +252,15 @@ main {
   vertical-align: text-bottom;
 }
 
+/* GitHub-style blue folder icons */
+.octicon-directory {
+  fill: #58a6ff;
+}
+
+[data-theme="light"] .octicon-directory {
+  fill: #0969da;
+}
+
 .octicon-home {
   margin-right: 8px;
 }
@@ -533,7 +542,7 @@ main {
   margin: 0;
   padding: 20px;
   overflow-x: auto;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   background-color: var(--bg-primary);
 }
@@ -765,7 +774,7 @@ main {
   color: var(--text-secondary);
   border-right: 1px solid var(--border-secondary);
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.5;
   user-select: none;
   -webkit-user-select: none;
   text-decoration: none;
@@ -1754,4 +1763,300 @@ main {
   text-align: center;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+/* Simple commit button */
+.commit-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.commit-btn:hover {
+  background: var(--hover-bg);
+  border-color: var(--text-secondary);
+}
+
+.commit-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Clean commit modal */
+.commit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.commit-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.commit-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.commit-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.commit-modal-body {
+  padding: 20px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.changed-files h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.file-list {
+  list-style: none;
+  margin: 0 0 20px 0;
+  padding: 0;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.file-item {
+  padding: 0;
+  border-bottom: 1px solid var(--border-secondary);
+  font-size: 13px;
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.file-checkbox-label:hover {
+  background: var(--bg-tertiary);
+}
+
+.file-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-primary);
+  border-radius: 3px;
+  background: var(--bg-primary);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.file-checkbox:hover {
+  border-color: var(--link-color);
+  background: var(--bg-secondary);
+}
+
+.file-checkbox:focus {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+.file-checkbox:checked {
+  background: var(--link-color);
+  border-color: var(--link-color);
+}
+
+.file-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 3px;
+  height: 6px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  display: block;
+}
+
+.file-status {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 80px;
+}
+
+.file-name {
+  color: var(--text-primary);
+  font-family: ui-monospace, monospace;
+  flex: 1;
+}
+
+.directory-group {
+  padding: 8px 12px 4px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: none;
+}
+
+.folder-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  fill: var(--text-secondary);
+}
+
+.file-item.indented .file-checkbox-label {
+  padding-left: 24px;
+}
+
+#modal-commit-message {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+#modal-commit-message:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+}
+
+.commit-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cancel:hover {
+  background: var(--bg-tertiary);
+}
+
+.btn-commit {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-commit:hover:not(:disabled) {
+  background: var(--hover-bg);
+  border-color: var(--text-secondary);
+}
+
+.btn-commit:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+/* Git status column - minimal spacing */
+.file-table .git-status-col {
+  width: 10px;
+  text-align: center;
+  padding: 0;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+/* Untracked file status styling */
+.git-status-untracked {
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] .git-status-untracked {
+  color: #8b5cf6 !important;
 }
