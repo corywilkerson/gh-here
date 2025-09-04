@@ -40,6 +40,14 @@ The app will automatically find an available port starting from 3000 and serve y
 - Shareable URLs with line selections (`#L10-L20`)
 - Syntax highlighting and line numbers in editor
 
+### 🔀 Git Integration
+- Automatic git repository detection
+- Git status indicators with GitHub-style icons next to modified files
+- Professional inline diff viewer with syntax highlighting
+- View/Diff/Edit mode toggle for files with changes
+- Beautiful raw git diff display with color coding
+- Git branch display in navigation header
+
 ### ⌨️ Keyboard Navigation
 - `j`/`k` or arrow keys to navigate files
 - `Enter` or `o` to open files/folders
@@ -49,6 +57,7 @@ The app will automatically find an available port starting from 3000 and serve y
 - `h` to go up directory
 - `t` to toggle theme
 - `i` to toggle .gitignore filter
+- `d` to show diff for focused file (if git changes)
 - `r` to refresh
 - `?` to show keyboard shortcuts
 - `Ctrl/Cmd + S` to save file (in editor)
@@ -117,6 +126,7 @@ The app will automatically find an available port starting from 3000 and serve y
 | `Shift + G` | Go to bottom |
 | `t` | Toggle theme |
 | `i` | Toggle .gitignore filter |
+| `d` | Show diff for focused file |
 | `r` | Refresh page |
 | `?` | Show keyboard shortcuts |
 | `Ctrl/Cmd + S` | Save file (in editor) |

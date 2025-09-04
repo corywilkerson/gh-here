@@ -43,6 +43,107 @@ Examples:
 const app = express();
 const workingDir = process.cwd();
 
+// Git repository detection
+let isGitRepo = false;
+let gitRepoRoot = '';
+
+// Check if current directory or any parent is a git repository
+function findGitRepo(dir) {
+  if (fs.existsSync(path.join(dir, '.git'))) {
+    return dir;
+  }
+  const parentDir = path.dirname(dir);
+  if (parentDir === dir) {
+    return null; // Reached root directory
+  }
+  return findGitRepo(parentDir);
+}
+
+// Initialize git detection
+gitRepoRoot = findGitRepo(workingDir);
+isGitRepo = !!gitRepoRoot;
+
+// Git status icon and description helpers
+function getGitStatusIcon(status) {
+  switch (status.trim()) {
+    case 'M': return octicons['dot-fill'].toSVG({ class: 'git-status-icon' });
+    case 'A': return octicons['plus'].toSVG({ class: 'git-status-icon' });
+    case 'D': return octicons['dash'].toSVG({ class: 'git-status-icon' });
+    case 'R': return octicons['arrow-right'].toSVG({ class: 'git-status-icon' });
+    case '??': return octicons['question'].toSVG({ class: 'git-status-icon' });
+    case 'MM': 
+    case 'AM': 
+    case 'AD': return octicons['dot-fill'].toSVG({ class: 'git-status-icon' });
+    default: return octicons['dot-fill'].toSVG({ class: 'git-status-icon' });
+  }
+}
+
+function getGitStatusDescription(status) {
+  switch (status.trim()) {
+    case 'M': return 'Modified';
+    case 'A': return 'Added';
+    case 'D': return 'Deleted';
+    case 'R': return 'Renamed';
+    case '??': return 'Untracked';
+    case 'MM': return 'Modified (staged and unstaged)';
+    case 'AM': return 'Added (modified)';
+    case 'AD': return 'Added (deleted)';
+    default: return `Git status: ${status}`;
+  }
+}
+
+// Get git status for files
+function getGitStatus() {
+  return new Promise((resolve) => {
+    if (!isGitRepo) {
+      resolve({});
+      return;
+    }
+    
+    exec('git status --porcelain', { cwd: gitRepoRoot }, (error, stdout) => {
+      if (error) {
+        resolve({});
+        return;
+      }
+      
+      const statusMap = {};
+      const lines = stdout.trim().split('\n').filter(line => line);
+      
+      for (const line of lines) {
+        const status = line.substring(0, 2);
+        const filePath = line.substring(3);
+        const absolutePath = path.resolve(gitRepoRoot, filePath);
+        statusMap[absolutePath] = {
+          status: status.trim(),
+          staged: status[0] !== ' ' && status[0] !== '?',
+          modified: status[1] !== ' ',
+          untracked: status === '??'
+        };
+      }
+      
+      resolve(statusMap);
+    });
+  });
+}
+
+// Get git branch info
+function getGitBranch() {
+  return new Promise((resolve) => {
+    if (!isGitRepo) {
+      resolve(null);
+      return;
+    }
+    
+    exec('git branch --show-current', { cwd: gitRepoRoot }, (error, stdout) => {
+      if (error) {
+        resolve('main');
+        return;
+      }
+      resolve(stdout.trim() || 'main');
+    });
+  });
+}
+
 // .gitignore parsing functionality
 function parseGitignore(gitignorePath) {
   try {
@@ -167,10 +268,14 @@ app.get('/download', (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   const currentPath = req.query.path || '';
   const showGitignored = req.query.gitignore === 'false'; // Default to hiding gitignored files
   const fullPath = path.join(workingDir, currentPath);
+  
+  // Get git status and branch info
+  const gitStatus = await getGitStatus();
+  const gitBranch = await getGitBranch();
   
   try {
     const stats = fs.statSync(fullPath);
@@ -181,12 +286,16 @@ app.get('/', (req, res) => {
       let items = fs.readdirSync(fullPath).map(item => {
         const itemPath = path.join(fullPath, item);
         const itemStats = fs.statSync(itemPath);
+        const absoluteItemPath = path.resolve(itemPath);
+        const gitInfo = gitStatus[absoluteItemPath] || null;
+        
         return {
           name: item,
           path: path.join(currentPath, item).replace(/\\/g, '/'),
           isDirectory: itemStats.isDirectory(),
           size: itemStats.size,
-          modified: itemStats.mtime
+          modified: itemStats.mtime,
+          gitStatus: gitInfo
         };
       });
       
@@ -205,12 +314,23 @@ app.get('/', (req, res) => {
         return a.name.localeCompare(b.name);
       });
       
-      res.send(renderDirectory(currentPath, items, showGitignored));
+      res.send(renderDirectory(currentPath, items, showGitignored, gitBranch));
     } else {
       const content = fs.readFileSync(fullPath, 'utf8');
       const ext = path.extname(fullPath).slice(1);
       const viewMode = req.query.view || 'rendered';
-      res.send(renderFile(currentPath, content, ext, viewMode));
+      
+      if (viewMode === 'diff' && isGitRepo) {
+        // Check if file has git status
+        const absolutePath = path.resolve(fullPath);
+        const gitInfo = gitStatus[absolutePath];
+        if (gitInfo) {
+          const diffHtml = await renderFileDiff(currentPath, ext, gitInfo);
+          return res.send(diffHtml);
+        }
+      }
+      
+      res.send(await renderFile(currentPath, content, ext, viewMode, gitStatus));
     }
   } catch (error) {
     res.status(404).send(`<h1>File not found</h1><p>${error.message}</p>`);
@@ -370,8 +490,45 @@ app.post('/api/rename', express.json(), (req, res) => {
   }
 });
 
-function renderDirectory(currentPath, items, showGitignored = false) {
-  const breadcrumbs = generateBreadcrumbs(currentPath);
+// Git diff endpoint
+app.get('/api/git-diff', async (req, res) => {
+  try {
+    if (!isGitRepo) {
+      return res.status(404).json({ success: false, error: 'Not a git repository' });
+    }
+    
+    const filePath = req.query.path;
+    const staged = req.query.staged === 'true';
+    
+    if (!filePath) {
+      return res.status(400).json({ success: false, error: 'File path is required' });
+    }
+    
+    // Get the diff for the specific file
+    const diffCommand = staged ? 
+      `git diff --cached "${filePath}"` : 
+      `git diff "${filePath}"`;
+    
+    exec(diffCommand, { cwd: gitRepoRoot }, (error, stdout, stderr) => {
+      if (error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      
+      res.json({
+        success: true,
+        diff: stdout,
+        staged: staged,
+        filePath: filePath
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
+function renderDirectory(currentPath, items, showGitignored = false, gitBranch = null) {
+  const breadcrumbs = generateBreadcrumbs(currentPath, gitBranch);
   const readmeFile = findReadmeFile(items);
   const readmePreview = readmeFile ? generateReadmePreview(currentPath, readmeFile) : '';
   const languageStats = generateLanguageStats(items);
@@ -383,10 +540,16 @@ function renderDirectory(currentPath, items, showGitignored = false) {
       </td>
       <td class="name">
         <a href="/?path=${encodeURIComponent(item.path)}">${item.name}</a>
+        ${item.gitStatus ? `<span class="git-status git-status-${item.gitStatus.status.replace(' ', '')}" title="Git Status: ${getGitStatusDescription(item.gitStatus.status)}">${getGitStatusIcon(item.gitStatus.status)}</span>` : ''}
         <div class="quick-actions">
           <button class="quick-btn copy-path-btn" title="Copy path" data-path="${item.path}">
             ${octicons.copy.toSVG({ class: 'quick-icon' })}
           </button>
+          ${!item.isDirectory && item.gitStatus ? `
+            <button class="quick-btn diff-btn" title="Show diff" data-path="${item.path}">
+              ${octicons.diff.toSVG({ class: 'quick-icon' })}
+            </button>
+          ` : ''}
           ${!item.isDirectory ? `
             <a class="quick-btn download-btn" href="/download?path=${encodeURIComponent(item.path)}" title="Download" download="${item.name}">
               ${octicons.download.toSVG({ class: 'quick-icon' })}
@@ -576,10 +739,138 @@ function getLanguageColor(language) {
   return colors[language] || colors.other;
 }
 
-function renderFile(filePath, content, ext, viewMode = 'rendered') {
+async function renderFileDiff(filePath, ext, gitInfo) {
+  const breadcrumbs = generateBreadcrumbs(filePath);
+  
+  // Get git diff for the file
+  return new Promise((resolve, reject) => {
+    const diffCommand = gitInfo.staged ? 
+      `git diff --cached "${filePath}"` : 
+      `git diff "${filePath}"`;
+    
+    exec(diffCommand, { cwd: gitRepoRoot }, (error, stdout) => {
+      if (error) {
+        return reject(error);
+      }
+      
+      const diffContent = renderRawDiff(stdout, ext);
+      const currentParams = new URLSearchParams({ path: filePath });
+      const viewUrl = `/?${currentParams.toString()}&view=rendered`;
+      const rawUrl = `/?${currentParams.toString()}&view=raw`;
+      const diffUrl = `/?${currentParams.toString()}&view=diff`;
+      
+      const viewToggle = `
+        <div class="view-toggle">
+          <a href="${viewUrl}" class="view-btn">
+            ${octicons.eye.toSVG({ class: 'view-icon' })} View
+          </a>
+          ${ext === 'md' ? `
+            <a href="${rawUrl}" class="view-btn">
+              ${octicons['file-code'].toSVG({ class: 'view-icon' })} Raw
+            </a>
+          ` : ''}
+          <a href="${diffUrl}" class="view-btn active">
+            ${octicons.diff.toSVG({ class: 'view-icon' })} Diff
+          </a>
+        </div>
+      `;
+      
+      const html = `
+        <!DOCTYPE html>
+        <html data-theme="dark">
+        <head>
+          <title>gh-here: ${path.basename(filePath)} (diff)</title>
+          <link rel="stylesheet" href="/static/styles.css?v=${Date.now()}">
+          <link rel="stylesheet" href="/static/highlight.css?v=${Date.now()}">
+          <script src="/static/app.js"></script>
+        </head>
+        <body>
+          <header>
+            <div class="header-content">
+              <div class="header-left">
+                <h1 class="header-path">${breadcrumbs}</h1>
+              </div>
+              <div class="header-right">
+                ${viewToggle}
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                  ${octicons.moon.toSVG({ class: 'theme-icon' })}
+                </button>
+              </div>
+            </div>
+          </header>
+          <main>
+            <div class="diff-container">
+              <div class="diff-content">
+                ${diffContent}
+              </div>
+            </div>
+          </main>
+        </body>
+        </html>
+      `;
+      
+      resolve(html);
+    });
+  });
+}
+
+function renderRawDiff(diffOutput, ext) {
+  if (!diffOutput.trim()) {
+    return '<div class="no-changes">No changes to display</div>';
+  }
+  
+  const language = getLanguageFromExtension(ext);
+  
+  // Apply syntax highlighting to the entire diff
+  let highlighted;
+  try {
+    // Use diff language for syntax highlighting if available, otherwise use the file's language
+    highlighted = hljs.highlight(diffOutput, { language: 'diff' }).value;
+  } catch {
+    // Fallback to plain text if diff highlighting fails
+    highlighted = diffOutput.replace(/&/g, '&amp;')
+                             .replace(/</g, '&lt;')
+                             .replace(/>/g, '&gt;');
+  }
+  
+  // Split into lines and add line numbers
+  const lines = highlighted.split('\n');
+  let lineNumber = 1;
+  
+  const linesHtml = lines.map(line => {
+    // Determine line type based on first character
+    let lineType = 'context';
+    let displayLine = line;
+    
+    if (line.startsWith('<span class="hljs-deletion">-') || line.startsWith('-')) {
+      lineType = 'removed';
+    } else if (line.startsWith('<span class="hljs-addition">+') || line.startsWith('+')) {
+      lineType = 'added';
+    } else if (line.startsWith('@@') || line.includes('hljs-meta')) {
+      lineType = 'hunk';
+    } else if (line.startsWith('diff --git') || line.startsWith('index ') || line.startsWith('---') || line.startsWith('+++')) {
+      lineType = 'header';
+    }
+    
+    const currentLineNumber = (lineType === 'context' || lineType === 'removed' || lineType === 'added') ? lineNumber++ : '';
+    
+    return `<div class="diff-line diff-line-${lineType}">
+      <span class="diff-line-number">${currentLineNumber}</span>
+      <span class="diff-line-content">${displayLine}</span>
+    </div>`;
+  }).join('');
+  
+  return `<div class="raw-diff-container">${linesHtml}</div>`;
+}
+
+async function renderFile(filePath, content, ext, viewMode = 'rendered', gitStatus = null) {
   const breadcrumbs = generateBreadcrumbs(filePath);
   let displayContent;
   let viewToggle = '';
+  
+  // Check if file has git changes
+  const absolutePath = path.resolve(path.join(workingDir, filePath));
+  const hasGitChanges = gitStatus && gitStatus[absolutePath];
   
   if (ext === 'md') {
     if (viewMode === 'raw') {
@@ -600,15 +891,21 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
     const currentParams = new URLSearchParams({ path: filePath });
     const rawUrl = `/?${currentParams.toString()}&view=raw`;
     const renderedUrl = `/?${currentParams.toString()}&view=rendered`;
+    const diffUrl = `/?${currentParams.toString()}&view=diff`;
     
     viewToggle = `
       <div class="view-toggle">
         <a href="${renderedUrl}" class="view-btn ${viewMode === 'rendered' ? 'active' : ''}">
-          ${octicons.eye.toSVG({ class: 'view-icon' })} Rendered
+          ${octicons.eye.toSVG({ class: 'view-icon' })} View
         </a>
         <a href="${rawUrl}" class="view-btn ${viewMode === 'raw' ? 'active' : ''}">
           ${octicons['file-code'].toSVG({ class: 'view-icon' })} Raw
         </a>
+        ${hasGitChanges ? `
+          <a href="${diffUrl}" class="view-btn ${viewMode === 'diff' ? 'active' : ''}">
+            ${octicons.diff.toSVG({ class: 'view-icon' })} Diff
+          </a>
+        ` : ''}
       </div>
     `;
   } else {
@@ -625,6 +922,24 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
     }).join('');
     
     displayContent = `<pre><code class="hljs with-line-numbers">${numberedLines}</code></pre>`;
+    
+    // Add view toggle for non-markdown files with git changes
+    if (hasGitChanges) {
+      const currentParams = new URLSearchParams({ path: filePath });
+      const viewUrl = `/?${currentParams.toString()}&view=rendered`;
+      const diffUrl = `/?${currentParams.toString()}&view=diff`;
+      
+      viewToggle = `
+        <div class="view-toggle">
+          <a href="${viewUrl}" class="view-btn ${viewMode === 'rendered' ? 'active' : ''}">
+            ${octicons.eye.toSVG({ class: 'view-icon' })} View
+          </a>
+          <a href="${diffUrl}" class="view-btn ${viewMode === 'diff' ? 'active' : ''}">
+            ${octicons.diff.toSVG({ class: 'view-icon' })} Diff
+          </a>
+        </div>
+      `;
+    }
   }
 
   return `
@@ -640,7 +955,10 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
       <header>
         <div class="header-content">
           <div class="header-left">
-            <h1 class="header-path">${breadcrumbs}</h1>
+            <h1 class="header-path">
+              ${breadcrumbs}
+              ${hasGitChanges ? `<span class="git-status git-status-${hasGitChanges.status.replace(' ', '')}" title="Git Status: ${getGitStatusDescription(hasGitChanges.status)}">${getGitStatusIcon(hasGitChanges.status)}</span>` : ''}
+            </h1>
           </div>
           <div class="header-right">
             <div id="filename-input-container" class="filename-input-container" style="display: none;">
@@ -729,10 +1047,11 @@ function renderNewFile(currentPath) {
   `;
 }
 
-function generateBreadcrumbs(currentPath) {
-  // At root, show gh-here branding
+function generateBreadcrumbs(currentPath, gitBranch = null) {
+  // At root, show gh-here branding with git branch if available
   if (!currentPath || currentPath === '.') {
-    return `${octicons.home.toSVG({ class: 'octicon-home' })} gh-here`;
+    const gitBranchDisplay = gitBranch ? `<span class="git-branch">${octicons['git-branch'].toSVG({ class: 'octicon-branch' })} ${gitBranch}</span>` : '';
+    return `${octicons.home.toSVG({ class: 'octicon-home' })} gh-here ${gitBranchDisplay}`;
   }
   
   // In subdirectories, show clickable path

@@ -138,6 +138,10 @@ document.addEventListener('DOMContentLoaded', function() {
                   <div class="shortcut-keys"><kbd>E</kbd></div>
                 </div>
                 <div class="shortcut-item">
+                  <span class="shortcut-desc">Show diff for focused file</span>
+                  <div class="shortcut-keys"><kbd>D</kbd></div>
+                </div>
+                <div class="shortcut-item">
                   <span class="shortcut-desc">Refresh page</span>
                   <div class="shortcut-keys"><kbd>R</kbd></div>
                 </div>
@@ -507,6 +511,22 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
         break;
+      case 'd':
+        // Show diff for focused file (if it has git status)
+        if (!e.ctrlKey && !e.metaKey && currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
+          e.preventDefault();
+          const focusedRow = visibleRows[currentFocusIndex];
+          const rowType = focusedRow.dataset.type;
+          
+          if (rowType === 'file') {
+            const filePath = focusedRow.dataset.path;
+            const diffBtn = focusedRow.querySelector('.diff-btn');
+            if (diffBtn) {
+              showDiffViewer(filePath);
+            }
+          }
+        }
+        break;
     }
   }
   
@@ -871,7 +891,202 @@ document.addEventListener('DOMContentLoaded', function() {
       // Navigate to the file and trigger edit mode
       window.location.href = `/?path=${encodeURIComponent(filePath)}#edit`;
     }
+    
+    // Git diff viewer functionality
+    if (e.target.closest('.diff-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const button = e.target.closest('.diff-btn');
+      const filePath = button.dataset.path;
+      showDiffViewer(filePath);
+    }
   });
+
+  // Git diff viewer functions
+  function showDiffViewer(filePath) {
+    // Create diff viewer overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'diff-viewer-overlay';
+    overlay.innerHTML = `
+      <div class="diff-viewer-modal">
+        <div class="diff-viewer-header">
+          <h3 class="diff-viewer-title">
+            📋 Diff: ${filePath}
+          </h3>
+          <button class="diff-close-btn" aria-label="Close diff viewer">&times;</button>
+        </div>
+        <div class="diff-viewer-content">
+          <div class="loading" style="padding: 40px; text-align: center;">Loading diff...</div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Close on overlay click or close button
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay || e.target.classList.contains('diff-close-btn')) {
+        document.body.removeChild(overlay);
+      }
+    });
+    
+    // Close with Escape key
+    const escHandler = function(e) {
+      if (e.key === 'Escape') {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+    
+    // Load diff content
+    loadDiffContent(filePath, overlay);
+  }
+
+  function loadDiffContent(filePath, overlay) {
+    fetch(`/api/git-diff?path=${encodeURIComponent(filePath)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          renderDiff(data.diff, data.filePath, overlay);
+        } else {
+          showDiffError(data.error, overlay);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading diff:', error);
+        showDiffError('Failed to load diff', overlay);
+      });
+  }
+
+  function renderDiff(diffText, filePath, overlay) {
+    if (!diffText || diffText.trim() === '') {
+      const content = overlay.querySelector('.diff-viewer-content');
+      content.innerHTML = `
+        <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
+          No changes detected for this file
+        </div>
+      `;
+      return;
+    }
+
+    const lines = diffText.split('\n');
+    const parsedDiff = parseDiff(lines);
+    
+    const content = overlay.querySelector('.diff-viewer-content');
+    content.innerHTML = `
+      <div class="diff-container">
+        <div class="diff-side">
+          <div class="diff-side-header">Original</div>
+          <div class="diff-side-content" id="diff-original"></div>
+        </div>
+        <div class="diff-side">
+          <div class="diff-side-header">Modified</div>
+          <div class="diff-side-content" id="diff-modified"></div>
+        </div>
+      </div>
+    `;
+
+    const originalSide = content.querySelector('#diff-original');
+    const modifiedSide = content.querySelector('#diff-modified');
+    
+    renderDiffSide(parsedDiff.original, originalSide, 'original');
+    renderDiffSide(parsedDiff.modified, modifiedSide, 'modified');
+  }
+
+  function parseDiff(lines) {
+    const original = [];
+    const modified = [];
+    let originalLineNum = 1;
+    let modifiedLineNum = 1;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      if (line.startsWith('@@')) {
+        // Parse hunk header
+        const match = line.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+        if (match) {
+          originalLineNum = parseInt(match[1]);
+          modifiedLineNum = parseInt(match[2]);
+        }
+        continue;
+      }
+      
+      if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('diff ') || line.startsWith('index ')) {
+        continue;
+      }
+      
+      if (line.startsWith('-')) {
+        original.push({
+          lineNum: originalLineNum++,
+          content: line.substring(1),
+          type: 'removed'
+        });
+      } else if (line.startsWith('+')) {
+        modified.push({
+          lineNum: modifiedLineNum++,
+          content: line.substring(1),
+          type: 'added'
+        });
+      } else {
+        // Context line
+        const content = line.startsWith(' ') ? line.substring(1) : line;
+        original.push({
+          lineNum: originalLineNum++,
+          content: content,
+          type: 'context'
+        });
+        modified.push({
+          lineNum: modifiedLineNum++,
+          content: content,
+          type: 'context'
+        });
+      }
+    }
+    
+    return { original, modified };
+  }
+
+  function renderDiffSide(lines, container, side) {
+    container.innerHTML = lines.map(line => {
+      let content = escapeHtml(line.content);
+      
+      // Apply syntax highlighting if hljs is available
+      if (window.hljs && line.content.trim() !== '') {
+        try {
+          const highlighted = hljs.highlightAuto(line.content);
+          content = highlighted.value;
+        } catch (e) {
+          // Fall back to escaped HTML if highlighting fails
+          content = escapeHtml(line.content);
+        }
+      }
+      
+      return `
+        <div class="diff-line diff-line-${line.type}">
+          <div class="diff-line-number">${line.lineNum}</div>
+          <div class="diff-line-content">${content}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function showDiffError(error, overlay) {
+    const content = overlay.querySelector('.diff-viewer-content');
+    content.innerHTML = `
+      <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
+        <p>Error loading diff:</p>
+        <p style="color: #dc3545; margin-top: 8px;">${error}</p>
+      </div>
+    `;
+  }
 
   // File operations (delete, rename)
   document.addEventListener('click', function(e) {
