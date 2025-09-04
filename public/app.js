@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Keyboard navigation
   document.addEventListener('keydown', function(e) {
+    // Don't handle shortcuts when editor is active
+    const editorContainer = document.getElementById('editor-container');
+    const fileEditor = document.getElementById('file-editor');
+    if (editorContainer && editorContainer.style.display !== 'none' && 
+        (document.activeElement === fileEditor || editorContainer.contains(document.activeElement))) {
+      return;
+    }
+    
     if (searchInput && document.activeElement === searchInput) {
       handleSearchKeydown(e);
     } else {
@@ -449,6 +457,73 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize line selections if we're on a file page
   if (document.querySelector('.with-line-numbers')) {
     initLineSelections();
+  }
+
+  // Editor functionality
+  const editBtn = document.getElementById('edit-btn');
+  const editorContainer = document.getElementById('editor-container');
+  const fileEditor = document.getElementById('file-editor');
+  const saveBtn = document.getElementById('save-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const fileContent = document.querySelector('.file-content');
+
+  if (editBtn && editorContainer && fileEditor) {
+    let originalContent = '';
+
+    editBtn.addEventListener('click', function() {
+      // Get current file path
+      const currentUrl = new URL(window.location.href);
+      const filePath = currentUrl.searchParams.get('path') || '';
+      
+      // Fetch original file content
+      fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`)
+        .then(response => response.text())
+        .then(content => {
+          originalContent = content;
+          fileEditor.value = content;
+          fileContent.style.display = 'none';
+          editorContainer.style.display = 'block';
+          fileEditor.focus();
+        })
+        .catch(error => {
+          console.error('Error fetching file content:', error);
+          alert('Failed to load file content for editing');
+        });
+    });
+
+    cancelBtn.addEventListener('click', function() {
+      editorContainer.style.display = 'none';
+      fileContent.style.display = 'block';
+    });
+
+    saveBtn.addEventListener('click', function() {
+      const currentUrl = new URL(window.location.href);
+      const filePath = currentUrl.searchParams.get('path') || '';
+      
+      fetch('/api/save-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: filePath,
+          content: fileEditor.value
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Refresh the page to show updated content
+          window.location.reload();
+        } else {
+          alert('Failed to save file: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving file:', error);
+        alert('Failed to save file');
+      });
+    });
   }
 
   async function copyToClipboard(text, button) {

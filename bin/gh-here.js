@@ -70,6 +70,42 @@ app.get('/', (req, res) => {
   }
 });
 
+// API endpoint to get file content for editing
+app.get('/api/file-content', (req, res) => {
+  try {
+    const currentPath = req.query.path || '';
+    const fullPath = path.join(process.cwd(), currentPath);
+    
+    // Security check - ensure we're not accessing files outside the current directory
+    if (!fullPath.startsWith(process.cwd())) {
+      return res.status(403).send('Access denied');
+    }
+    
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    res.send(content);
+  } catch (error) {
+    res.status(404).send(`File not found: ${error.message}`);
+  }
+});
+
+// API endpoint to save file changes
+app.post('/api/save-file', express.json(), (req, res) => {
+  try {
+    const { path: filePath, content } = req.body;
+    const fullPath = path.join(process.cwd(), filePath || '');
+    
+    // Security check - ensure we're not accessing files outside the current directory
+    if (!fullPath.startsWith(process.cwd())) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+    
+    fs.writeFileSync(fullPath, content, 'utf-8');
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 function renderDirectory(currentPath, items) {
   const breadcrumbs = generateBreadcrumbs(currentPath);
   const readmeFile = findReadmeFile(items);
@@ -323,6 +359,9 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
             <h1 class="header-path">${breadcrumbs}</h1>
           </div>
           <div class="header-right">
+            <button id="edit-btn" class="edit-btn" aria-label="Edit file">
+              ${octicons.pencil.toSVG({ class: 'edit-icon' })}
+            </button>
             ${viewToggle}
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
               ${octicons.moon.toSVG({ class: 'theme-icon' })}
@@ -333,6 +372,16 @@ function renderFile(filePath, content, ext, viewMode = 'rendered') {
       <main>
         <div class="file-content">
           ${displayContent}
+        </div>
+        <div id="editor-container" class="editor-container" style="display: none;">
+          <div class="editor-header">
+            <div class="editor-title">Edit ${path.basename(filePath)}</div>
+            <div class="editor-actions">
+              <button id="cancel-btn" class="btn btn-secondary">Cancel</button>
+              <button id="save-btn" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+          <textarea id="file-editor" class="file-editor"></textarea>
         </div>
       </main>
     </body>
