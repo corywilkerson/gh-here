@@ -44,7 +44,6 @@ The app will automatically find an available port starting from 3000 and serve y
 - Quick actions (copy path, download files, edit, rename, delete)
 - .gitignore support with toggle functionality
 - File and folder creation, editing, renaming, and deletion
-- Responsive design for mobile and desktop
 
 ### 🎨 Code Viewing & Editing
 - GitHub-accurate syntax highlighting for 25+ languages
@@ -56,11 +55,13 @@ The app will automatically find an available port starting from 3000 and serve y
 
 ### 🔀 Git Integration
 - Automatic git repository detection
-- Git status indicators with GitHub-style icons next to modified files
+- Clean git status indicators with colored dots in dedicated column
+- Smart status detection for files within untracked directories
 - Professional inline diff viewer with syntax highlighting
 - View/Diff/Edit mode toggle for files with changes
 - Beautiful raw git diff display with color coding
 - Git branch display in navigation header
+- Visual status indicators: modified (dot), untracked (purple dot), added, deleted
 
 ### ⌨️ Keyboard Navigation
 - `j`/`k` or arrow keys to navigate files
