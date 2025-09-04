@@ -4,8 +4,16 @@ A local GitHub-like file browser for viewing code in your terminal. Launch it in
 
 ## Installation
 
+You can run gh-here directly with npx (no installation required):
+
 ```bash
-npm install -g .
+npx gh-here
+```
+
+Or install it globally:
+
+```bash
+npm install -g gh-here
 ```
 
 ## Usage
@@ -13,10 +21,10 @@ npm install -g .
 Navigate to any directory and run:
 
 ```bash
-npx gh-here                           # Start server on available port
-npx gh-here --open                    # Start server and open browser
-npx gh-here --open --browser=safari   # Start server and open in Safari
-npx gh-here --open --browser=arc      # Start server and open in Arc
+gh-here                           # Start server on available port
+gh-here --open                    # Start server and open browser
+gh-here --open --browser=safari   # Start server and open in Safari
+gh-here --open --browser=arc      # Start server and open in Arc
 ```
 
 The app will automatically find an available port starting from 3000 and serve your current directory with a GitHub-like interface.
