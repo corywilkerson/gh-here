@@ -196,46 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const availableLanguages = monaco.languages.getLanguages();
         console.log('Available Monaco languages:', availableLanguages.map(lang => lang.id).sort());
         
-        // Initialize file editor if container exists
-        const fileEditorContainer = document.getElementById('file-editor');
-        if (fileEditorContainer) {
-          const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
-          const language = getLanguageFromExtension(filename);
-          console.log('Monaco initialization - filename:', filename, 'detected language:', language);
-          
-          // Validate language exists in Monaco  
-          const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
-          const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-          console.log('Available languages include', language + ':', availableLanguages.includes(language));
-          console.log('Using language:', validLanguage);
-          
-          monacoFileEditor = monaco.editor.create(fileEditorContainer, {
-            value: '',
-            language: validLanguage,
-            theme: monacoTheme,
-            minimap: { enabled: false },
-            lineNumbers: 'on',
-            wordWrap: 'on',
-            scrollBeyondLastLine: false,
-            fontSize: 12,
-            lineHeight: 1.5,
-            fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-            padding: { top: 20, bottom: 20 },
-            renderLineHighlight: 'line',
-            selectOnLineNumbers: true,
-            automaticLayout: true,
-            folding: true,
-            foldingHighlight: true,
-            foldingStrategy: 'auto',
-            showFoldingControls: 'mouseover',
-            bracketPairColorization: { enabled: true },
-            guides: {
-              bracketPairs: true,
-              indentation: true
-            }
-          });
-          console.log('File editor initialized');
-        }
+        // Don't create editor on page load - create it when edit button is clicked
+        console.log('Monaco loaded, editor will be created when needed');
         
         // Initialize new file editor if container exists  
         const newFileEditorContainer = document.getElementById('new-file-content');
@@ -1024,6 +986,53 @@ document.addEventListener('DOMContentLoaded', function() {
             clearDraft(filePath);
           }
           
+          // Create Monaco editor if it doesn't exist
+          if (!monacoFileEditor && window.monacoReady) {
+            console.log('Creating Monaco editor for edit mode...');
+            const fileEditorContainer = document.getElementById('file-editor');
+            if (fileEditorContainer) {
+              const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
+              const language = getLanguageFromExtension(filename);
+              console.log('Creating Monaco editor - filename:', filename, 'detected language:', language);
+              
+              // Validate language exists in Monaco  
+              const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
+              const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
+              console.log('Available languages include', language + ':', availableLanguages.includes(language));
+              console.log('Using language:', validLanguage);
+              
+              const currentTheme = html.getAttribute('data-theme');
+              const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
+              
+              monacoFileEditor = monaco.editor.create(fileEditorContainer, {
+                value: '',
+                language: validLanguage,
+                theme: monacoTheme,
+                minimap: { enabled: false },
+                lineNumbers: 'on',
+                wordWrap: 'on',
+                scrollBeyondLastLine: false,
+                fontSize: 12,
+                lineHeight: 1.5,
+                fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+                padding: { top: 20, bottom: 20 },
+                renderLineHighlight: 'line',
+                selectOnLineNumbers: true,
+                automaticLayout: true,
+                folding: true,
+                foldingHighlight: true,
+                foldingStrategy: 'auto',
+                showFoldingControls: 'mouseover',
+                bracketPairColorization: { enabled: true },
+                guides: {
+                  bracketPairs: true,
+                  indentation: true
+                }
+              });
+              console.log('Monaco editor created for editing');
+            }
+          }
+          
           // Set content in Monaco editor - wait for Monaco to be ready
           const setContentWhenReady = () => {
             console.log('Checking Monaco readiness...', { 
@@ -1092,49 +1101,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Monaco not ready yet, wait and try again
               console.log('Monaco not ready, retrying in 100ms...');
               
-              // If Monaco is available but the editor wasn't created, try to reinitialize
-              if (window.monacoReady && !monacoFileEditor && typeof monaco !== 'undefined') {
-                console.log('Reinitializing Monaco file editor...');
-                const fileEditorContainer = document.getElementById('file-editor');
-                if (fileEditorContainer) {
-                  const currentTheme = html.getAttribute('data-theme');
-                  const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
-                  const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
-                  const language = getLanguageFromExtension(filename);
-                  
-                  // Validate language exists in Monaco
-                  const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
-                  const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-                  console.log('Reinit - Available languages include', language + ':', availableLanguages.includes(language));
-                  
-                  monacoFileEditor = monaco.editor.create(fileEditorContainer, {
-                    value: '',
-                    language: validLanguage,
-                    theme: monacoTheme,
-                    minimap: { enabled: false },
-                    lineNumbers: 'on',
-                    wordWrap: 'on',
-                    scrollBeyondLastLine: false,
-                    fontSize: 12,
-                    lineHeight: 1.5,
-                    fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-                    padding: { top: 20, bottom: 20 },
-                    renderLineHighlight: 'line',
-                    selectOnLineNumbers: true,
-                    automaticLayout: true,
-                    folding: true,
-                    foldingHighlight: true,
-                    foldingStrategy: 'auto',
-                    showFoldingControls: 'mouseover',
-                    bracketPairColorization: { enabled: true },
-                    guides: {
-                      bracketPairs: true,
-                      indentation: true
-                    }
-                  });
-                  console.log('Monaco file editor reinitialized');
-                }
-              }
+              // Editor will be created above if needed
               
               setTimeout(setContentWhenReady, 100);
             }
