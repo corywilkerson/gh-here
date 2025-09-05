@@ -32,12 +32,21 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Set background on html to prevent flash during navigation */
+  background-color: #0d1117; /* Default dark theme background */
+}
+
+[data-theme="light"] html {
+  background-color: #ffffff; /* Light theme background */
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh; /* Ensure full height */
 }
 
 header {
@@ -604,7 +613,10 @@ main {
 .editor-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-accent);
+  display: flex;
+  align-items: center;
+  margin: 0;
 }
 
 .editor-actions {
@@ -647,48 +659,17 @@ main {
   border-color: var(--text-secondary);
 }
 
-.editor-with-line-numbers {
-  position: relative;
-  display: flex;
-  border: 1px solid var(--border-primary);
-  border-width: 0 1px 1px 1px;
-  border-radius: 0 0 5px 5px;
-  background: var(--bg-primary);
-  height: 600px;
-  overflow: hidden;
-}
 
-.editor-line-numbers {
-  padding: 16px 8px 16px 16px;
-  background: var(--bg-primary);
-  border-right: 1px solid var(--border-secondary);
-  color: var(--text-secondary);
-  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: right;
-  user-select: none;
-  white-space: pre;
-  min-width: 50px;
-  height: 600px;
-  overflow-y: auto;
-}
 
-.file-editor {
-  flex: 1;
-  height: 600px;
-  padding: 16px;
-  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  background: transparent;
-  color: var(--text-primary);
-  border: none;
-  outline: none;
-  resize: vertical;
-  tab-size: 2;
-  white-space: pre;
-  overflow-y: auto;
+
+/* Monaco editor container (current) */
+#file-editor.monaco-editor {
+  height: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  flex: none !important;
 }
 
 .editor-with-line-numbers:focus-within {
@@ -2059,4 +2040,88 @@ main {
 
 [data-theme="light"] .git-status-untracked {
   color: #8b5cf6 !important;
+}
+
+/* Monaco Editor styling - inner container only */
+.monaco-editor-container {
+  height: 600px !important;
+  width: 100% !important;
+  min-width: 400px !important;
+  overflow: hidden !important;
+  background: var(--bg-primary);
+  position: relative !important;
+  display: block !important;
+  border-radius: 0 0 6px 6px;
+}
+
+.monaco-editor-container .monaco-editor {
+  height: 600px !important;
+  width: 100% !important;
+  min-width: 400px !important;
+  position: relative !important;
+}
+
+/* Monaco theme integration - match view/browse UI */
+.monaco-editor .monaco-editor-background {
+  background-color: var(--bg-primary) !important;
+}
+
+.monaco-editor .monaco-editor .margin {
+  background-color: var(--bg-primary) !important;
+}
+
+.monaco-editor .monaco-scrollable-element .scrollbar {
+  background: var(--bg-secondary) !important;
+}
+
+.monaco-editor .monaco-scrollable-element .slider {
+  background: var(--border-primary) !important;
+}
+
+.monaco-editor .monaco-scrollable-element .slider:hover {
+  background: var(--text-secondary) !important;
+}
+
+/* Ensure Monaco editor integrates seamlessly with container */
+.monaco-editor-container .monaco-editor .monaco-editor-background,
+.monaco-editor-container .monaco-editor .margin-view-overlays .current-line {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Line number styling to match our theme */
+.monaco-editor .margin-view-overlays .line-numbers {
+  color: var(--text-secondary) !important;
+}
+
+.monaco-editor .margin-view-overlays .line-numbers.active-line-number {
+  color: var(--text-primary) !important;
+}
+
+/* Draft dialog styling */
+.draft-modal {
+  max-width: 400px;
+  text-align: center;
+}
+
+.draft-modal h3 {
+  margin: 0 0 12px 0;
+  color: var(--text-accent);
+  font-size: 18px;
+}
+
+.draft-modal p {
+  margin: 0 0 20px 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.draft-actions .btn {
+  flex: 1;
+  max-width: 120px;
 }

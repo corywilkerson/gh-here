@@ -4,7 +4,7 @@ A local GitHub-like file browser for viewing and exploring codebases in your bro
 
 ## Why?
 
-TUIs (Terminal User Interfaces) like Claude Code, Google Gemini CLI, and Cursor are becoming very popular tools for working on codebases, but they don't provide a visual view into the directories and files themselves. gh-here exists to fill that gap, so you can easily explore your project files in a familiar GitHub-esque browser GUI.
+TUIs (Terminal User Interfaces) like Claude Code, Google Gemini CLI, and Cursor have become very popular tools for working on codebases, but they don't provide a visual view into the directories and files themselves. gh-here exists to fill that gap, so you can easily explore your project files in a familiar GitHub-esque browser GUI.
 
 <!-- Test change for commit interface -->
 
