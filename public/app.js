@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const html = document.documentElement;
   const searchInput = document.getElementById('file-search');
   const fileTable = document.getElementById('file-table');
-  const fileEditor = document.getElementById('file-editor');
   
   let currentFocusIndex = -1;
   let fileRows = [];
@@ -347,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Keyboard navigation
   document.addEventListener('keydown', function(e) {
     // Handle help overlay first
-    if (e.key === '?' && document.activeElement !== searchInput && document.activeElement !== fileEditor) {
+    if (e.key === '?' && document.activeElement !== searchInput) {
       e.preventDefault();
       showKeyboardHelp();
       return;
@@ -365,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Don't handle shortcuts when editor is active
     const editorContainer = document.getElementById('editor-container');
     if (editorContainer && editorContainer.style.display !== 'none' && 
-        (document.activeElement === fileEditor || editorContainer.contains(document.activeElement))) {
+        editorContainer.contains(document.activeElement)) {
       return;
     }
     
@@ -833,35 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cancelBtn = document.getElementById('cancel-btn');
   const fileContent = document.querySelector('.file-content');
 
-  // Line numbers functionality
-  function updateLineNumbers(textarea, lineNumbersDiv) {
-    if (!textarea || !lineNumbersDiv) return;
-    
-    const lines = textarea.value.split('\n');
-    const lineNumbers = lines.map((_, index) => index + 1).join('\n');
-    lineNumbersDiv.textContent = lineNumbers || '1';
-  }
-
-  // Initialize and handle line numbers for both editors
-  const editorLineNumbers = document.getElementById('editor-line-numbers');
-  const newFileContent = document.getElementById('new-file-content');
-  const newFileLineNumbers = document.getElementById('new-file-line-numbers');
-
-  // Get fileEditor reference (declared earlier in the file)
-  if (document.getElementById('file-editor') && editorLineNumbers) {
-    const fileEditorElement = document.getElementById('file-editor');
-    fileEditorElement.addEventListener('input', () => updateLineNumbers(fileEditorElement, editorLineNumbers));
-    fileEditorElement.addEventListener('scroll', () => {
-      editorLineNumbers.scrollTop = fileEditorElement.scrollTop;
-    });
-  }
-
-  if (newFileContent && newFileLineNumbers) {
-    newFileContent.addEventListener('input', () => updateLineNumbers(newFileContent, newFileLineNumbers));
-    newFileContent.addEventListener('scroll', () => {
-      newFileLineNumbers.scrollTop = newFileContent.scrollTop;
-    });
-  }
+  
 
   // Auto-open editor if hash is #edit
   if (window.location.hash === '#edit' && editBtn) {
@@ -870,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => editBtn.click(), 100);
   }
 
-  if (editBtn && editorContainer && fileEditor) {
+  if (editBtn && editorContainer) {
     let originalContent = '';
 
     // Editor keyboard shortcuts
@@ -938,9 +909,29 @@ document.addEventListener('DOMContentLoaded', function() {
             if (monacoFileEditor && window.monacoReady) {
               console.log('Setting Monaco content:', contentToLoad.substring(0, 100) + '...');
               
+              // Debug DOM elements
+              const editorContainer = document.getElementById('file-editor');
+              const parentContainer = editorContainer?.parentElement;
+              console.log('Editor container:', editorContainer, 'dimensions:', {
+                width: editorContainer?.offsetWidth,
+                height: editorContainer?.offsetHeight,
+                display: window.getComputedStyle(editorContainer || {}).display
+              });
+              console.log('Parent container:', parentContainer, 'dimensions:', {
+                width: parentContainer?.offsetWidth,
+                height: parentContainer?.offsetHeight,
+                display: window.getComputedStyle(parentContainer || {}).display
+              });
+              
               // Make sure the editor is visible and properly sized
               monacoFileEditor.layout();
               monacoFileEditor.setValue(contentToLoad);
+              
+              // Force another layout after a brief delay to ensure proper sizing
+              setTimeout(() => {
+                monacoFileEditor.layout();
+                console.log('Forced layout refresh completed');
+              }, 50);
               
               // Update language based on current file
               const filename = document.querySelector('.header-path a:last-child')?.textContent || '';

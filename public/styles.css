@@ -647,48 +647,17 @@ main {
   border-color: var(--text-secondary);
 }
 
-.editor-with-line-numbers {
-  position: relative;
-  display: flex;
-  border: 1px solid var(--border-primary);
-  border-width: 0 1px 1px 1px;
-  border-radius: 0 0 5px 5px;
-  background: var(--bg-primary);
-  height: 600px;
-  overflow: hidden;
-}
 
-.editor-line-numbers {
-  padding: 16px 8px 16px 16px;
-  background: var(--bg-primary);
-  border-right: 1px solid var(--border-secondary);
-  color: var(--text-secondary);
-  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: right;
-  user-select: none;
-  white-space: pre;
-  min-width: 50px;
-  height: 600px;
-  overflow-y: auto;
-}
 
-.file-editor {
-  flex: 1;
-  height: 600px;
-  padding: 16px;
-  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  background: transparent;
-  color: var(--text-primary);
-  border: none;
-  outline: none;
-  resize: vertical;
-  tab-size: 2;
-  white-space: pre;
-  overflow-y: auto;
+
+/* Monaco editor container (current) */
+#file-editor.monaco-editor {
+  height: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  flex: none !important;
 }
 
 .editor-with-line-numbers:focus-within {
@@ -2065,14 +2034,17 @@ main {
 .monaco-editor-container {
   border: 1px solid var(--border-primary);
   border-radius: 6px;
-  height: 600px;
-  overflow: hidden;
+  height: 600px !important;
+  overflow: visible !important;
   background: var(--bg-primary);
+  position: relative;
+  display: block !important;
 }
 
-.monaco-editor {
-  height: 100%;
-  width: 100%;
+.monaco-editor-container .monaco-editor {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative !important;
 }
 
 /* Monaco theme integration */
