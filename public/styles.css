@@ -2060,3 +2060,26 @@ main {
 [data-theme="light"] .git-status-untracked {
   color: #8b5cf6 !important;
 }
+
+/* Monaco Editor styling */
+.monaco-editor-container {
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  height: 600px;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.monaco-editor {
+  height: 100%;
+  width: 100%;
+}
+
+/* Monaco theme integration */
+.monaco-editor .monaco-editor-background {
+  background-color: var(--bg-primary) !important;
+}
+
+.monaco-editor .monaco-editor .margin {
+  background-color: var(--bg-primary) !important;
+}

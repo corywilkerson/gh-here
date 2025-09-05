@@ -55,6 +55,107 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Removed loading state utilities - not needed for local operations
   
+  // Monaco Editor integration
+  let monacoFileEditor = null;
+  let monacoNewFileEditor = null;
+  
+  // Language detection based on file extension
+  function getLanguageFromExtension(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const languageMap = {
+      'js': 'javascript',
+      'ts': 'typescript',
+      'jsx': 'javascript',
+      'tsx': 'typescript',
+      'html': 'html',
+      'css': 'css',
+      'scss': 'scss',
+      'less': 'less',
+      'json': 'json',
+      'py': 'python',
+      'java': 'java',
+      'c': 'c',
+      'cpp': 'cpp',
+      'cs': 'csharp',
+      'php': 'php',
+      'rb': 'ruby',
+      'go': 'go',
+      'rs': 'rust',
+      'sql': 'sql',
+      'md': 'markdown',
+      'xml': 'xml',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+      'sh': 'shell',
+      'bash': 'shell',
+      'dockerfile': 'dockerfile'
+    };
+    return languageMap[ext] || 'plaintext';
+  }
+  
+  // Initialize Monaco Editor
+  function initializeMonaco() {
+    if (typeof require !== 'undefined') {
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
+      
+      require(['vs/editor/editor.main'], function () {
+        console.log('Monaco Editor loaded successfully');
+        
+        // Set Monaco theme based on current theme
+        const currentTheme = html.getAttribute('data-theme');
+        const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
+        monaco.editor.setTheme(monacoTheme);
+        
+        // Initialize file editor if container exists
+        const fileEditorContainer = document.getElementById('file-editor');
+        if (fileEditorContainer) {
+          const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
+          const language = getLanguageFromExtension(filename);
+          
+          monacoFileEditor = monaco.editor.create(fileEditorContainer, {
+            value: '',
+            language: language,
+            theme: monacoTheme,
+            minimap: { enabled: false },
+            lineNumbers: 'on',
+            wordWrap: 'on',
+            scrollBeyondLastLine: false,
+            fontSize: 12,
+            fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+          });
+          console.log('File editor initialized');
+        }
+        
+        // Initialize new file editor if container exists  
+        const newFileEditorContainer = document.getElementById('new-file-content');
+        if (newFileEditorContainer) {
+          monacoNewFileEditor = monaco.editor.create(newFileEditorContainer, {
+            value: '',
+            language: 'plaintext',
+            theme: monacoTheme,
+            minimap: { enabled: false },
+            lineNumbers: 'on',
+            wordWrap: 'on',
+            scrollBeyondLastLine: false,
+            fontSize: 12,
+            fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+          });
+          console.log('New file editor initialized');
+        }
+        
+        // Set global flag that Monaco is ready
+        window.monacoReady = true;
+      });
+    }
+  }
+  
+  // Initialize Monaco when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMonaco);
+  } else {
+    initializeMonaco();
+  }
+  
   // Initialize
   updateFileRows();
   
@@ -88,6 +189,12 @@ document.addEventListener('DOMContentLoaded', function() {
     html.setAttribute('data-theme', newTheme);
     localStorage.setItem('gh-here-theme', newTheme);
     updateThemeIcon(newTheme);
+    
+    // Update Monaco editor themes
+    if (typeof monaco !== 'undefined') {
+      const monacoTheme = newTheme === 'dark' ? 'vs-dark' : 'vs';
+      monaco.editor.setTheme(monacoTheme);
+    }
   });
 
   // Gitignore toggle functionality
@@ -814,28 +921,84 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Check for draft
           const draft = loadDraft(filePath);
-          if (draft && draft !== content) {
-            if (confirm('You have unsaved changes for this file. Load draft?')) {
-              fileEditor.value = draft;
-            } else {
-              fileEditor.value = content;
-              clearDraft(filePath);
-            }
-          } else {
-            fileEditor.value = content;
+          const contentToLoad = (draft && draft !== content && confirm('You have unsaved changes for this file. Load draft?')) ? draft : content;
+          
+          if (draft && draft === content) {
+            clearDraft(filePath);
           }
+          
+          // Set content in Monaco editor - wait for Monaco to be ready
+          const setContentWhenReady = () => {
+            console.log('Checking Monaco readiness...', { 
+              monacoFileEditor: !!monacoFileEditor, 
+              windowMonacoReady: !!window.monacoReady,
+              contentLength: contentToLoad.length 
+            });
+            
+            if (monacoFileEditor && window.monacoReady) {
+              console.log('Setting Monaco content:', contentToLoad.substring(0, 100) + '...');
+              
+              // Make sure the editor is visible and properly sized
+              monacoFileEditor.layout();
+              monacoFileEditor.setValue(contentToLoad);
+              
+              // Update language based on current file
+              const filename = document.querySelector('.header-path a:last-child')?.textContent || '';
+              if (filename) {
+                const language = getLanguageFromExtension(filename);
+                const model = monacoFileEditor.getModel();
+                if (model) {
+                  monaco.editor.setModelLanguage(model, language);
+                }
+              }
+              
+              // Set up auto-save
+              monacoFileEditor.onDidChangeModelContent(() => {
+                saveDraft(filePath, monacoFileEditor.getValue());
+              });
+              
+              console.log('Monaco content set successfully');
+            } else {
+              // Monaco not ready yet, wait and try again
+              console.log('Monaco not ready, retrying in 100ms...');
+              
+              // If Monaco is available but the editor wasn't created, try to reinitialize
+              if (window.monacoReady && !monacoFileEditor && typeof monaco !== 'undefined') {
+                console.log('Reinitializing Monaco file editor...');
+                const fileEditorContainer = document.getElementById('file-editor');
+                if (fileEditorContainer) {
+                  const currentTheme = html.getAttribute('data-theme');
+                  const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
+                  const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
+                  const language = getLanguageFromExtension(filename);
+                  
+                  monacoFileEditor = monaco.editor.create(fileEditorContainer, {
+                    value: '',
+                    language: language,
+                    theme: monacoTheme,
+                    minimap: { enabled: false },
+                    lineNumbers: 'on',
+                    wordWrap: 'on',
+                    scrollBeyondLastLine: false,
+                    fontSize: 12,
+                    fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+                  });
+                  console.log('Monaco file editor reinitialized');
+                }
+              }
+              
+              setTimeout(setContentWhenReady, 100);
+            }
+          };
+          setContentWhenReady();
           
           fileContent.style.display = 'none';
           editorContainer.style.display = 'block';
-          fileEditor.focus();
           
-          // Set up auto-save and update line numbers
-          fileEditor.addEventListener('input', function() {
-            saveDraft(filePath, fileEditor.value);
-          });
-          
-          // Update line numbers for loaded content
-          updateLineNumbers(fileEditor, editorLineNumbers);
+          // Focus Monaco editor
+          if (monacoFileEditor) {
+            monacoFileEditor.focus();
+          }
         })
         .catch(error => {
           console.error('Error fetching file content:', error);
@@ -868,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         body: JSON.stringify({
           path: filePath,
-          content: fileEditor.value
+          content: monacoFileEditor ? monacoFileEditor.getValue() : ''
         })
       })
       .then(response => {
@@ -1217,13 +1380,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // New file interface functionality
   const newFilenameInput = document.getElementById('new-filename-input');
+  
+  // Update Monaco language when filename changes
+  if (newFilenameInput) {
+    newFilenameInput.addEventListener('input', function() {
+      const filename = this.value.trim();
+      if (monacoNewFileEditor && filename) {
+        const language = getLanguageFromExtension(filename);
+        const model = monacoNewFileEditor.getModel();
+        if (model) {
+          monaco.editor.setModelLanguage(model, language);
+        }
+      }
+    });
+  }
   const createNewFileBtn = document.getElementById('create-new-file');
   const cancelNewFileBtn = document.getElementById('cancel-new-file');
 
   if (createNewFileBtn) {
     createNewFileBtn.addEventListener('click', function() {
       const filename = newFilenameInput.value.trim();
-      const content = newFileContent.value;
+      const content = monacoNewFileEditor ? monacoNewFileEditor.getValue() : '';
       
       if (!filename) {
         showNotification('Please enter a filename', 'error');
