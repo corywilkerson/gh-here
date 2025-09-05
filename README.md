@@ -29,11 +29,12 @@ Navigate to any directory and run:
 ```bash
 gh-here                           # Start server on available port
 gh-here --open                    # Start server and open browser
+gh-here --port=8080               # Start server on port 8080
 gh-here --open --browser=safari   # Start server and open in Safari
 gh-here --open --browser=arc      # Start server and open in Arc
 ```
 
-The app will automatically find an available port starting from 3000 and serve your current directory with a GitHub-like interface.
+The app will automatically find an available port starting from 5555 and serve your current directory with a GitHub-like interface.
 
 ## Features
 
@@ -46,12 +47,13 @@ The app will automatically find an available port starting from 3000 and serve y
 - File and folder creation, editing, renaming, and deletion
 
 ### 🎨 Code Viewing & Editing
-- GitHub-accurate syntax highlighting for 25+ languages
-- Line numbers with GitHub-style selection (click, shift-click, ctrl-click)
-- In-browser file editing with auto-save to localStorage
+- VS Code-quality Monaco Editor with advanced syntax highlighting for 30+ languages
+- GitHub-style line numbers with selection (click, shift-click, ctrl-click)
+- Professional in-browser file editing with auto-save to localStorage
+- Draft management with persistence across sessions
 - Raw and rendered markdown views
 - Shareable URLs with line selections (`#L10-L20`)
-- Syntax highlighting and line numbers in editor
+- Monaco Editor features: IntelliSense, bracket matching, folding
 
 ### 🔀 Git Integration
 - Automatic git repository detection
@@ -86,44 +88,9 @@ The app will automatically find an available port starting from 3000 and serve y
 - Error handling and loading states
 - Notification system for user feedback
 
-## Supported File Types
+## Language Support
 
-### Programming Languages
-- JavaScript (.js, .mjs, .jsx) - React, Node.js
-- TypeScript (.ts, .tsx)
-- Python (.py)
-- Java (.java)
-- Go (.go)
-- Rust (.rs)
-- PHP (.php)
-- Ruby (.rb)
-- Swift (.swift)
-- Kotlin (.kt)
-- Dart (.dart)
-
-### Web Technologies
-- HTML (.html)
-- CSS (.css, .scss, .sass, .less)
-- JSON (.json)
-- XML (.xml)
-- YAML (.yml, .yaml)
-
-### Documentation & Config
-- Markdown (.md) - with beautiful rendering
-- Text files (.txt)
-- Configuration files (ESLint, Prettier, Webpack, etc.)
-- Docker files (Dockerfile, docker-compose.yml)
-- Environment files (.env)
-
-### Media & Archives
-- Images (.png, .jpg, .gif, .svg, .webp)
-- Videos (.mp4, .mov, .avi)
-- Audio (.mp3, .wav, .flac)
-- Archives (.zip, .tar, .gz, .rar)
-
-### Shell & Database
-- Shell scripts (.sh, .bash, .zsh)
-- SQL (.sql)
+Supports syntax highlighting for 30+ languages including JavaScript, TypeScript, Python, Go, Rust, Java, C/C++, and many more through Monaco Editor integration.
 
 ## Keyboard Shortcuts
 
@@ -161,7 +128,7 @@ npm install
 npm start
 ```
 
-Navigate to `http://localhost:3000` to view the interface.
+Navigate to `http://localhost:5555` to view the interface.
 
 ## Dependencies
 
