@@ -1063,20 +1063,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 monacoFileEditor.layout();
               }, 50);
               
-              // Update language based on current file
-              const filename = document.querySelector('.header-path a:last-child')?.textContent || '';
-              if (filename) {
-                const language = getLanguageFromExtension(filename);
-                
-                // Validate language exists in Monaco
-                const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
-                const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-                
-                const model = monacoFileEditor.getModel();
-                if (model) {
-                  monaco.editor.setModelLanguage(model, validLanguage);
-                }
-              }
+              // Language is already set during editor creation, no need to set it again
               
               // Set up auto-save
               monacoFileEditor.onDidChangeModelContent(() => {
