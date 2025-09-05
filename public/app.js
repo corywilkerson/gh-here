@@ -21,6 +21,164 @@ const octicons = {
     }
   };
 
+// Language detection utility - pure function, easily testable
+function getLanguageFromExtension(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const languageMap = {
+    // JavaScript family
+    'js': 'javascript',
+    'mjs': 'javascript', 
+    'jsx': 'javascript',
+    'ts': 'typescript',
+    'tsx': 'typescript',
+    
+    // Web languages
+    'html': 'html',
+    'htm': 'html',
+    'css': 'css',
+    'scss': 'scss',
+    'sass': 'sass',
+    'less': 'less',
+    
+    // Data formats
+    'json': 'json',
+    'xml': 'xml',
+    'yaml': 'yaml',
+    'yml': 'yaml',
+    
+    // Programming languages
+    'py': 'python',
+    'java': 'java',
+    'go': 'go',
+    'rs': 'rust',
+    'php': 'php',
+    'rb': 'ruby',
+    'swift': 'swift',
+    'kt': 'kotlin',
+    'dart': 'dart',
+    
+    // Systems languages
+    'c': 'c',
+    'cpp': 'cpp',
+    'cc': 'cpp',
+    'cxx': 'cpp',
+    'h': 'c',
+    'hpp': 'cpp',
+    
+    // Shell and scripts
+    'sh': 'shell',
+    'bash': 'shell',
+    'zsh': 'shell',
+    'fish': 'shell',
+    'ps1': 'powershell',
+    
+    // Other languages
+    'sql': 'sql',
+    'r': 'r',
+    'scala': 'scala',
+    'clj': 'clojure',
+    'lua': 'lua',
+    'pl': 'perl',
+    'groovy': 'groovy',
+    
+    // Config and text
+    'md': 'markdown',
+    'txt': 'plaintext',
+    'log': 'plaintext'
+  };
+  
+  // Special filename handling
+  const basename = filename.toLowerCase();
+  if (basename === 'dockerfile' || basename.startsWith('dockerfile.')) return 'dockerfile';
+  if (basename === 'makefile') return 'makefile';
+  if (basename.startsWith('.env')) return 'dotenv';
+  if (basename === 'package.json' || basename === 'composer.json') return 'json';
+  
+  return languageMap[ext] || 'plaintext';
+}
+
+// Draft management utilities - pure functions, easily testable
+const DraftManager = {
+  STORAGE_PREFIX: 'gh-here-draft-',
+  
+  saveDraft(filePath, content) {
+    localStorage.setItem(`${this.STORAGE_PREFIX}${filePath}`, content);
+  },
+  
+  loadDraft(filePath) {
+    return localStorage.getItem(`${this.STORAGE_PREFIX}${filePath}`);
+  },
+  
+  clearDraft(filePath) {
+    localStorage.removeItem(`${this.STORAGE_PREFIX}${filePath}`);
+  },
+  
+  // Helper to check if draft exists and differs from content
+  hasDraftChanges(filePath, originalContent) {
+    const draft = this.loadDraft(filePath);
+    return draft !== null && draft !== originalContent;
+  },
+  
+  // Get all draft keys for cleanup/debugging
+  getAllDrafts() {
+    const drafts = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(this.STORAGE_PREFIX)) {
+        const filePath = key.replace(this.STORAGE_PREFIX, '');
+        drafts[filePath] = localStorage.getItem(key);
+      }
+    }
+    return drafts;
+  }
+};
+
+// Path utility functions - pure functions, easily testable
+const PathUtils = {
+  // Extract current path from URL parameters
+  getCurrentPath() {
+    const currentUrl = new URL(window.location.href);
+    return currentUrl.searchParams.get('path') || '';
+  },
+
+  // Navigate to parent directory
+  getParentPath(currentPath) {
+    if (!currentPath || currentPath === '') {
+      return null; // Already at root
+    }
+    
+    const pathParts = currentPath.split('/').filter(p => p);
+    if (pathParts.length === 0) {
+      return null; // Already at root
+    }
+    
+    pathParts.pop();
+    return pathParts.join('/');
+  },
+
+  // Build file path from directory and filename
+  buildFilePath(currentPath, filename) {
+    return currentPath ? `${currentPath}/${filename}` : filename;
+  },
+
+  // Get filename from full path
+  getFileName(filePath) {
+    return filePath.split('/').pop() || 'file.txt';
+  },
+
+  // Build URL with encoded path parameter
+  buildPathUrl(basePath, targetPath) {
+    return targetPath ? `${basePath}?path=${encodeURIComponent(targetPath)}` : basePath;
+  },
+
+  // Extract directory path from file path
+  getDirectoryPath(filePath) {
+    const parts = filePath.split('/').filter(p => p);
+    if (parts.length <= 1) return '';
+    return parts.slice(0, -1).join('/');
+  }
+};
+
 // Notification system - global scope for access from commit functions
 function showNotification(message, type = 'info') {
     // Remove existing notifications
@@ -58,107 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let monacoFileEditor = null;
   let monacoNewFileEditor = null;
   
-  // Enhanced language detection based on file extension and filename
-  function getLanguageFromExtension(filename) {
-    const ext = filename.split('.').pop().toLowerCase();
-    const languageMap = {
-      // JavaScript family
-      'js': 'javascript',
-      'mjs': 'javascript', 
-      'jsx': 'javascript',
-      'ts': 'typescript',
-      'tsx': 'typescript',
-      
-      // Web technologies  
-      'html': 'html',
-      'htm': 'html',
-      'css': 'css',
-      'scss': 'scss',
-      'sass': 'scss',
-      'less': 'less',
-      
-      // Data formats
-      'json': 'json',
-      'xml': 'xml',
-      'yml': 'yaml',
-      'yaml': 'yaml',
-      
-      // Programming languages
-      'py': 'python',
-      'java': 'java',
-      'c': 'c',
-      'cpp': 'cpp',
-      'cc': 'cpp',
-      'cxx': 'cpp',
-      'h': 'c',
-      'hpp': 'cpp',
-      'cs': 'csharp',
-      'go': 'go',
-      'rs': 'rust',
-      'php': 'php',
-      'rb': 'ruby',
-      'swift': 'swift',
-      'kt': 'kotlin',
-      'kts': 'kotlin',
-      'dart': 'dart',
-      'r': 'r',
-      'scala': 'scala',
-      'clj': 'clojure',
-      'hs': 'haskell',
-      'lua': 'lua',
-      'perl': 'perl',
-      'pl': 'perl',
-      
-      // Shell scripts
-      'sh': 'shell',
-      'bash': 'shell',
-      'zsh': 'shell',
-      'fish': 'shell',
-      'ps1': 'powershell',
-      
-      // Database
-      'sql': 'sql',
-      
-      // Config files
-      'dockerfile': 'dockerfile',
-      'ini': 'ini',
-      'toml': 'toml',
-      'cfg': 'ini',
-      'conf': 'ini',
-      'env': 'shell',
-      
-      // Documentation
-      'md': 'markdown',
-      'markdown': 'markdown',
-      'rst': 'restructuredtext',
-      'txt': 'plaintext',
-      
-      // Other
-      'vim': 'vim',
-      'bat': 'bat',
-      'cmd': 'bat'
-    };
-    
-    // Special cases for files without extensions or special names
-    const basename = filename.toLowerCase();
-    const specialFiles = {
-      'dockerfile': 'dockerfile',
-      'makefile': 'makefile', 
-      'cmakelists.txt': 'cmake',
-      'package.json': 'json',
-      'tsconfig.json': 'jsonc',
-      '.gitignore': 'ignore',
-      '.env': 'shell',
-      '.bashrc': 'shell',
-      '.zshrc': 'shell'
-    };
-    
-    if (specialFiles[basename]) {
-      return specialFiles[basename];
-    }
-    
-    return languageMap[ext] || 'plaintext';
-  }
+  // Note: getLanguageFromExtension is now a global utility function
   
   // Initialize Monaco Editor
   function initializeMonaco() {
@@ -453,12 +511,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (newFileBtn) {
     newFileBtn.addEventListener('click', function() {
-      const currentUrl = new URL(window.location.href);
-      const currentPath = currentUrl.searchParams.get('path') || '';
+      const currentPath = PathUtils.getCurrentPath();
       
       // Navigate to new file creation mode
-      const newFileUrl = `/new?path=${encodeURIComponent(currentPath)}`;
-      window.location.href = newFileUrl;
+      window.location.href = PathUtils.buildPathUrl('/new', currentPath);
     });
   }
 
@@ -698,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (rowType === 'file') {
             const filePath = focusedRow.dataset.path;
             // Navigate to the file and trigger edit mode
-            window.location.href = `/?path=${encodeURIComponent(filePath)}#edit`;
+            window.location.href = PathUtils.buildPathUrl('/', filePath) + '#edit';
           } else {
             // If we're on a file page, use the edit button
             const editBtn = document.getElementById('edit-btn');
@@ -785,24 +841,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function goUpDirectory() {
-    const currentUrl = new URL(window.location.href);
-    const currentPath = currentUrl.searchParams.get('path');
+    const currentPath = PathUtils.getCurrentPath();
+    const newPath = PathUtils.getParentPath(currentPath);
     
-    if (!currentPath || currentPath === '') {
+    if (newPath === null) {
       // Already at root, do nothing
       return;
     }
     
-    const pathParts = currentPath.split('/').filter(p => p);
-    if (pathParts.length === 0) {
-      // Go to root
-      window.location.href = '/';
-    } else {
-      // Go up one directory
-      pathParts.pop();
-      const newPath = pathParts.join('/');
-      window.location.href = `/?path=${encodeURIComponent(newPath)}`;
-    }
+    window.location.href = PathUtils.buildPathUrl('/', newPath);
   }
   
 
@@ -960,18 +1007,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    // Auto-save functionality
-    function saveDraft(filePath, content) {
-      localStorage.setItem(`gh-here-draft-${filePath}`, content);
-    }
-    
-    function loadDraft(filePath) {
-      return localStorage.getItem(`gh-here-draft-${filePath}`);
-    }
-    
-    function clearDraft(filePath) {
-      localStorage.removeItem(`gh-here-draft-${filePath}`);
-    }
+    // Note: Draft management functions are now in global DraftManager object
     
     // Show draft dialog with Load/Discard/Cancel options
     function showDraftDialog(filePath) {
@@ -1018,16 +1054,16 @@ document.addEventListener('DOMContentLoaded', function() {
         originalContent = content;
         
         // Check for draft
-        const draft = loadDraft(filePath);
+        const draft = DraftManager.loadDraft(filePath);
         let contentToLoad = content;
         
-        if (draft && draft !== content) {
+        if (DraftManager.hasDraftChanges(filePath, content)) {
           // Show custom draft dialog with 3 options
           const draftChoice = await showDraftDialog(filePath);
           if (draftChoice === 'load') {
             contentToLoad = draft;
           } else if (draftChoice === 'discard') {
-            clearDraft(filePath);
+            DraftManager.clearDraft(filePath);
             contentToLoad = content;
           } else {
             // User cancelled, use original content
@@ -1036,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (draft && draft === content) {
-          clearDraft(filePath);
+          DraftManager.clearDraft(filePath);
         }
         
         // Create Monaco editor if it doesn't exist
@@ -1046,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Get filename reliably from the current URL path parameter
               const currentUrl = new URL(window.location.href);
               const filePath = currentUrl.searchParams.get('path') || '';
-              const filename = filePath.split('/').pop() || 'file.txt';
+              const filename = PathUtils.getFileName(filePath);
               
               const language = getLanguageFromExtension(filename);
               
@@ -1112,7 +1148,7 @@ document.addEventListener('DOMContentLoaded', function() {
               
               // Set up auto-save
               monacoFileEditor.onDidChangeModelContent(() => {
-                saveDraft(filePath, monacoFileEditor.getValue());
+                DraftManager.saveDraft(filePath, monacoFileEditor.getValue());
               });
             } else {
               // Monaco not ready yet, wait and try again
@@ -1173,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         if (data.success) {
           // Clear draft on successful save
-          clearDraft(filePath);
+          DraftManager.clearDraft(filePath);
           // Refresh the page to show updated content
           window.location.reload();
         } else {
@@ -1203,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const button = e.target.closest('.edit-file-btn');
       const filePath = button.dataset.path;
       // Navigate to the file and trigger edit mode
-      window.location.href = `/?path=${encodeURIComponent(filePath)}#edit`;
+      window.location.href = PathUtils.buildPathUrl('/', filePath) + '#edit';
     }
     
     // Git diff viewer functionality
@@ -1538,8 +1574,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       
-      const currentUrl = new URL(window.location.href);
-      const currentPath = currentUrl.searchParams.get('path') || '';
+      const currentPath = PathUtils.getCurrentPath();
       
       fetch('/api/create-file', {
         method: 'POST',
@@ -1561,7 +1596,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           // If there's content, save it
           if (content.trim()) {
-            const filePath = currentPath ? `${currentPath}/${filename}` : filename;
+            const filePath = PathUtils.buildFilePath(currentPath, filename);
             return fetch('/api/save-file', {
               method: 'POST',
               headers: {
@@ -1583,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           showNotification(`File "${filename}" created successfully`, 'success');
           // Navigate back to the directory or to the new file
-          const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
+          const redirectPath = PathUtils.buildPathUrl('/', currentPath);
           setTimeout(() => window.location.href = redirectPath, 800);
         } else {
           throw new Error(data.error);
@@ -1606,9 +1641,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (cancelNewFileBtn) {
     cancelNewFileBtn.addEventListener('click', function() {
-      const currentUrl = new URL(window.location.href);
-      const currentPath = currentUrl.searchParams.get('path') || '';
-      const redirectPath = currentPath ? `/?path=${encodeURIComponent(currentPath)}` : '/';
+      const currentPath = PathUtils.getCurrentPath();
+      const redirectPath = PathUtils.buildPathUrl('/', currentPath);
       window.location.href = redirectPath;
     });
   }
@@ -1711,7 +1745,7 @@ function groupFilesByDirectory(files) {
       groups.get('').files.push(file);
     } else {
       // File in subdirectory
-      const directory = parts.slice(0, -1).join('/');
+      const directory = PathUtils.getDirectoryPath(file.name);
       if (!groups.has(directory)) {
         groups.set(directory, { directory, files: [] });
       }
