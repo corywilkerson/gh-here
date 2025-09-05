@@ -21,18 +21,8 @@ const octicons = {
     }
   };
 
-document.addEventListener('DOMContentLoaded', function() {
-  
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  const searchInput = document.getElementById('file-search');
-  const fileTable = document.getElementById('file-table');
-  
-  let currentFocusIndex = -1;
-  let fileRows = [];
-
-  // Notification system
-  function showNotification(message, type = 'info') {
+// Notification system - global scope for access from commit functions
+function showNotification(message, type = 'info') {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.notification');
     existingNotifications.forEach(n => n.remove());
@@ -50,7 +40,17 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => notification.remove(), 300);
       }
     }, 4000);
-  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  
+  const themeToggle = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  const searchInput = document.getElementById('file-search');
+  const fileTable = document.getElementById('file-table');
+  
+  let currentFocusIndex = -1;
+  let fileRows = [];
   
   // Removed loading state utilities - not needed for local operations
   
@@ -189,12 +189,12 @@ document.addEventListener('DOMContentLoaded', function() {
             theme: monacoTheme,
             minimap: { enabled: false },
             lineNumbers: 'on',
-            wordWrap: 'on',
+            wordWrap: 'off',
             scrollBeyondLastLine: false,
             fontSize: 12,
-            lineHeight: 1.5,
+            lineHeight: 20,  // Match view mode breathing
             fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-            padding: { top: 20, bottom: 20 },
+            padding: { top: 20, bottom: 20, left: 20, right: 20 },
             renderLineHighlight: 'line',
             selectOnLineNumbers: true,
             automaticLayout: true,
@@ -916,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (editBtn && editorContainer) {
     let originalContent = '';
-    let wordWrapEnabled = true; // Default to enabled
+    let wordWrapEnabled = false; // Default to disabled
 
     // Word wrap toggle functionality
     function toggleWordWrap() {
@@ -972,47 +972,81 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearDraft(filePath) {
       localStorage.removeItem(`gh-here-draft-${filePath}`);
     }
+    
+    // Show draft dialog with Load/Discard/Cancel options
+    function showDraftDialog(filePath) {
+      return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content draft-modal">
+            <h3>Unsaved Changes Found</h3>
+            <p>You have unsaved changes for this file. What would you like to do?</p>
+            <div class="draft-actions">
+              <button class="btn btn-primary" data-action="load">Load Draft</button>
+              <button class="btn btn-secondary" data-action="discard">Discard Draft</button>
+              <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+            </div>
+          </div>
+        `;
+        
+        modal.addEventListener('click', (e) => {
+          if (e.target.matches('[data-action]') || e.target === modal) {
+            const action = e.target.dataset?.action || 'cancel';
+            modal.remove();
+            resolve(action);
+          }
+        });
+        
+        document.body.appendChild(modal);
+      });
+    }
 
-    editBtn.addEventListener('click', function() {
+    editBtn.addEventListener('click', async function() {
       // Get current file path
       const currentUrl = new URL(window.location.href);
       const filePath = currentUrl.searchParams.get('path') || '';
       
       
       // Fetch original file content
-      fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          return response.text();
-        })
-        .then(content => {
-          originalContent = content;
-          
-          // Check for draft
-          const draft = loadDraft(filePath);
-          const contentToLoad = (draft && draft !== content && confirm('You have unsaved changes for this file. Load draft?')) ? draft : content;
-          
-          if (draft && draft === content) {
+      try {
+        const response = await fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const content = await response.text();
+        originalContent = content;
+        
+        // Check for draft
+        const draft = loadDraft(filePath);
+        let contentToLoad = content;
+        
+        if (draft && draft !== content) {
+          // Show custom draft dialog with 3 options
+          const draftChoice = await showDraftDialog(filePath);
+          if (draftChoice === 'load') {
+            contentToLoad = draft;
+          } else if (draftChoice === 'discard') {
             clearDraft(filePath);
+            contentToLoad = content;
+          } else {
+            // User cancelled, use original content
+            contentToLoad = content;
           }
-          
-          // Create Monaco editor if it doesn't exist
-          if (!monacoFileEditor && window.monacoReady) {
+        }
+        
+        if (draft && draft === content) {
+          clearDraft(filePath);
+        }
+        
+        // Create Monaco editor if it doesn't exist
+        if (!monacoFileEditor && window.monacoReady) {
             const fileEditorContainer = document.getElementById('file-editor');
             if (fileEditorContainer) {
-              // Try multiple selectors to get the filename
-              let filename = document.querySelector('.header-path a:last-child')?.textContent;
-              if (!filename || filename === 'file.txt') {
-                // Try other possible selectors
-                filename = document.querySelector('.file-path')?.textContent ||
-                          document.querySelector('.breadcrumb-item:last-child')?.textContent ||
-                          document.querySelector('title')?.textContent ||
-                          window.location.pathname.split('/').pop() ||
-                          new URLSearchParams(window.location.search).get('path')?.split('/').pop() ||
-                          'file.txt';
-              }
+              // Get filename reliably from the current URL path parameter
+              const currentUrl = new URL(window.location.href);
+              const filePath = currentUrl.searchParams.get('path') || '';
+              const filename = filePath.split('/').pop() || 'file.txt';
               
               const language = getLanguageFromExtension(filename);
               
@@ -1023,18 +1057,21 @@ document.addEventListener('DOMContentLoaded', function() {
               const currentTheme = html.getAttribute('data-theme');
               const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
               
-              monacoFileEditor = monaco.editor.create(fileEditorContainer, {
+              // Ensure Monaco is fully ready before creating editor
+              const createEditorWhenReady = () => {
+                if (monaco && monaco.editor && monaco.languages) {
+                  monacoFileEditor = monaco.editor.create(fileEditorContainer, {
                 value: '',
                 language: validLanguage,
                 theme: monacoTheme,
                 minimap: { enabled: false },
                 lineNumbers: 'on',
-                wordWrap: 'on',
+                wordWrap: 'off',
                 scrollBeyondLastLine: false,
                 fontSize: 12,
-                lineHeight: 1.5,
+                lineHeight: 20,  // Match view mode (12px * 1.5 = 18, but Monaco uses pixels)
                 fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-                padding: { top: 20, bottom: 20 },
+                padding: { top: 20, bottom: 20, left: 20, right: 20 },
                 renderLineHighlight: 'line',
                 selectOnLineNumbers: true,
                 automaticLayout: true,
@@ -1048,6 +1085,14 @@ document.addEventListener('DOMContentLoaded', function() {
                   indentation: true
                 }
               });
+                } else {
+                  // Monaco not fully ready yet, retry
+                  setTimeout(createEditorWhenReady, 10);
+                }
+              };
+              
+              // Start the ready check
+              createEditorWhenReady();
             }
           }
           
@@ -1075,27 +1120,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           };
           setContentWhenReady();
-          
-          fileContent.style.display = 'none';
-          editorContainer.style.display = 'block';
-          
-          // Focus Monaco editor
-          if (monacoFileEditor) {
-            monacoFileEditor.focus();
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching file content:', error);
-          let errorMessage = 'Failed to load file content for editing';
-          if (error.message.includes('HTTP 403')) {
-            errorMessage = 'Access denied: Cannot read this file';
-          } else if (error.message.includes('HTTP 404')) {
-            errorMessage = 'File not found';
-          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error: Please check your connection';
-          }
-          showNotification(errorMessage, 'error');
-        });
+        
+        // Show editor UI
+        fileContent.style.display = 'none';
+        editorContainer.style.display = 'block';
+        
+        // Focus Monaco editor
+        if (monacoFileEditor) {
+          monacoFileEditor.focus();
+        }
+        
+      } catch (error) {
+        console.error('Error fetching file content:', error);
+        let errorMessage = 'Failed to load file content for editing';
+        if (error.message.includes('HTTP 403')) {
+          errorMessage = 'Access denied: Cannot read this file';
+        } else if (error.message.includes('HTTP 404')) {
+          errorMessage = 'File not found';
+        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+          errorMessage = 'Network error: Please check your connection';
+        }
+        showNotification(errorMessage, 'error');
+      }
     });
 
     cancelBtn.addEventListener('click', function() {
@@ -1128,9 +1174,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           // Clear draft on successful save
           clearDraft(filePath);
-          showNotification('File saved successfully', 'success');
           // Refresh the page to show updated content
-          setTimeout(() => window.location.reload(), 800);
+          window.location.reload();
         } else {
           showNotification('Failed to save file: ' + data.error, 'error');
         }
