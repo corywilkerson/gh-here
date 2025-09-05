@@ -2035,15 +2035,18 @@ main {
   border: 1px solid var(--border-primary);
   border-radius: 6px;
   height: 600px !important;
+  width: 100% !important;
+  min-width: 400px !important;
   overflow: visible !important;
   background: var(--bg-primary);
-  position: relative;
+  position: relative !important;
   display: block !important;
 }
 
 .monaco-editor-container .monaco-editor {
-  height: 100% !important;
+  height: 600px !important;
   width: 100% !important;
+  min-width: 400px !important;
   position: relative !important;
 }
 

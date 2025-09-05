@@ -168,20 +168,50 @@ document.addEventListener('DOMContentLoaded', function() {
       require(['vs/editor/editor.main'], function () {
         console.log('Monaco Editor loaded successfully');
         
+        // Configure Monaco Editor workers for proper syntax highlighting
+        self.MonacoEnvironment = {
+          getWorkerUrl: function (moduleId, label) {
+            if (label === 'json') {
+              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/json/json.worker.js';
+            }
+            if (label === 'css' || label === 'scss' || label === 'less') {
+              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/css/css.worker.js';
+            }
+            if (label === 'html' || label === 'handlebars' || label === 'razor') {
+              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/html/html.worker.js';
+            }
+            if (label === 'typescript' || label === 'javascript') {
+              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/typescript/ts.worker.js';
+            }
+            return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/editor/editor.worker.js';
+          }
+        };
+        
         // Set Monaco theme based on current theme
         const currentTheme = html.getAttribute('data-theme');
         const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
         monaco.editor.setTheme(monacoTheme);
+        
+        // Debug: Check what languages are available
+        const availableLanguages = monaco.languages.getLanguages();
+        console.log('Available Monaco languages:', availableLanguages.map(lang => lang.id).sort());
         
         // Initialize file editor if container exists
         const fileEditorContainer = document.getElementById('file-editor');
         if (fileEditorContainer) {
           const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
           const language = getLanguageFromExtension(filename);
+          console.log('Monaco initialization - filename:', filename, 'detected language:', language);
+          
+          // Validate language exists in Monaco  
+          const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
+          const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
+          console.log('Available languages include', language + ':', availableLanguages.includes(language));
+          console.log('Using language:', validLanguage);
           
           monacoFileEditor = monaco.editor.create(fileEditorContainer, {
             value: '',
-            language: language,
+            language: validLanguage,
             theme: monacoTheme,
             minimap: { enabled: false },
             lineNumbers: 'on',
@@ -1033,9 +1063,22 @@ document.addEventListener('DOMContentLoaded', function() {
               const filename = document.querySelector('.header-path a:last-child')?.textContent || '';
               if (filename) {
                 const language = getLanguageFromExtension(filename);
+                console.log('Detected language for file:', filename, '→', language);
+                
+                // Validate language exists in Monaco
+                const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
+                const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
+                if (language !== validLanguage) {
+                  console.log('Language', language, 'not available in Monaco, using plaintext');
+                }
+                
                 const model = monacoFileEditor.getModel();
                 if (model) {
-                  monaco.editor.setModelLanguage(model, language);
+                  console.log('Setting Monaco model language to:', validLanguage);
+                  monaco.editor.setModelLanguage(model, validLanguage);
+                  console.log('Current model language after setting:', model.getLanguageId());
+                } else {
+                  console.log('No Monaco model found');
                 }
               }
               
@@ -1059,9 +1102,14 @@ document.addEventListener('DOMContentLoaded', function() {
                   const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
                   const language = getLanguageFromExtension(filename);
                   
+                  // Validate language exists in Monaco
+                  const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
+                  const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
+                  console.log('Reinit - Available languages include', language + ':', availableLanguages.includes(language));
+                  
                   monacoFileEditor = monaco.editor.create(fileEditorContainer, {
                     value: '',
-                    language: language,
+                    language: validLanguage,
                     theme: monacoTheme,
                     minimap: { enabled: false },
                     lineNumbers: 'on',
