@@ -12,6 +12,17 @@ const args = process.argv.slice(2);
 const openBrowser = args.includes('--open') || args.includes('-o');
 const helpRequested = args.includes('--help') || args.includes('-h');
 
+// Check for port specification
+let specifiedPort = null;
+const portArg = args.find(arg => arg.startsWith('--port='));
+if (portArg) {
+  specifiedPort = parseInt(portArg.split('=')[1]);
+  if (isNaN(specifiedPort) || specifiedPort < 1 || specifiedPort > 65535) {
+    console.error('❌ Invalid port number. Port must be between 1 and 65535.');
+    process.exit(1);
+  }
+}
+
 // Check for browser specification
 let specificBrowser = null;
 const browserArg = args.find(arg => arg.startsWith('--browser='));
@@ -28,11 +39,13 @@ Usage: npx gh-here [options]
 Options:
   --open, -o              Open browser automatically
   --browser=<name>        Specify browser (safari, chrome, firefox, arc)
+  --port=<number>         Specify port number (default: 5555)
   --help, -h              Show this help message
 
 Examples:
-  npx gh-here                           Start server on available port
+  npx gh-here                           Start server on port 5555 (or next available)
   npx gh-here --open                    Start server and open browser
+  npx gh-here --port=8080               Start server on port 8080
   npx gh-here --open --browser=safari   Start server and open in Safari
   npx gh-here --open --browser=arc      Start server and open in Arc
 `);
@@ -50,7 +63,7 @@ const isGitRepo = !!gitRepoRoot;
 setupRoutes(app, workingDir, isGitRepo, gitRepoRoot);
 
 // Function to find an available port
-async function findAvailablePort(startPort = 3000) {
+async function findAvailablePort(startPort = 5555) {
   const net = require('net');
   
   return new Promise((resolve, reject) => {
@@ -133,7 +146,32 @@ function openBrowserToUrl(url) {
 // Start server with automatic port selection
 async function startServer() {
   try {
-    const port = await findAvailablePort();
+    let port;
+    if (specifiedPort) {
+      // If user specified a port, try only that port
+      const net = require('net');
+      const server = net.createServer();
+      
+      try {
+        await new Promise((resolve, reject) => {
+          server.listen(specifiedPort, () => {
+            server.close(() => resolve());
+          });
+          server.on('error', reject);
+        });
+        port = specifiedPort;
+      } catch (error) {
+        if (error.code === 'EADDRINUSE') {
+          console.error(`❌ Port ${specifiedPort} is already in use. Please choose a different port.`);
+          process.exit(1);
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      // Find available port starting from 5555
+      port = await findAvailablePort(5555);
+    }
     const url = `http://localhost:${port}`;
     
     app.listen(port, () => {
