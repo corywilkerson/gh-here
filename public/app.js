@@ -58,37 +58,105 @@ document.addEventListener('DOMContentLoaded', function() {
   let monacoFileEditor = null;
   let monacoNewFileEditor = null;
   
-  // Language detection based on file extension
+  // Enhanced language detection based on file extension and filename
   function getLanguageFromExtension(filename) {
     const ext = filename.split('.').pop().toLowerCase();
     const languageMap = {
+      // JavaScript family
       'js': 'javascript',
-      'ts': 'typescript',
+      'mjs': 'javascript', 
       'jsx': 'javascript',
+      'ts': 'typescript',
       'tsx': 'typescript',
+      
+      // Web technologies  
       'html': 'html',
+      'htm': 'html',
       'css': 'css',
       'scss': 'scss',
+      'sass': 'scss',
       'less': 'less',
+      
+      // Data formats
       'json': 'json',
+      'xml': 'xml',
+      'yml': 'yaml',
+      'yaml': 'yaml',
+      
+      // Programming languages
       'py': 'python',
       'java': 'java',
       'c': 'c',
       'cpp': 'cpp',
+      'cc': 'cpp',
+      'cxx': 'cpp',
+      'h': 'c',
+      'hpp': 'cpp',
       'cs': 'csharp',
-      'php': 'php',
-      'rb': 'ruby',
       'go': 'go',
       'rs': 'rust',
-      'sql': 'sql',
-      'md': 'markdown',
-      'xml': 'xml',
-      'yaml': 'yaml',
-      'yml': 'yaml',
+      'php': 'php',
+      'rb': 'ruby',
+      'swift': 'swift',
+      'kt': 'kotlin',
+      'kts': 'kotlin',
+      'dart': 'dart',
+      'r': 'r',
+      'scala': 'scala',
+      'clj': 'clojure',
+      'hs': 'haskell',
+      'lua': 'lua',
+      'perl': 'perl',
+      'pl': 'perl',
+      
+      // Shell scripts
       'sh': 'shell',
       'bash': 'shell',
-      'dockerfile': 'dockerfile'
+      'zsh': 'shell',
+      'fish': 'shell',
+      'ps1': 'powershell',
+      
+      // Database
+      'sql': 'sql',
+      
+      // Config files
+      'dockerfile': 'dockerfile',
+      'ini': 'ini',
+      'toml': 'toml',
+      'cfg': 'ini',
+      'conf': 'ini',
+      'env': 'shell',
+      
+      // Documentation
+      'md': 'markdown',
+      'markdown': 'markdown',
+      'rst': 'restructuredtext',
+      'txt': 'plaintext',
+      
+      // Other
+      'vim': 'vim',
+      'bat': 'bat',
+      'cmd': 'bat'
     };
+    
+    // Special cases for files without extensions or special names
+    const basename = filename.toLowerCase();
+    const specialFiles = {
+      'dockerfile': 'dockerfile',
+      'makefile': 'makefile', 
+      'cmakelists.txt': 'cmake',
+      'package.json': 'json',
+      'tsconfig.json': 'jsonc',
+      '.gitignore': 'ignore',
+      '.env': 'shell',
+      '.bashrc': 'shell',
+      '.zshrc': 'shell'
+    };
+    
+    if (specialFiles[basename]) {
+      return specialFiles[basename];
+    }
+    
     return languageMap[ext] || 'plaintext';
   }
   
@@ -120,7 +188,21 @@ document.addEventListener('DOMContentLoaded', function() {
             wordWrap: 'on',
             scrollBeyondLastLine: false,
             fontSize: 12,
-            fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+            lineHeight: 1.5,
+            fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+            padding: { top: 20, bottom: 20 },
+            renderLineHighlight: 'line',
+            selectOnLineNumbers: true,
+            automaticLayout: true,
+            folding: true,
+            foldingHighlight: true,
+            foldingStrategy: 'auto',
+            showFoldingControls: 'mouseover',
+            bracketPairColorization: { enabled: true },
+            guides: {
+              bracketPairs: true,
+              indentation: true
+            }
           });
           console.log('File editor initialized');
         }
@@ -137,7 +219,21 @@ document.addEventListener('DOMContentLoaded', function() {
             wordWrap: 'on',
             scrollBeyondLastLine: false,
             fontSize: 12,
-            fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+            lineHeight: 1.5,
+            fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+            padding: { top: 20, bottom: 20 },
+            renderLineHighlight: 'line',
+            selectOnLineNumbers: true,
+            automaticLayout: true,
+            folding: true,
+            foldingHighlight: true,
+            foldingStrategy: 'auto',
+            showFoldingControls: 'mouseover',
+            bracketPairColorization: { enabled: true },
+            guides: {
+              bracketPairs: true,
+              indentation: true
+            }
           });
           console.log('New file editor initialized');
         }
@@ -972,7 +1068,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     wordWrap: 'on',
                     scrollBeyondLastLine: false,
                     fontSize: 12,
-                    fontFamily: "'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace"
+                    lineHeight: 1.5,
+                    fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+                    padding: { top: 20, bottom: 20 },
+                    renderLineHighlight: 'line',
+                    selectOnLineNumbers: true,
+                    automaticLayout: true,
+                    folding: true,
+                    foldingHighlight: true,
+                    foldingStrategy: 'auto',
+                    showFoldingControls: 'mouseover',
+                    bracketPairColorization: { enabled: true },
+                    guides: {
+                      bracketPairs: true,
+                      indentation: true
+                    }
                   });
                   console.log('Monaco file editor reinitialized');
                 }
