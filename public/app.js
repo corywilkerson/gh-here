@@ -168,22 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
       require(['vs/editor/editor.main'], function () {
         console.log('Monaco Editor loaded successfully');
         
-        // Configure Monaco Editor workers for proper syntax highlighting
+        // Configure Monaco Editor to work without web workers (avoids CORS issues)
         self.MonacoEnvironment = {
-          getWorkerUrl: function (moduleId, label) {
-            if (label === 'json') {
-              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/json/json.worker.js';
-            }
-            if (label === 'css' || label === 'scss' || label === 'less') {
-              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/css/css.worker.js';
-            }
-            if (label === 'html' || label === 'handlebars' || label === 'razor') {
-              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/html/html.worker.js';
-            }
-            if (label === 'typescript' || label === 'javascript') {
-              return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/language/typescript/ts.worker.js';
-            }
-            return 'https://unpkg.com/monaco-editor@0.45.0/min/vs/editor/editor.worker.js';
+          getWorker: function(workerId, label) {
+            // Return undefined to disable workers and use main thread processing
+            // This avoids CORS issues with unpkg CDN while still providing syntax highlighting
+            return undefined;
           }
         };
         
@@ -991,7 +981,24 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Creating Monaco editor for edit mode...');
             const fileEditorContainer = document.getElementById('file-editor');
             if (fileEditorContainer) {
-              const filename = document.querySelector('.header-path a:last-child')?.textContent || 'file.txt';
+              // Try multiple selectors to get the filename
+              let filename = document.querySelector('.header-path a:last-child')?.textContent;
+              if (!filename || filename === 'file.txt') {
+                // Try other possible selectors
+                filename = document.querySelector('.file-path')?.textContent ||
+                          document.querySelector('.breadcrumb-item:last-child')?.textContent ||
+                          document.querySelector('title')?.textContent ||
+                          window.location.pathname.split('/').pop() ||
+                          new URLSearchParams(window.location.search).get('path')?.split('/').pop() ||
+                          'file.txt';
+              }
+              
+              console.log('DOM debugging:');
+              console.log('- .header-path a:last-child:', document.querySelector('.header-path a:last-child')?.textContent);
+              console.log('- window.location.pathname:', window.location.pathname);
+              console.log('- URL search params path:', new URLSearchParams(window.location.search).get('path'));
+              console.log('- Final filename:', filename);
+              
               const language = getLanguageFromExtension(filename);
               console.log('Creating Monaco editor - filename:', filename, 'detected language:', language);
               
