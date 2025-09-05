@@ -166,8 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
       require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
       
       require(['vs/editor/editor.main'], function () {
-        console.log('Monaco Editor loaded successfully');
-        
         // Configure Monaco Editor to work without web workers (avoids CORS issues)
         self.MonacoEnvironment = {
           getWorker: function(workerId, label) {
@@ -181,13 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentTheme = html.getAttribute('data-theme');
         const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
         monaco.editor.setTheme(monacoTheme);
-        
-        // Debug: Check what languages are available
-        const availableLanguages = monaco.languages.getLanguages();
-        console.log('Available Monaco languages:', availableLanguages.map(lang => lang.id).sort());
-        
-        // Don't create editor on page load - create it when edit button is clicked
-        console.log('Monaco loaded, editor will be created when needed');
         
         // Initialize new file editor if container exists  
         const newFileEditorContainer = document.getElementById('new-file-content');
@@ -217,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
               indentation: true
             }
           });
-          console.log('New file editor initialized');
         }
         
         // Set global flag that Monaco is ready
@@ -395,6 +385,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="shortcut-item">
                   <span class="shortcut-desc">Save file (in editor)</span>
                   <div class="shortcut-keys"><kbd>⌘</kbd> <kbd>S</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                  <span class="shortcut-desc">Toggle word wrap (in editor)</span>
+                  <div class="shortcut-keys"><kbd>Alt</kbd> <kbd>Z</kbd></div>
                 </div>
                 <div class="shortcut-item">
                   <span class="shortcut-desc">Close help/cancel</span>
@@ -908,6 +902,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const editorContainer = document.getElementById('editor-container');
   const saveBtn = document.getElementById('save-btn');
   const cancelBtn = document.getElementById('cancel-btn');
+  const wordWrapBtn = document.getElementById('word-wrap-btn');
   const fileContent = document.querySelector('.file-content');
 
   
@@ -921,6 +916,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (editBtn && editorContainer) {
     let originalContent = '';
+    let wordWrapEnabled = true; // Default to enabled
+
+    // Word wrap toggle functionality
+    function toggleWordWrap() {
+      if (monacoFileEditor) {
+        wordWrapEnabled = !wordWrapEnabled;
+        monacoFileEditor.updateOptions({ wordWrap: wordWrapEnabled ? 'on' : 'off' });
+        
+        // Update button appearance
+        if (wordWrapBtn) {
+          wordWrapBtn.classList.toggle('btn-primary', wordWrapEnabled);
+          wordWrapBtn.classList.toggle('btn-secondary', !wordWrapEnabled);
+          wordWrapBtn.textContent = wordWrapEnabled ? '↩ Wrap ON' : '↩ Wrap OFF';
+          wordWrapBtn.title = `Toggle word wrap (Alt+Z) - ${wordWrapEnabled ? 'ON' : 'OFF'}`;
+        }
+      }
+    }
+
+    // Word wrap button click
+    if (wordWrapBtn) {
+      wordWrapBtn.addEventListener('click', toggleWordWrap);
+    }
 
     // Editor keyboard shortcuts
     document.addEventListener('keydown', function(e) {
@@ -929,6 +946,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
           saveBtn.click();
+        }
+        // Alt+Z to toggle word wrap
+        if (e.altKey && e.key === 'z') {
+          e.preventDefault();
+          toggleWordWrap();
         }
         // Escape to cancel
         if (e.key === 'Escape') {
@@ -978,7 +1000,6 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Create Monaco editor if it doesn't exist
           if (!monacoFileEditor && window.monacoReady) {
-            console.log('Creating Monaco editor for edit mode...');
             const fileEditorContainer = document.getElementById('file-editor');
             if (fileEditorContainer) {
               // Try multiple selectors to get the filename
@@ -993,20 +1014,11 @@ document.addEventListener('DOMContentLoaded', function() {
                           'file.txt';
               }
               
-              console.log('DOM debugging:');
-              console.log('- .header-path a:last-child:', document.querySelector('.header-path a:last-child')?.textContent);
-              console.log('- window.location.pathname:', window.location.pathname);
-              console.log('- URL search params path:', new URLSearchParams(window.location.search).get('path'));
-              console.log('- Final filename:', filename);
-              
               const language = getLanguageFromExtension(filename);
-              console.log('Creating Monaco editor - filename:', filename, 'detected language:', language);
               
               // Validate language exists in Monaco  
               const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
               const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-              console.log('Available languages include', language + ':', availableLanguages.includes(language));
-              console.log('Using language:', validLanguage);
               
               const currentTheme = html.getAttribute('data-theme');
               const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
@@ -1036,35 +1048,12 @@ document.addEventListener('DOMContentLoaded', function() {
                   indentation: true
                 }
               });
-              console.log('Monaco editor created for editing');
             }
           }
           
           // Set content in Monaco editor - wait for Monaco to be ready
           const setContentWhenReady = () => {
-            console.log('Checking Monaco readiness...', { 
-              monacoFileEditor: !!monacoFileEditor, 
-              windowMonacoReady: !!window.monacoReady,
-              contentLength: contentToLoad.length 
-            });
-            
             if (monacoFileEditor && window.monacoReady) {
-              console.log('Setting Monaco content:', contentToLoad.substring(0, 100) + '...');
-              
-              // Debug DOM elements
-              const editorContainer = document.getElementById('file-editor');
-              const parentContainer = editorContainer?.parentElement;
-              console.log('Editor container:', editorContainer, 'dimensions:', {
-                width: editorContainer?.offsetWidth,
-                height: editorContainer?.offsetHeight,
-                display: window.getComputedStyle(editorContainer || {}).display
-              });
-              console.log('Parent container:', parentContainer, 'dimensions:', {
-                width: parentContainer?.offsetWidth,
-                height: parentContainer?.offsetHeight,
-                display: window.getComputedStyle(parentContainer || {}).display
-              });
-              
               // Make sure the editor is visible and properly sized
               monacoFileEditor.layout();
               monacoFileEditor.setValue(contentToLoad);
@@ -1072,29 +1061,20 @@ document.addEventListener('DOMContentLoaded', function() {
               // Force another layout after a brief delay to ensure proper sizing
               setTimeout(() => {
                 monacoFileEditor.layout();
-                console.log('Forced layout refresh completed');
               }, 50);
               
               // Update language based on current file
               const filename = document.querySelector('.header-path a:last-child')?.textContent || '';
               if (filename) {
                 const language = getLanguageFromExtension(filename);
-                console.log('Detected language for file:', filename, '→', language);
                 
                 // Validate language exists in Monaco
                 const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
                 const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-                if (language !== validLanguage) {
-                  console.log('Language', language, 'not available in Monaco, using plaintext');
-                }
                 
                 const model = monacoFileEditor.getModel();
                 if (model) {
-                  console.log('Setting Monaco model language to:', validLanguage);
                   monaco.editor.setModelLanguage(model, validLanguage);
-                  console.log('Current model language after setting:', model.getLanguageId());
-                } else {
-                  console.log('No Monaco model found');
                 }
               }
               
@@ -1102,14 +1082,8 @@ document.addEventListener('DOMContentLoaded', function() {
               monacoFileEditor.onDidChangeModelContent(() => {
                 saveDraft(filePath, monacoFileEditor.getValue());
               });
-              
-              console.log('Monaco content set successfully');
             } else {
               // Monaco not ready yet, wait and try again
-              console.log('Monaco not ready, retrying in 100ms...');
-              
-              // Editor will be created above if needed
-              
               setTimeout(setContentWhenReady, 100);
             }
           };
