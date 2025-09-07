@@ -1,6 +1,6 @@
 {
   "name": "gh-here",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A local GitHub-like file browser for viewing code",
   "repository": "https://github.com/corywilkerson/gh-here",
   "main": "index.js",
