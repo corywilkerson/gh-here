@@ -499,29 +499,54 @@ main {
 
 /* Old search styles removed - using new GitHub-style search */
 
-/* Language stats */
+/* Language stats in control bar */
 .language-stats {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-primary);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  max-width: 300px;
+  overflow: hidden;
+  position: relative;
+}
+
+.language-stats:hover {
+  overflow: visible;
+  z-index: 10;
+}
+
+.language-stats:hover::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -8px;
+  right: -8px;
+  bottom: -4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .lang-stat {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: 11px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 2px 0;
 }
 
 .lang-dot {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .lang-name {
@@ -2008,6 +2033,31 @@ main {
 .commit-icon {
   width: 14px;
   height: 14px;
+}
+
+/* General modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 /* Clean commit modal */
