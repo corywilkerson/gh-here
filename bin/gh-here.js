@@ -9,7 +9,8 @@ const { setupRoutes } = require('../lib/server');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const openBrowser = args.includes('--open') || args.includes('-o');
+const noOpen = args.includes('--no-open');
+const openBrowser = !noOpen; // Default is to open browser
 const helpRequested = args.includes('--help') || args.includes('-h');
 
 // Check for port specification
@@ -37,17 +38,17 @@ gh-here - GitHub-like local file browser
 Usage: npx gh-here [options]
 
 Options:
-  --open, -o              Open browser automatically
+  --no-open               Do not open browser automatically
   --browser=<name>        Specify browser (safari, chrome, firefox, arc)
   --port=<number>         Specify port number (default: 5555)
   --help, -h              Show this help message
 
 Examples:
-  npx gh-here                           Start server on port 5555 (or next available)
-  npx gh-here --open                    Start server and open browser
-  npx gh-here --port=8080               Start server on port 8080
-  npx gh-here --open --browser=safari   Start server and open in Safari
-  npx gh-here --open --browser=arc      Start server and open in Arc
+  npx gh-here                           Start server and open browser
+  npx gh-here --no-open                 Start server without opening browser
+  npx gh-here --port=8080               Start server on port 8080 and open browser
+  npx gh-here --browser=safari          Start server and open in Safari
+  npx gh-here --browser=arc             Start server and open in Arc
 `);
   process.exit(0);
 }
@@ -181,8 +182,6 @@ async function startServer() {
       if (openBrowser) {
         console.log(`🌍 Opening browser...`);
         setTimeout(() => openBrowserToUrl(url), 1000);
-      } else {
-        console.log(`💡 Tip: Use --open flag to launch browser automatically`);
       }
     });
   } catch (error) {
