@@ -35,39 +35,86 @@
 html {
   /* Set background on html to prevent flash during navigation */
   background-color: #0d1117; /* Default dark theme background */
+  color-scheme: dark;
 }
 
-[data-theme="light"] html {
+html[data-theme="light"] {
   background-color: #ffffff; /* Light theme background */
+  color-scheme: light;
+}
+
+/* View Transitions API animations */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+::view-transition-old(root) {
+  animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
-  min-height: 100vh; /* Ensure full height */
+  min-height: 100vh;
+}
+
+/* Smooth content fades for navigation */
+.main-content-wrapper {
+  transition: opacity 160ms ease;
+  will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-content-wrapper {
+    transition: none;
+  }
 }
 
 header {
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-primary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 16px 24px;
+  padding: 12px 32px;
+  max-width: 100%;
+}
+
+.header-left {
+  flex: 0 0 auto;
 }
 
 .header-left h1 {
   font-size: 20px;
   font-weight: 600;
   margin: 0;
-  color: var(--text-accent);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .header-path {
@@ -79,18 +126,21 @@ header {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  margin-left: auto;
 }
 
 /* GitHub-style White Canvas Section */
 .repo-canvas {
   background-color: var(--bg-primary);
+  flex: 1;
+  min-width: 0;
 }
 
 .repo-canvas-content {
-  max-width: 980px;
-  margin: 0 auto;
   padding: 16px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .breadcrumb-section {
@@ -120,17 +170,24 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 40px;
 }
 
 .repo-controls-left {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.repo-controls-left:empty {
+  display: none;
 }
 
 .repo-controls-right {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 
 .branch-button {
@@ -175,8 +232,9 @@ header {
 }
 
 .branch-name {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-weight: 600;
+  font-size: 12px;
 }
 
 .octicon-chevron {
@@ -282,43 +340,52 @@ header {
 .theme-toggle,
 .gitignore-toggle,
 .edit-btn {
-  background: none;
+  background: var(--bg-primary);
   border: 1px solid var(--border-primary);
   border-radius: 6px;
-  padding: 8px;
+  padding: 5px 12px;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  min-height: 40px;
-  margin-left: 8px;
+  height: 32px;
+  min-width: 32px;
+  margin: 0;
+  font-size: 14px;
 }
 
 .theme-toggle:hover,
 .gitignore-toggle:hover,
 .edit-btn:hover {
-  background-color: var(--hover-bg);
+  background-color: var(--bg-tertiary);
   border-color: var(--text-secondary);
+}
+
+.theme-toggle:active,
+.gitignore-toggle:active,
+.edit-btn:active {
+  background-color: var(--hover-bg);
+  transform: scale(0.97);
 }
 
 .gitignore-toggle.showing-ignored {
   color: var(--link-color);
   border-color: var(--link-color);
+  background: rgba(88, 166, 255, 0.1);
 }
 
 .gitignore-toggle.showing-ignored:hover {
-  background-color: rgba(88, 166, 255, 0.1);
+  background-color: rgba(88, 166, 255, 0.15);
 }
 
-.edit-btn {
-  margin-right: 8px;
-}
-
-.theme-icon {
-  font-size: 16px;
+.theme-icon,
+.gitignore-icon,
+.edit-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 .view-toggle {
@@ -380,14 +447,371 @@ header {
   opacity: 0.7;
 }
 
+/* File Header */
+.file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.file-header-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-path-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.file-path-text {
+  color: var(--link-color);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.file-path-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.file-path-copy-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.octicon-copy {
+  fill: currentColor;
+}
+
+.file-stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.file-stat {
+  color: var(--text-secondary);
+}
+
+.file-stat-separator {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.file-header-actions {
+  flex-shrink: 0;
+}
+
+.file-action-group {
+  display: inline-flex;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.file-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  gap: 6px;
+  border-right: 1px solid var(--border-primary);
+}
+
+.file-action-btn:last-child {
+  border-right: none;
+}
+
+.file-action-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.file-action-btn .file-action-label {
+  color: inherit;
+}
+
+.file-action-icon {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.copy-raw-btn {
+  padding: 6px;
+}
+
+.file-action-btn:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.file-action-btn:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+/* Single button case */
+.file-action-group:has(.file-action-btn:only-child) .file-action-btn {
+  border-radius: 6px;
+  border-right: none;
+}
+
 main {
   padding: 0;
+  display: flex;
+  min-height: calc(100vh - 57px);
+  background: var(--bg-primary);
+}
+
+/* File Tree Sidebar */
+.file-tree-sidebar {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-primary);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-secondary);
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 57px);
+  align-self: flex-start;
+}
+
+.file-tree-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.files-icon {
+  fill: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.sidebar-controls {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-branch {
+  width: 100%;
+  justify-content: flex-start;
+  font-size: 12px;
+}
+
+.btn-sidebar {
+  width: 100%;
+  padding: 5px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  font-size: 14px;
+}
+
+.btn-sidebar:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--text-secondary);
+}
+
+.sidebar-search {
+  width: 100%;
+}
+
+.sidebar-search .search-input {
+  width: 100%;
+  font-size: 12px;
+  padding: 5px 32px 5px 28px;
+  height: 28px;
+}
+
+.sidebar-search .search-hotkey {
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+.file-tree-container {
+  padding: 8px 0;
+  background: var(--bg-secondary);
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-primary);
+  transition: background-color 0.1s ease;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+}
+
+.tree-item:hover {
+  background-color: var(--hover-bg);
+}
+
+.tree-item.active {
+  background-color: var(--bg-tertiary);
+  font-weight: 600;
+}
+
+.tree-toggle {
+  font-size: 10px;
+  color: var(--text-secondary);
+  width: 12px;
+  display: inline-block;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tree-spacer {
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.tree-icon {
+  flex-shrink: 0;
+  fill: var(--text-secondary);
+}
+
+.tree-icon.file-icon {
+  fill: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.tree-item .tree-icon:not(.file-icon) {
+  fill: #7dd3fc;
+}
+
+[data-theme="light"] .tree-item .tree-icon:not(.file-icon) {
+  fill: #54adf5;
+}
+
+.tree-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.tree-children {
+  transition: none;
+}
+
+/* File tree loading skeleton */
+.tree-skeleton {
+  padding: 8px;
+}
+
+.skeleton-item {
+  height: 28px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--hover-bg) 50%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.skeleton-indent {
+  margin-left: 20px;
+  width: calc(100% - 20px);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.main-content-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.15s ease;
+}
+
+.main-content-wrapper.no-sidebar {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.main-content-wrapper.no-sidebar .repo-canvas-content {
+  max-width: 980px;
 }
 
 .main-content {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 16px 24px;
+  width: 100%;
 }
 
 .directory-actions {
@@ -742,7 +1166,7 @@ main {
 .file-table .name a {
   color: var(--link-color);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .file-table .name a:hover {
@@ -773,8 +1197,9 @@ main {
 }
 
 .file-content code {
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
+  font-weight: 400;
 }
 
 /* Image viewing styles */
@@ -858,7 +1283,8 @@ main {
 .with-line-numbers {
   counter-reset: line;
   display: block;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 400;
 }
 
 .line-container {
@@ -1035,9 +1461,7 @@ main {
   gap: 8px;
 }
 
-.new-file-editor {
-  /* No additional styling needed - uses existing .file-editor */
-}
+
 
 .line-number {
   display: inline-block;
@@ -1050,7 +1474,8 @@ main {
   border-right: 1px solid var(--border-primary);
   font-size: 12px;
   line-height: 20px;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 400;
   user-select: none;
   -webkit-user-select: none;
   text-decoration: none;
@@ -1066,9 +1491,11 @@ main {
   white-space: pre;
   display: inline-block;
   padding: 0 10px;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
   line-height: 20px;
+  font-weight: 400;
+  letter-spacing: normal;
 }
 
 /* Keep gutter simple: only border-right, no per-line background */
@@ -1344,7 +1771,7 @@ main {
   padding: 3px 6px;
   border-radius: 6px;
   font-size: 85%;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   color: var(--text-accent);
   border: 1px solid var(--border-primary);
 }
@@ -1414,47 +1841,54 @@ main {
   .main-content {
     padding: 12px 16px;
   }
-  
+
   .repo-canvas-content {
     padding: 12px 16px;
   }
-  
+
   .header-content {
-    padding: 12px 16px;
-    flex-direction: column;
-    gap: 12px;
+    padding: 8px 16px;
   }
-  
+
+  .header-left h1 {
+    font-size: 14px;
+  }
+
+  .commit-text {
+    display: none;
+  }
+
+  .commit-btn {
+    padding: 5px 8px;
+    min-width: 32px;
+  }
+
   .file-table .size,
   .file-table .modified {
     display: none;
   }
-  
+
   .repo-controls {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .repo-controls-right {
     flex-direction: column;
     gap: 8px;
   }
-  
-  .header-right {
-    align-self: flex-end;
-  }
-  
+
   .keyboard-help-content {
     margin: 20px;
     max-width: calc(100% - 40px);
   }
-  
+
   .keyboard-shortcuts-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .keyboard-help-body {
     padding: 20px;
   }
@@ -1611,7 +2045,7 @@ main {
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 11px;
-  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   color: var(--text-primary);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
@@ -1683,7 +2117,7 @@ main {
   color: #1f6feb; /* renamed - blue */
 }
 
-.git-status-?? {
+.git-status-\?\? {
   color: #a371f7; /* untracked - purple */
 }
 
@@ -1814,9 +2248,10 @@ main {
 .diff-side-content {
   flex: 1;
   overflow: auto;
-  font-family: 'SFMono-Regular', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 20px;
+  font-weight: 400;
 }
 
 .diff-line {
@@ -1920,9 +2355,10 @@ main {
 }
 
 .raw-diff-container {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
   overflow-x: auto;
 }
 
@@ -2047,31 +2483,42 @@ main {
   font-style: italic;
 }
 
-/* Simple commit button */
+/* Commit button */
 .commit-btn {
-  background: var(--bg-tertiary);
+  background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border-primary);
   border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 5px 12px;
+  height: 32px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-right: 8px;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .commit-btn:hover {
-  background: var(--hover-bg);
+  background: var(--bg-tertiary);
   border-color: var(--text-secondary);
 }
 
+.commit-btn:active {
+  background: var(--hover-bg);
+  transform: scale(0.97);
+}
+
 .commit-icon {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.commit-text {
+  font-size: 14px;
 }
 
 /* General modal overlay */
@@ -2255,7 +2702,8 @@ main {
 
 .file-name {
   color: var(--text-primary);
-  font-family: ui-monospace, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
   flex: 1;
 }
 
@@ -2378,7 +2826,7 @@ main {
   position: relative !important;
   display: block !important;
   border-radius: 0 0 6px 6px;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 .monaco-editor-container .monaco-editor {

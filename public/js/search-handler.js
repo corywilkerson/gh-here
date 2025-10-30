@@ -8,17 +8,20 @@ export class SearchHandler {
   constructor() {
     this.searchInput = document.getElementById('file-search');
     this.fileTable = document.getElementById('file-table');
+    this.fileTree = document.getElementById('file-tree');
     this.fileRows = [];
+    this.treeItems = [];
     this.currentFocusIndex = -1;
     this.init();
   }
 
   init() {
-    if (!this.searchInput || !this.fileTable) {
+    if (!this.searchInput) {
       return;
     }
 
     this.updateFileRows();
+    this.updateTreeItems();
     this.setupListeners();
   }
 
@@ -34,6 +37,11 @@ export class SearchHandler {
         this.focusSearch();
       }
     });
+
+    // Listen for file tree loaded event
+    document.addEventListener('filetree-loaded', () => {
+      this.updateTreeItems();
+    });
   }
 
   updateFileRows() {
@@ -42,20 +50,70 @@ export class SearchHandler {
     }
   }
 
+  updateTreeItems() {
+    if (this.fileTree) {
+      this.treeItems = Array.from(this.fileTree.querySelectorAll('.tree-item'));
+    }
+  }
+
   filterFiles(query) {
-    if (!query) {
-      this.fileRows.forEach(row => row.classList.remove('hidden'));
-      return;
+    // Filter file table if it exists
+    if (this.fileTable && this.fileRows.length > 0) {
+      if (!query) {
+        this.fileRows.forEach(row => row.classList.remove('hidden'));
+        return;
+      }
+
+      this.fileRows.forEach(row => {
+        const fileName = row.dataset.name;
+        const isVisible = fileName.includes(query);
+        row.classList.toggle('hidden', !isVisible);
+      });
+
+      this.clearFocus();
+      this.currentFocusIndex = -1;
     }
 
-    this.fileRows.forEach(row => {
-      const fileName = row.dataset.name;
-      const isVisible = fileName.includes(query);
-      row.classList.toggle('hidden', !isVisible);
-    });
+    // Filter file tree if it exists
+    if (this.fileTree && this.treeItems.length > 0) {
+      if (!query) {
+        this.treeItems.forEach(item => item.style.display = '');
+        // Show all parent containers too
+        const containers = this.fileTree.querySelectorAll('.tree-children');
+        containers.forEach(container => container.style.display = '');
+        return;
+      }
 
-    this.clearFocus();
-    this.currentFocusIndex = -1;
+      // First hide everything
+      this.treeItems.forEach(item => item.style.display = 'none');
+      const containers = this.fileTree.querySelectorAll('.tree-children');
+      containers.forEach(container => container.style.display = 'none');
+
+      // Then show matching items and their parents
+      this.treeItems.forEach(item => {
+        const label = item.querySelector('.tree-label');
+        const fileName = label ? label.textContent.toLowerCase() : '';
+        const isVisible = fileName.includes(query);
+
+        if (isVisible) {
+          // Show this item
+          item.style.display = '';
+
+          // Show all parent folders and containers
+          let parent = item.parentElement;
+          while (parent && parent !== this.fileTree) {
+            if (parent.classList.contains('tree-children')) {
+              parent.style.display = '';
+            }
+            const parentItem = parent.previousElementSibling;
+            if (parentItem && parentItem.classList.contains('tree-item')) {
+              parentItem.style.display = '';
+            }
+            parent = parent.parentElement;
+          }
+        }
+      });
+    }
   }
 
   focusSearch() {

@@ -131,7 +131,8 @@ export class KeyboardHandler {
       return;
     }
 
-    window.location.href = PathUtils.buildPathUrl('/', newPath);
+    const detail = { path: newPath, isDirectory: true };
+    document.dispatchEvent(new CustomEvent('navigate', { detail }));
   }
 
   isEditorVisible() {

@@ -7,6 +7,8 @@ import { ThemeManager } from './js/theme-manager.js';
 import { EditorManager } from './js/editor-manager.js';
 import { SearchHandler } from './js/search-handler.js';
 import { KeyboardHandler } from './js/keyboard-handler.js';
+import { FileTreeNavigator } from './js/file-tree.js';
+import { NavigationHandler } from './js/navigation.js';
 import { PathUtils } from './js/utils.js';
 import { DraftManager } from './js/draft-manager.js';
 import { showNotification } from './js/notification.js';
@@ -18,15 +20,24 @@ class Application {
     this.editorManager = null;
     this.searchHandler = null;
     this.keyboardHandler = null;
+    this.fileTree = null;
+    this.navigationHandler = null;
   }
 
   init() {
     document.addEventListener('DOMContentLoaded', () => {
-      this.themeManager = new ThemeManager();
-      this.editorManager = new EditorManager(this.themeManager.getCurrentTheme());
+      // Initialize navigation first so listeners are ready
+      this.navigation = new NavigationHandler();
+      this.initializeComponents();
+    });
+
+    // Re-initialize components after client-side navigation
+    document.addEventListener('content-loaded', () => {
+      // Re-initialize components that need fresh DOM references
+      this.editorManager = new EditorManager(this.themeManager?.getCurrentTheme() || 'dark');
       this.searchHandler = new SearchHandler();
       this.keyboardHandler = new KeyboardHandler(this.searchHandler);
-
+      this.fileTree = new FileTreeNavigator();
       this.setupGlobalEventListeners();
       this.setupGitignoreToggle();
       this.setupFileEditor();
@@ -37,6 +48,27 @@ class Application {
     });
   }
 
+  initializeComponents() {
+    // Theme manager persists across navigations
+    if (!this.themeManager) {
+      this.themeManager = new ThemeManager();
+    }
+
+    // Initialize components
+    this.editorManager = new EditorManager(this.themeManager.getCurrentTheme());
+    this.searchHandler = new SearchHandler();
+    this.keyboardHandler = new KeyboardHandler(this.searchHandler);
+    this.fileTree = new FileTreeNavigator();
+
+    this.setupGlobalEventListeners();
+    this.setupGitignoreToggle();
+    this.setupFileEditor();
+    this.setupNewFileInterface();
+    this.setupFileOperations();
+    this.setupCommitModal();
+    this.handleAutoEdit();
+  }
+
   setupGlobalEventListeners() {
     document.addEventListener('click', e => {
       if (e.target.closest('.copy-path-btn')) {
@@ -44,6 +76,20 @@ class Application {
         e.stopPropagation();
         const button = e.target.closest('.copy-path-btn');
         copyToClipboard(button.dataset.path, button);
+      }
+
+      if (e.target.closest('.file-path-copy-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const button = e.target.closest('.file-path-copy-btn');
+        copyToClipboard(button.dataset.path, button);
+      }
+
+      if (e.target.closest('.copy-raw-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const button = e.target.closest('.copy-raw-btn');
+        this.copyRawContent(button.dataset.path, button);
       }
 
       if (e.target.closest('.diff-btn')) {
@@ -439,6 +485,21 @@ class Application {
     url.searchParams.set('path', filePath);
     url.searchParams.set('view', 'diff');
     window.location.href = url.toString();
+  }
+
+  async copyRawContent(filePath, button) {
+    try {
+      const response = await fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const content = await response.text();
+      await copyToClipboard(content, button);
+      showNotification('Raw content copied to clipboard', 'success');
+    } catch (error) {
+      console.error('Failed to copy raw content:', error);
+      showNotification('Failed to copy raw content', 'error');
+    }
   }
 
   handleAutoEdit() {
