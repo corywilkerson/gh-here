@@ -1,1896 +1,456 @@
-// Octicons directly embedded for frontend use
-const octicons = {
-    'file-directory': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-file-directory" aria-hidden="true"><path d="M0 2.75C0 1.784.784 1 1.75 1H5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1h6.75c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25H7.5c-.55 0-1.07-.26-1.4-.7l-.9-1.2a.25.25 0 0 0-.2-.1Z"></path></svg>',
-    'git-commit': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-git-commit" aria-hidden="true"><path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path></svg>',
-    'diff': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-diff" aria-hidden="true"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg>',
-    'copy': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-copy" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>',
-    'download': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-download" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg>',
-    'pencil': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-pencil" aria-hidden="true"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path></svg>',
-    'x': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-x" aria-hidden="true"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>',
-    'check': '<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-check" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>',
-    
-    // Helper to get an icon with optional classes
-    get(name, options = {}) {
-      const svg = this[name];
-      if (!svg) return `<span class="missing-icon">[${name}]</span>`;
-      
-      if (options.class) {
-        return svg.replace('class="octicon', `class="${options.class} octicon`);
-      }
-      return svg;
-    }
-  };
+/**
+ * Main application entry point
+ * Coordinates all modules and initializes the application
+ */
 
-// Language detection utility - pure function, easily testable
-function getLanguageFromExtension(filename) {
-  const ext = filename.split('.').pop().toLowerCase();
-  const languageMap = {
-    // JavaScript family
-    'js': 'javascript',
-    'mjs': 'javascript', 
-    'jsx': 'javascript',
-    'ts': 'typescript',
-    'tsx': 'typescript',
-    
-    // Web languages
-    'html': 'html',
-    'htm': 'html',
-    'css': 'css',
-    'scss': 'scss',
-    'sass': 'sass',
-    'less': 'less',
-    
-    // Data formats
-    'json': 'json',
-    'xml': 'xml',
-    'yaml': 'yaml',
-    'yml': 'yaml',
-    
-    // Programming languages
-    'py': 'python',
-    'java': 'java',
-    'go': 'go',
-    'rs': 'rust',
-    'php': 'php',
-    'rb': 'ruby',
-    'swift': 'swift',
-    'kt': 'kotlin',
-    'dart': 'dart',
-    
-    // Systems languages
-    'c': 'c',
-    'cpp': 'cpp',
-    'cc': 'cpp',
-    'cxx': 'cpp',
-    'h': 'c',
-    'hpp': 'cpp',
-    
-    // Shell and scripts
-    'sh': 'shell',
-    'bash': 'shell',
-    'zsh': 'shell',
-    'fish': 'shell',
-    'ps1': 'powershell',
-    
-    // Other languages
-    'sql': 'sql',
-    'r': 'r',
-    'scala': 'scala',
-    'clj': 'clojure',
-    'lua': 'lua',
-    'pl': 'perl',
-    'groovy': 'groovy',
-    
-    // Config and text
-    'md': 'markdown',
-    'txt': 'plaintext',
-    'log': 'plaintext'
-  };
-  
-  // Special filename handling
-  const basename = filename.toLowerCase();
-  if (basename === 'dockerfile' || basename.startsWith('dockerfile.')) return 'dockerfile';
-  if (basename === 'makefile') return 'makefile';
-  if (basename.startsWith('.env')) return 'dotenv';
-  if (basename === 'package.json' || basename === 'composer.json') return 'json';
-  
-  return languageMap[ext] || 'plaintext';
-}
+import { ThemeManager } from './js/theme-manager.js';
+import { EditorManager } from './js/editor-manager.js';
+import { SearchHandler } from './js/search-handler.js';
+import { KeyboardHandler } from './js/keyboard-handler.js';
+import { PathUtils } from './js/utils.js';
+import { DraftManager } from './js/draft-manager.js';
+import { showNotification } from './js/notification.js';
+import { copyToClipboard } from './js/clipboard-utils.js';
 
-// Draft management utilities - pure functions, easily testable
-const DraftManager = {
-  STORAGE_PREFIX: 'gh-here-draft-',
-  
-  saveDraft(filePath, content) {
-    localStorage.setItem(`${this.STORAGE_PREFIX}${filePath}`, content);
-  },
-  
-  loadDraft(filePath) {
-    return localStorage.getItem(`${this.STORAGE_PREFIX}${filePath}`);
-  },
-  
-  clearDraft(filePath) {
-    localStorage.removeItem(`${this.STORAGE_PREFIX}${filePath}`);
-  },
-  
-  // Helper to check if draft exists and differs from content
-  hasDraftChanges(filePath, originalContent) {
-    const draft = this.loadDraft(filePath);
-    return draft !== null && draft !== originalContent;
-  },
-  
-  // Get all draft keys for cleanup/debugging
-  getAllDrafts() {
-    const drafts = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith(this.STORAGE_PREFIX)) {
-        const filePath = key.replace(this.STORAGE_PREFIX, '');
-        drafts[filePath] = localStorage.getItem(key);
-      }
-    }
-    return drafts;
+class Application {
+  constructor() {
+    this.themeManager = null;
+    this.editorManager = null;
+    this.searchHandler = null;
+    this.keyboardHandler = null;
   }
-};
 
-// Path utility functions - pure functions, easily testable
-const PathUtils = {
-  // Extract current path from URL parameters
-  getCurrentPath() {
-    const currentUrl = new URL(window.location.href);
-    return currentUrl.searchParams.get('path') || '';
-  },
+  init() {
+    document.addEventListener('DOMContentLoaded', () => {
+      this.themeManager = new ThemeManager();
+      this.editorManager = new EditorManager(this.themeManager.getCurrentTheme());
+      this.searchHandler = new SearchHandler();
+      this.keyboardHandler = new KeyboardHandler(this.searchHandler);
 
-  // Navigate to parent directory
-  getParentPath(currentPath) {
-    if (!currentPath || currentPath === '') {
-      return null; // Already at root
-    }
-    
-    const pathParts = currentPath.split('/').filter(p => p);
-    if (pathParts.length === 0) {
-      return null; // Already at root
-    }
-    
-    pathParts.pop();
-    return pathParts.join('/');
-  },
-
-  // Build file path from directory and filename
-  buildFilePath(currentPath, filename) {
-    return currentPath ? `${currentPath}/${filename}` : filename;
-  },
-
-  // Get filename from full path
-  getFileName(filePath) {
-    return filePath.split('/').pop() || 'file.txt';
-  },
-
-  // Build URL with encoded path parameter
-  buildPathUrl(basePath, targetPath) {
-    return targetPath ? `${basePath}?path=${encodeURIComponent(targetPath)}` : basePath;
-  },
-
-  // Extract directory path from file path
-  getDirectoryPath(filePath) {
-    const parts = filePath.split('/').filter(p => p);
-    if (parts.length <= 1) return '';
-    return parts.slice(0, -1).join('/');
-  }
-};
-
-// Notification system - global scope for access from commit functions
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(n => n.remove());
-    
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Auto-remove after 4 seconds
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }
-    }, 4000);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  const searchInput = document.getElementById('file-search');
-  const fileTable = document.getElementById('file-table');
-  
-  let currentFocusIndex = -1;
-  let fileRows = [];
-  
-  // Removed loading state utilities - not needed for local operations
-  
-  // Monaco Editor integration
-  let monacoFileEditor = null;
-  let monacoNewFileEditor = null;
-  
-  // Note: getLanguageFromExtension is now a global utility function
-  
-  // Initialize Monaco Editor
-  function initializeMonaco() {
-    if (typeof require !== 'undefined') {
-      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
-      
-      require(['vs/editor/editor.main'], function () {
-        // Configure Monaco Editor to work without web workers (avoids CORS issues)
-        self.MonacoEnvironment = {
-          getWorker: function(workerId, label) {
-            // Return undefined to disable workers and use main thread processing
-            // This avoids CORS issues with unpkg CDN while still providing syntax highlighting
-            return undefined;
-          }
-        };
-        
-        // Set Monaco theme based on current theme
-        const currentTheme = html.getAttribute('data-theme');
-        const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
-        monaco.editor.setTheme(monacoTheme);
-        
-        // Initialize new file editor if container exists  
-        const newFileEditorContainer = document.getElementById('new-file-content');
-        if (newFileEditorContainer) {
-          monacoNewFileEditor = monaco.editor.create(newFileEditorContainer, {
-            value: '',
-            language: 'plaintext',
-            theme: monacoTheme,
-            minimap: { enabled: false },
-            lineNumbers: 'on',
-            wordWrap: 'off',
-            scrollBeyondLastLine: false,
-            fontSize: 12,
-            lineHeight: 20,  // Match view mode breathing
-            fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-            padding: { top: 20, bottom: 20, left: 20, right: 20 },
-            renderLineHighlight: 'line',
-            selectOnLineNumbers: true,
-            automaticLayout: true,
-            folding: true,
-            foldingHighlight: true,
-            foldingStrategy: 'auto',
-            showFoldingControls: 'mouseover',
-            bracketPairColorization: { enabled: true },
-            guides: {
-              bracketPairs: true,
-              indentation: true
-            }
-          });
-        }
-        
-        // Set global flag that Monaco is ready
-        window.monacoReady = true;
-      });
-    }
-  }
-  
-  // Initialize Monaco when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeMonaco);
-  } else {
-    initializeMonaco();
-  }
-  
-  // Initialize
-  updateFileRows();
-  
-  // Detect system theme preference
-  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const systemTheme = systemPrefersDark ? 'dark' : 'light';
-  
-  // Load saved theme or default to system preference
-  const savedTheme = localStorage.getItem('gh-here-theme') || systemTheme;
-  html.setAttribute('data-theme', savedTheme);
-  updateThemeIcon(savedTheme);
-  
-  // Listen for system theme changes (only if no manual override is saved)
-  if (window.matchMedia) {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addListener(function(e) {
-      // Only auto-update if user hasn't manually set a theme
-      if (!localStorage.getItem('gh-here-theme')) {
-        const newTheme = e.matches ? 'dark' : 'light';
-        html.setAttribute('data-theme', newTheme);
-        updateThemeIcon(newTheme);
-      }
+      this.setupGlobalEventListeners();
+      this.setupGitignoreToggle();
+      this.setupFileEditor();
+      this.setupNewFileInterface();
+      this.setupFileOperations();
+      this.setupCommitModal();
+      this.handleAutoEdit();
     });
   }
-  
-  // Theme toggle functionality
-  themeToggle.addEventListener('click', function() {
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('gh-here-theme', newTheme);
-    updateThemeIcon(newTheme);
-    
-    // Update Monaco editor themes
-    if (typeof monaco !== 'undefined') {
-      const monacoTheme = newTheme === 'dark' ? 'vs-dark' : 'vs';
-      monaco.editor.setTheme(monacoTheme);
-    }
-  });
 
-  // Gitignore toggle functionality
-  const gitignoreToggle = document.getElementById('gitignore-toggle');
-  if (gitignoreToggle) {
-    gitignoreToggle.addEventListener('click', function() {
-      const currentUrl = new URL(window.location.href);
-      const currentGitignoreState = currentUrl.searchParams.get('gitignore');
-      const newGitignoreState = currentGitignoreState === 'false' ? null : 'false';
-      
-      if (newGitignoreState) {
-        currentUrl.searchParams.set('gitignore', newGitignoreState);
-      } else {
-        currentUrl.searchParams.delete('gitignore');
-      }
-      
-      // Navigate to the new URL
-      window.location.href = currentUrl.toString();
-    });
-  }
-  
-  // Search functionality
-  if (searchInput) {
-    searchInput.addEventListener('input', function() {
-      const query = this.value.toLowerCase().trim();
-      filterFiles(query);
-    });
-    
-    // Focus search with Ctrl+K or Cmd+K
-    document.addEventListener('keydown', function(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+  setupGlobalEventListeners() {
+    document.addEventListener('click', e => {
+      if (e.target.closest('.copy-path-btn')) {
         e.preventDefault();
-        searchInput.focus();
-        searchInput.select();
+        e.stopPropagation();
+        const button = e.target.closest('.copy-path-btn');
+        copyToClipboard(button.dataset.path, button);
       }
-    });
-  }
-  
-  // Keyboard shortcuts help overlay
-  function showKeyboardHelp() {
-    // Remove existing help if present
-    const existingHelp = document.getElementById('keyboard-help');
-    if (existingHelp) {
-      existingHelp.remove();
-      return;
-    }
 
-    const helpOverlay = document.createElement('div');
-    helpOverlay.id = 'keyboard-help';
-    helpOverlay.className = 'keyboard-help-overlay';
-    
-    helpOverlay.innerHTML = `
-      <div class="keyboard-help-content">
-        <div class="keyboard-help-header">
-          <h2>Keyboard shortcuts</h2>
-          <button class="keyboard-help-close" aria-label="Close help">&times;</button>
-        </div>
-        <div class="keyboard-help-body">
-          <div class="shortcuts-container">
-            <div class="shortcut-section">
-              <h3>Repositories</h3>
-              <div class="shortcut-list">
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Go to parent directory</span>
-                  <div class="shortcut-keys"><kbd>H</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Toggle .gitignore filter</span>
-                  <div class="shortcut-keys"><kbd>I</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Create new file</span>
-                  <div class="shortcut-keys"><kbd>C</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Edit focused file</span>
-                  <div class="shortcut-keys"><kbd>E</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Show diff for focused file</span>
-                  <div class="shortcut-keys"><kbd>D</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Refresh page</span>
-                  <div class="shortcut-keys"><kbd>R</kbd></div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="shortcut-section">
-              <h3>Site-wide shortcuts</h3>
-              <div class="shortcut-list">
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Focus search</span>
-                  <div class="shortcut-keys"><kbd>S</kbd> or <kbd>/</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Focus search</span>
-                  <div class="shortcut-keys"><kbd>⌘</kbd> <kbd>K</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Toggle theme</span>
-                  <div class="shortcut-keys"><kbd>T</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Bring up this help dialog</span>
-                  <div class="shortcut-keys"><kbd>?</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Move selection down</span>
-                  <div class="shortcut-keys"><kbd>J</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Move selection up</span>
-                  <div class="shortcut-keys"><kbd>K</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Open selection</span>
-                  <div class="shortcut-keys"><kbd>O</kbd> or <kbd>↵</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Save file (in editor)</span>
-                  <div class="shortcut-keys"><kbd>⌘</kbd> <kbd>S</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Toggle word wrap (in editor)</span>
-                  <div class="shortcut-keys"><kbd>Alt</kbd> <kbd>Z</kbd></div>
-                </div>
-                <div class="shortcut-item">
-                  <span class="shortcut-desc">Close help/cancel</span>
-                  <div class="shortcut-keys"><kbd>Esc</kbd></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(helpOverlay);
-    
-    // Close on click outside or escape
-    helpOverlay.addEventListener('click', function(e) {
-      if (e.target === helpOverlay) {
-        helpOverlay.remove();
+      if (e.target.closest('.diff-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const button = e.target.closest('.diff-btn');
+        this.showDiffViewer(button.dataset.path);
       }
     });
-    
-    helpOverlay.querySelector('.keyboard-help-close').addEventListener('click', function() {
-      helpOverlay.remove();
-    });
-  }
 
-  // Keyboard navigation
-  document.addEventListener('keydown', function(e) {
-    // Handle help overlay first
-    if (e.key === '?' && document.activeElement !== searchInput) {
-      e.preventDefault();
-      showKeyboardHelp();
-      return;
-    }
-    
-    // Close help with Escape
-    if (e.key === 'Escape') {
-      const helpOverlay = document.getElementById('keyboard-help');
-      if (helpOverlay) {
-        helpOverlay.remove();
-        return;
-      }
-    }
-    
-    // Don't handle shortcuts when editor is active
-    const editorContainer = document.getElementById('editor-container');
-    if (editorContainer && editorContainer.style.display !== 'none' && 
-        editorContainer.contains(document.activeElement)) {
-      return;
-    }
-    
-    if (searchInput && document.activeElement === searchInput) {
-      handleSearchKeydown(e);
-    } else {
-      handleGlobalKeydown(e);
-    }
-  });
-
-  // New file and folder functionality
-  const newFileBtn = document.getElementById('new-file-btn');
-  const newFolderBtn = document.getElementById('new-folder-btn');
-
-  if (newFileBtn) {
-    newFileBtn.addEventListener('click', function() {
-      const currentPath = PathUtils.getCurrentPath();
-      
-      // Navigate to new file creation mode
-      window.location.href = PathUtils.buildPathUrl('/new', currentPath);
-    });
-  }
-
-  if (newFolderBtn) {
-    newFolderBtn.addEventListener('click', function() {
-      const foldername = prompt('Enter folder name:');
-      if (foldername && foldername.trim()) {
-        const currentUrl = new URL(window.location.href);
-        const currentPath = currentUrl.searchParams.get('path') || '';
-        
-        fetch('/api/create-folder', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            path: currentPath,
-            foldername: foldername.trim()
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Refresh the current directory view
-            window.location.reload();
-          } else {
-            alert('Failed to create folder: ' + data.error);
-          }
-        })
-        .catch(error => {
-          console.error('Error creating folder:', error);
-          alert('Failed to create folder');
-        });
-      }
-    });
-  }
-  
-  // File row click navigation
-  fileRows.forEach((row, index) => {
-    row.addEventListener('click', function(e) {
-      // Don't navigate if clicking on quick actions
-      if (e.target.closest('.quick-actions')) {
-        return;
-      }
-      
-      const link = row.querySelector('a');
-      if (link) {
-        link.click();
-      }
-    });
-  });
-  
-  // Quick actions functionality
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.copy-path-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const button = e.target.closest('.copy-path-btn');
-      const path = button.dataset.path;
-      copyToClipboard(path, button);
-    }
-  });
-  
-  // Line selection functionality
-  let lastClickedLine = null;
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('line-number')) {
-      e.preventDefault();
-      const lineContainer = e.target.closest('.line-container');
-      const lineNum = parseInt(lineContainer.dataset.line);
-      
-      if (e.shiftKey && lastClickedLine !== null) {
-        // Range selection
-        selectLineRange(Math.min(lastClickedLine, lineNum), Math.max(lastClickedLine, lineNum));
-      } else if (e.ctrlKey || e.metaKey) {
-        // Toggle individual line
-        toggleLineSelection(lineNum);
-      } else {
-        // Single line selection
-        clearAllSelections();
-        selectLine(lineNum);
-        lastClickedLine = lineNum;
-      }
-      
-      updateURL();
-    }
-  });
-  
-  function updateThemeIcon(theme) {
-    const iconSvg = themeToggle.querySelector('.theme-icon');
-    if (iconSvg) {
-      if (theme === 'dark') {
-        iconSvg.innerHTML = '<path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.061zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061zM16 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8zM3 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 3 8zm10.657-5.657a.75.75 0 0 1 0 1.061l-1.061 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.061 0zm-9.193 9.193a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0z"></path>';
-      } else {
-        iconSvg.innerHTML = '<path d="M9.598 1.591a.75.75 0 0 1 .785-.175 7 7 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.5 5.5 0 1 0 7.678-7.678z"></path>';
-      }
-    }
-  }
-  
-  function updateFileRows() {
-    if (fileTable) {
-      fileRows = Array.from(fileTable.querySelectorAll('.file-row'));
-    }
-  }
-  
-  function filterFiles(query) {
-    if (!query) {
-      fileRows.forEach(row => {
-        row.classList.remove('hidden');
-      });
-      return;
-    }
-    
+    const fileRows = document.querySelectorAll('.file-row');
     fileRows.forEach(row => {
-      const fileName = row.dataset.name;
-      const isVisible = fileName.includes(query);
-      row.classList.toggle('hidden', !isVisible);
+      row.addEventListener('click', e => {
+        if (!e.target.closest('.quick-actions')) {
+          const link = row.querySelector('a');
+          if (link) {
+            link.click();
+          }
+        }
+      });
     });
-    
-    // Reset focus when filtering
-    clearFocus();
-    currentFocusIndex = -1;
   }
-  
-  function handleSearchKeydown(e) {
-    switch(e.key) {
-      case 'Escape':
-        searchInput.blur();
-        searchInput.value = '';
-        filterFiles('');
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        searchInput.blur();
-        focusFirstVisibleRow();
-        break;
-      case 'Enter':
-        if (searchInput.value.trim()) {
-          const firstVisible = getVisibleRows()[0];
-          if (firstVisible) {
-            const link = firstVisible.querySelector('a');
-            if (link) link.click();
-          }
+
+  setupGitignoreToggle() {
+    const toggle = document.getElementById('gitignore-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        const current = url.searchParams.get('gitignore');
+        const newState = current === 'false' ? null : 'false';
+
+        if (newState) {
+          url.searchParams.set('gitignore', newState);
+        } else {
+          url.searchParams.delete('gitignore');
         }
-        break;
-    }
-  }
-  
-  function handleGlobalKeydown(e) {
-    const visibleRows = getVisibleRows();
-    
-    switch(e.key) {
-      case 'ArrowDown':
-      case 'j':
-        e.preventDefault();
-        navigateDown(visibleRows);
-        break;
-      case 'ArrowUp':
-      case 'k':
-        e.preventDefault();
-        navigateUp(visibleRows);
-        break;
-      case 'Enter':
-      case 'o':
-        if (currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
-          const link = visibleRows[currentFocusIndex].querySelector('a');
-          if (link) link.click();
-        }
-        break;
-      case '/':
-      case 's':
-        if (searchInput && !e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          searchInput.focus();
-        }
-        break;
-      case 'g':
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          if (visibleRows.length > 0) {
-            currentFocusIndex = 0;
-            updateFocus(visibleRows);
-          }
-        }
-        break;
-      case 'G':
-        if (e.shiftKey) {
-          e.preventDefault();
-          if (visibleRows.length > 0) {
-            currentFocusIndex = visibleRows.length - 1;
-            updateFocus(visibleRows);
-          }
-        }
-        break;
-      case 'h':
-        // Go back/up one directory
-        e.preventDefault();
-        goUpDirectory();
-        break;
-      case 'r':
-        // Refresh page
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          location.reload();
-        }
-        break;
-      case 't':
-        // Toggle theme
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          themeToggle.click();
-        }
-        break;
-      case '?':
-        // Show keyboard shortcuts help
-        e.preventDefault();
-        showKeyboardHelp();
-        break;
-      case 'c':
-        // Create new file
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          const newFileBtn = document.getElementById('new-file-btn');
-          if (newFileBtn) {
-            newFileBtn.click();
-          }
-        }
-        break;
-      case 'e':
-        // Edit focused file
-        if (!e.ctrlKey && !e.metaKey && currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
-          e.preventDefault();
-          const focusedRow = visibleRows[currentFocusIndex];
-          const rowType = focusedRow.dataset.type;
-          
-          // If we're in a directory listing and focused on a file
-          if (rowType === 'file') {
-            const filePath = focusedRow.dataset.path;
-            // Navigate to the file and trigger edit mode
-            window.location.href = PathUtils.buildPathUrl('/', filePath) + '#edit';
-          } else {
-            // If we're on a file page, use the edit button
-            const editBtn = document.getElementById('edit-btn');
-            if (editBtn && editBtn.style.display !== 'none') {
-              editBtn.click();
-            }
-          }
-        }
-        break;
-      case 'i':
-        // Toggle gitignore
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          const gitignoreToggle = document.getElementById('gitignore-toggle');
-          if (gitignoreToggle) {
-            gitignoreToggle.click();
-          }
-        }
-        break;
-      case 'd':
-        // Show diff for focused file (if it has git status)
-        if (!e.ctrlKey && !e.metaKey && currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
-          e.preventDefault();
-          const focusedRow = visibleRows[currentFocusIndex];
-          const rowType = focusedRow.dataset.type;
-          
-          if (rowType === 'file') {
-            const filePath = focusedRow.dataset.path;
-            const diffBtn = focusedRow.querySelector('.diff-btn');
-            if (diffBtn) {
-              showDiffViewer(filePath);
-            }
-          }
-        }
-        break;
-    }
-  }
-  
-  function getVisibleRows() {
-    return fileRows.filter(row => !row.classList.contains('hidden'));
-  }
-  
-  function focusFirstVisibleRow() {
-    const visibleRows = getVisibleRows();
-    if (visibleRows.length > 0) {
-      currentFocusIndex = 0;
-      updateFocus(visibleRows);
-    }
-  }
-  
-  function navigateDown(visibleRows) {
-    if (visibleRows.length === 0) return;
-    
-    currentFocusIndex++;
-    if (currentFocusIndex >= visibleRows.length) {
-      currentFocusIndex = 0;
-    }
-    updateFocus(visibleRows);
-  }
-  
-  function navigateUp(visibleRows) {
-    if (visibleRows.length === 0) return;
-    
-    currentFocusIndex--;
-    if (currentFocusIndex < 0) {
-      currentFocusIndex = visibleRows.length - 1;
-    }
-    updateFocus(visibleRows);
-  }
-  
-  function updateFocus(visibleRows) {
-    clearFocus();
-    if (currentFocusIndex >= 0 && visibleRows[currentFocusIndex]) {
-      visibleRows[currentFocusIndex].classList.add('focused');
-      visibleRows[currentFocusIndex].scrollIntoView({ 
-        block: 'nearest',
-        behavior: 'smooth'
+
+        window.location.href = url.toString();
       });
     }
   }
-  
-  function clearFocus() {
-    fileRows.forEach(row => row.classList.remove('focused'));
-  }
-  
-  function goUpDirectory() {
-    const currentPath = PathUtils.getCurrentPath();
-    const newPath = PathUtils.getParentPath(currentPath);
-    
-    if (newPath === null) {
-      // Already at root, do nothing
+
+  async setupFileEditor() {
+    const editBtn = document.getElementById('edit-btn');
+    const editorContainer = document.getElementById('editor-container');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const wordWrapBtn = document.getElementById('word-wrap-btn');
+    const fileContent = document.querySelector('.file-content');
+
+    if (!editBtn || !editorContainer) {
       return;
     }
-    
-    window.location.href = PathUtils.buildPathUrl('/', newPath);
-  }
-  
 
-  function selectLine(lineNum) {
-    const lineContainer = document.querySelector(`[data-line="${lineNum}"]`);
-    if (lineContainer) {
-      lineContainer.classList.add('selected');
-    }
-  }
-  
-  function toggleLineSelection(lineNum) {
-    const lineContainer = document.querySelector(`[data-line="${lineNum}"]`);
-    if (lineContainer) {
-      lineContainer.classList.toggle('selected');
-    }
-  }
-  
-  function selectLineRange(startLine, endLine) {
-    clearAllSelections();
-    for (let i = startLine; i <= endLine; i++) {
-      selectLine(i);
-    }
-  }
-  
-  function clearAllSelections() {
-    document.querySelectorAll('.line-container.selected').forEach(line => {
-      line.classList.remove('selected');
-    });
-  }
-  
-  function updateURL() {
-    const selectedLines = Array.from(document.querySelectorAll('.line-container.selected'))
-      .map(line => parseInt(line.dataset.line))
-      .sort((a, b) => a - b);
-    
-    const url = new URL(window.location);
-    
-    if (selectedLines.length === 0) {
-      url.hash = '';
-    } else if (selectedLines.length === 1) {
-      url.hash = `#L${selectedLines[0]}`;
-    } else {
-      // Find ranges
-      const ranges = [];
-      let rangeStart = selectedLines[0];
-      let rangeEnd = selectedLines[0];
-      
-      for (let i = 1; i < selectedLines.length; i++) {
-        if (selectedLines[i] === rangeEnd + 1) {
-          rangeEnd = selectedLines[i];
-        } else {
-          if (rangeStart === rangeEnd) {
-            ranges.push(`L${rangeStart}`);
-          } else {
-            ranges.push(`L${rangeStart}-L${rangeEnd}`);
-          }
-          rangeStart = rangeEnd = selectedLines[i];
-        }
-      }
-      
-      if (rangeStart === rangeEnd) {
-        ranges.push(`L${rangeStart}`);
-      } else {
-        ranges.push(`L${rangeStart}-L${rangeEnd}`);
-      }
-      
-      url.hash = `#${ranges.join(',')}`;
-    }
-    
-    window.history.replaceState({}, '', url);
-  }
-  
-  // Initialize line selections from URL on page load
-  function initLineSelections() {
-    const hash = window.location.hash.slice(1);
-    if (!hash) return;
-    
-    const parts = hash.split(',');
-    parts.forEach(part => {
-      if (part.includes('-')) {
-        const [start, end] = part.split('-').map(p => parseInt(p.replace('L', '')));
-        selectLineRange(start, end);
-      } else {
-        const lineNum = parseInt(part.replace('L', ''));
-        selectLine(lineNum);
-      }
-    });
-  }
-  
-  // Initialize line selections if we're on a file page
-  if (document.querySelector('.with-line-numbers')) {
-    initLineSelections();
-  }
+    let wordWrapEnabled = false;
 
-  // Editor functionality
-  const editBtn = document.getElementById('edit-btn');
-  const editorContainer = document.getElementById('editor-container');
-  const saveBtn = document.getElementById('save-btn');
-  const cancelBtn = document.getElementById('cancel-btn');
-  const wordWrapBtn = document.getElementById('word-wrap-btn');
-  const fileContent = document.querySelector('.file-content');
-
-  
-
-  // Auto-open editor if hash is #edit
-  if (window.location.hash === '#edit' && editBtn) {
-    // Remove hash and trigger edit
-    window.location.hash = '';
-    setTimeout(() => editBtn.click(), 100);
-  }
-
-  if (editBtn && editorContainer) {
-    let originalContent = '';
-    let wordWrapEnabled = false; // Default to disabled
-
-    // Word wrap toggle functionality
-    function toggleWordWrap() {
-      if (monacoFileEditor) {
-        wordWrapEnabled = !wordWrapEnabled;
-        monacoFileEditor.updateOptions({ wordWrap: wordWrapEnabled ? 'on' : 'off' });
-        
-        // Update button appearance
-        if (wordWrapBtn) {
-          wordWrapBtn.classList.toggle('btn-primary', wordWrapEnabled);
-          wordWrapBtn.classList.toggle('btn-secondary', !wordWrapEnabled);
-          wordWrapBtn.textContent = wordWrapEnabled ? '↩ Wrap ON' : '↩ Wrap OFF';
-          wordWrapBtn.title = `Toggle word wrap (Alt+Z) - ${wordWrapEnabled ? 'ON' : 'OFF'}`;
-        }
-      }
-    }
-
-    // Word wrap button click
     if (wordWrapBtn) {
-      wordWrapBtn.addEventListener('click', toggleWordWrap);
+      wordWrapBtn.addEventListener('click', () => {
+        wordWrapEnabled = this.editorManager.toggleWordWrap(this.editorManager.fileEditor);
+        wordWrapBtn.textContent = wordWrapEnabled ? '↩ Wrap ON' : '↩ Wrap OFF';
+        wordWrapBtn.classList.toggle('btn-primary', wordWrapEnabled);
+        wordWrapBtn.classList.toggle('btn-secondary', !wordWrapEnabled);
+      });
     }
 
-    // Editor keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      if (editorContainer && editorContainer.style.display !== 'none') {
-        // Cmd/Ctrl+S to save
+    editBtn.addEventListener('click', async () => {
+      const filePath = PathUtils.getCurrentPath();
+
+      try {
+        const response = await fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const content = await response.text();
+        const container = document.getElementById('file-editor');
+
+        await this.editorManager.createFileEditor(container, filePath, content);
+
+        fileContent.style.display = 'none';
+        editorContainer.style.display = 'block';
+        this.editorManager.focus('file');
+      } catch (error) {
+        showNotification('Failed to load file for editing', 'error');
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      editorContainer.style.display = 'none';
+      fileContent.style.display = 'block';
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      const filePath = PathUtils.getCurrentPath();
+      const content = this.editorManager.getValue('file');
+
+      try {
+        const response = await fetch('/api/save-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath, content })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        DraftManager.clearDraft(filePath);
+        window.location.reload();
+      } catch (error) {
+        showNotification('Failed to save file', 'error');
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (editorContainer.style.display !== 'none') {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
           saveBtn.click();
         }
-        // Alt+Z to toggle word wrap
         if (e.altKey && e.key === 'z') {
           e.preventDefault();
-          toggleWordWrap();
+          wordWrapBtn?.click();
         }
-        // Escape to cancel
         if (e.key === 'Escape') {
           e.preventDefault();
           cancelBtn.click();
         }
       }
     });
+  }
 
-    // Note: Draft management functions are now in global DraftManager object
-    
-    // Show draft dialog with Load/Discard/Cancel options
-    function showDraftDialog(filePath) {
-      return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-          <div class="modal-content draft-modal">
-            <h3>Unsaved Changes Found</h3>
-            <p>You have unsaved changes for this file. What would you like to do?</p>
-            <div class="draft-actions">
-              <button class="btn btn-primary" data-action="load">Load Draft</button>
-              <button class="btn btn-secondary" data-action="discard">Discard Draft</button>
-              <button class="btn btn-secondary" data-action="cancel">Cancel</button>
-            </div>
-          </div>
-        `;
-        
-        modal.addEventListener('click', (e) => {
-          if (e.target.matches('[data-action]') || e.target === modal) {
-            const action = e.target.dataset?.action || 'cancel';
-            modal.remove();
-            resolve(action);
-          }
-        });
-        
-        document.body.appendChild(modal);
+  setupNewFileInterface() {
+    const filenameInput = document.getElementById('new-filename-input');
+    const createBtn = document.getElementById('create-new-file');
+    const cancelBtn = document.getElementById('cancel-new-file');
+
+    if (filenameInput) {
+      filenameInput.addEventListener('input', () => {
+        const filename = filenameInput.value.trim();
+        if (filename) {
+          this.editorManager.updateLanguage(filename);
+        }
       });
     }
 
-    editBtn.addEventListener('click', async function() {
-      // Get current file path
-      const currentUrl = new URL(window.location.href);
-      const filePath = currentUrl.searchParams.get('path') || '';
-      
-      
-      // Fetch original file content
-      try {
-        const response = await fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        const content = await response.text();
-        originalContent = content;
-        
-        // Check for draft
-        const draft = DraftManager.loadDraft(filePath);
-        let contentToLoad = content;
-        
-        if (DraftManager.hasDraftChanges(filePath, content)) {
-          // Show custom draft dialog with 3 options
-          const draftChoice = await showDraftDialog(filePath);
-          if (draftChoice === 'load') {
-            contentToLoad = draft;
-          } else if (draftChoice === 'discard') {
-            DraftManager.clearDraft(filePath);
-            contentToLoad = content;
-          } else {
-            // User cancelled, use original content
-            contentToLoad = content;
-          }
-        }
-        
-        if (draft && draft === content) {
-          DraftManager.clearDraft(filePath);
-        }
-        
-        // Create Monaco editor if it doesn't exist
-        if (!monacoFileEditor && window.monacoReady) {
-            const fileEditorContainer = document.getElementById('file-editor');
-            if (fileEditorContainer) {
-              // Get filename reliably from the current URL path parameter
-              const currentUrl = new URL(window.location.href);
-              const filePath = currentUrl.searchParams.get('path') || '';
-              const filename = PathUtils.getFileName(filePath);
-              
-              const language = getLanguageFromExtension(filename);
-              
-              // Validate language exists in Monaco  
-              const availableLanguages = monaco.languages.getLanguages().map(lang => lang.id);
-              const validLanguage = availableLanguages.includes(language) ? language : 'plaintext';
-              
-              const currentTheme = html.getAttribute('data-theme');
-              const monacoTheme = currentTheme === 'dark' ? 'vs-dark' : 'vs';
-              
-              // Ensure Monaco is fully ready before creating editor
-              const createEditorWhenReady = () => {
-                if (monaco && monaco.editor && monaco.languages) {
-                  monacoFileEditor = monaco.editor.create(fileEditorContainer, {
-                value: '',
-                language: validLanguage,
-                theme: monacoTheme,
-                minimap: { enabled: false },
-                lineNumbers: 'on',
-                wordWrap: 'off',
-                scrollBeyondLastLine: false,
-                fontSize: 12,
-                lineHeight: 20,  // Match view mode (12px * 1.5 = 18, but Monaco uses pixels)
-                fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-                padding: { top: 20, bottom: 20, left: 20, right: 20 },
-                renderLineHighlight: 'line',
-                selectOnLineNumbers: true,
-                automaticLayout: true,
-                folding: true,
-                foldingHighlight: true,
-                foldingStrategy: 'auto',
-                showFoldingControls: 'mouseover',
-                bracketPairColorization: { enabled: true },
-                guides: {
-                  bracketPairs: true,
-                  indentation: true
-                }
-              });
-                } else {
-                  // Monaco not fully ready yet, retry
-                  setTimeout(createEditorWhenReady, 10);
-                }
-              };
-              
-              // Start the ready check
-              createEditorWhenReady();
-            }
-          }
-          
-          // Set content in Monaco editor - wait for Monaco to be ready
-          const setContentWhenReady = () => {
-            if (monacoFileEditor && window.monacoReady) {
-              // Make sure the editor is visible and properly sized
-              monacoFileEditor.layout();
-              monacoFileEditor.setValue(contentToLoad);
-              
-              // Force another layout after a brief delay to ensure proper sizing
-              setTimeout(() => {
-                monacoFileEditor.layout();
-              }, 50);
-              
-              // Language is already set during editor creation, no need to set it again
-              
-              // Set up auto-save
-              monacoFileEditor.onDidChangeModelContent(() => {
-                DraftManager.saveDraft(filePath, monacoFileEditor.getValue());
-              });
-            } else {
-              // Monaco not ready yet, wait and try again
-              setTimeout(setContentWhenReady, 100);
-            }
-          };
-          setContentWhenReady();
-        
-        // Show editor UI
-        fileContent.style.display = 'none';
-        editorContainer.style.display = 'block';
-        
-        // Focus Monaco editor
-        if (monacoFileEditor) {
-          monacoFileEditor.focus();
-        }
-        
-      } catch (error) {
-        console.error('Error fetching file content:', error);
-        let errorMessage = 'Failed to load file content for editing';
-        if (error.message.includes('HTTP 403')) {
-          errorMessage = 'Access denied: Cannot read this file';
-        } else if (error.message.includes('HTTP 404')) {
-          errorMessage = 'File not found';
-        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error: Please check your connection';
-        }
-        showNotification(errorMessage, 'error');
-      }
-    });
+    if (createBtn) {
+      createBtn.addEventListener('click', async () => {
+        const filename = filenameInput.value.trim();
 
-    cancelBtn.addEventListener('click', function() {
-      editorContainer.style.display = 'none';
-      fileContent.style.display = 'block';
-    });
-
-    saveBtn.addEventListener('click', function() {
-      const currentUrl = new URL(window.location.href);
-      const filePath = currentUrl.searchParams.get('path') || '';
-      
-      
-      fetch('/api/save-file', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          path: filePath,
-          content: monacoFileEditor ? monacoFileEditor.getValue() : ''
-        })
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!filename) {
+          showNotification('Please enter a filename', 'error');
+          filenameInput.focus();
+          return;
         }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          // Clear draft on successful save
-          DraftManager.clearDraft(filePath);
-          // Refresh the page to show updated content
-          window.location.reload();
-        } else {
-          showNotification('Failed to save file: ' + data.error, 'error');
-        }
-      })
-      .catch(error => {
-        console.error('Error saving file:', error);
-        let errorMessage = 'Failed to save file';
-        if (error.message.includes('HTTP 403')) {
-          errorMessage = 'Access denied: Cannot write to this file';
-        } else if (error.message.includes('HTTP 413')) {
-          errorMessage = 'File too large to save';
-        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error: Please check your connection';
-        }
-        showNotification(errorMessage, 'error');
-      });
-    });
-  }
 
-  // Quick edit file functionality
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.edit-file-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const button = e.target.closest('.edit-file-btn');
-      const filePath = button.dataset.path;
-      // Navigate to the file and trigger edit mode
-      window.location.href = PathUtils.buildPathUrl('/', filePath) + '#edit';
-    }
-    
-    // Git diff viewer functionality
-    if (e.target.closest('.diff-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const button = e.target.closest('.diff-btn');
-      const filePath = button.dataset.path;
-      showDiffViewer(filePath);
-    }
-  });
+        const content = this.editorManager.getValue('newFile');
+        const currentPath = PathUtils.getCurrentPath();
 
-  // Git diff viewer functions
-  function showDiffViewer(filePath) {
-    // Create diff viewer overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'diff-viewer-overlay';
-    overlay.innerHTML = `
-      <div class="diff-viewer-modal">
-        <div class="diff-viewer-header">
-          <h3 class="diff-viewer-title">
-            📋 Diff: ${filePath}
-          </h3>
-          <button class="diff-close-btn" aria-label="Close diff viewer">&times;</button>
-        </div>
-        <div class="diff-viewer-content">
-          <div style="padding: 40px; text-align: center;">Fetching diff...</div>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    // Close on overlay click or close button
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay || e.target.classList.contains('diff-close-btn')) {
-        document.body.removeChild(overlay);
-      }
-    });
-    
-    // Close with Escape key
-    const escHandler = function(e) {
-      if (e.key === 'Escape') {
-        document.body.removeChild(overlay);
-        document.removeEventListener('keydown', escHandler);
-      }
-    };
-    document.addEventListener('keydown', escHandler);
-    
-    // Load diff content
-    loadDiffContent(filePath, overlay);
-  }
-
-  function loadDiffContent(filePath, overlay) {
-    fetch(`/api/git-diff?path=${encodeURIComponent(filePath)}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          renderDiff(data.diff, data.filePath, overlay);
-        } else {
-          showDiffError(data.error, overlay);
-        }
-      })
-      .catch(error => {
-        console.error('Error loading diff:', error);
-        showDiffError('Failed to load diff', overlay);
-      });
-  }
-
-  function renderDiff(diffText, filePath, overlay) {
-    if (!diffText || diffText.trim() === '') {
-      const content = overlay.querySelector('.diff-viewer-content');
-      content.innerHTML = `
-        <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
-          No changes detected for this file
-        </div>
-      `;
-      return;
-    }
-
-    const lines = diffText.split('\n');
-    const parsedDiff = parseDiff(lines);
-    
-    const content = overlay.querySelector('.diff-viewer-content');
-    content.innerHTML = `
-      <div class="diff-container">
-        <div class="diff-side">
-          <div class="diff-side-header">Original</div>
-          <div class="diff-side-content" id="diff-original"></div>
-        </div>
-        <div class="diff-side">
-          <div class="diff-side-header">Modified</div>
-          <div class="diff-side-content" id="diff-modified"></div>
-        </div>
-      </div>
-    `;
-
-    const originalSide = content.querySelector('#diff-original');
-    const modifiedSide = content.querySelector('#diff-modified');
-    
-    renderDiffSide(parsedDiff.original, originalSide, 'original');
-    renderDiffSide(parsedDiff.modified, modifiedSide, 'modified');
-  }
-
-  function parseDiff(lines) {
-    const original = [];
-    const modified = [];
-    let originalLineNum = 1;
-    let modifiedLineNum = 1;
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      if (line.startsWith('@@')) {
-        // Parse hunk header
-        const match = line.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
-        if (match) {
-          originalLineNum = parseInt(match[1]);
-          modifiedLineNum = parseInt(match[2]);
-        }
-        continue;
-      }
-      
-      if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('diff ') || line.startsWith('index ')) {
-        continue;
-      }
-      
-      if (line.startsWith('-')) {
-        original.push({
-          lineNum: originalLineNum++,
-          content: line.substring(1),
-          type: 'removed'
-        });
-      } else if (line.startsWith('+')) {
-        modified.push({
-          lineNum: modifiedLineNum++,
-          content: line.substring(1),
-          type: 'added'
-        });
-      } else {
-        // Context line
-        const content = line.startsWith(' ') ? line.substring(1) : line;
-        original.push({
-          lineNum: originalLineNum++,
-          content: content,
-          type: 'context'
-        });
-        modified.push({
-          lineNum: modifiedLineNum++,
-          content: content,
-          type: 'context'
-        });
-      }
-    }
-    
-    return { original, modified };
-  }
-
-  function renderDiffSide(lines, container, side) {
-    container.innerHTML = lines.map(line => {
-      let content = escapeHtml(line.content);
-      
-      // Apply syntax highlighting if hljs is available
-      if (window.hljs && line.content.trim() !== '') {
         try {
-          const highlighted = hljs.highlightAuto(line.content);
-          content = highlighted.value;
-        } catch (e) {
-          // Fall back to escaped HTML if highlighting fails
-          content = escapeHtml(line.content);
-        }
-      }
-      
-      return `
-        <div class="diff-line diff-line-${line.type}">
-          <div class="diff-line-number">${line.lineNum}</div>
-          <div class="diff-line-content">${content}</div>
-        </div>
-      `;
-    }).join('');
-  }
+          let response = await fetch('/api/create-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: currentPath, filename })
+          });
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  function showDiffError(error, overlay) {
-    const content = overlay.querySelector('.diff-viewer-content');
-    content.innerHTML = `
-      <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
-        <p>Error loading diff:</p>
-        <p style="color: #dc3545; margin-top: 8px;">${error}</p>
-      </div>
-    `;
-  }
-
-  // File operations (delete, rename)
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.delete-btn')) {
-      const btn = e.target.closest('.delete-btn');
-      const itemPath = btn.dataset.path;
-      const itemName = btn.dataset.name;
-      const isDirectory = btn.dataset.isDirectory === 'true';
-      
-      const confirmMessage = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?${isDirectory ? ' This will permanently delete the folder and all its contents.' : ''}`;
-      
-      if (confirm(confirmMessage)) {
-        btn.style.opacity = '0.5';
-        
-        fetch('/api/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            path: itemPath
-          })
-        })
-        .then(response => {
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('Failed to create file');
           }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            showNotification(`${isDirectory ? 'Folder' : 'File'} "${itemName}" deleted successfully`, 'success');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            btn.style.opacity = '1';
-            showNotification('Failed to delete: ' + data.error, 'error');
-          }
-        })
-        .catch(error => {
-          console.error('Error deleting item:', error);
-          btn.style.opacity = '1';
-          let errorMessage = 'Failed to delete item';
-          if (error.message.includes('HTTP 403')) {
-            errorMessage = 'Access denied: Cannot delete this item';
-          } else if (error.message.includes('HTTP 404')) {
-            errorMessage = 'Item not found';
-          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error: Please check your connection';
-          }
-          showNotification(errorMessage, 'error');
-        });
-      }
-    }
-    
-    if (e.target.closest('.rename-btn')) {
-      const btn = e.target.closest('.rename-btn');
-      const itemPath = btn.dataset.path;
-      const currentName = btn.dataset.name;
-      const isDirectory = btn.dataset.isDirectory === 'true';
-      
-      const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
-      if (newName && newName.trim() && newName !== currentName) {
-        btn.style.opacity = '0.5';
-        
-        fetch('/api/rename', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            path: itemPath,
-            newName: newName.trim()
-          })
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            showNotification(`${isDirectory ? 'Folder' : 'File'} renamed to "${newName.trim()}"`, 'success');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            btn.style.opacity = '1';
-            showNotification('Failed to rename: ' + data.error, 'error');
-          }
-        })
-        .catch(error => {
-          console.error('Error renaming item:', error);
-          btn.style.opacity = '1';
-          let errorMessage = 'Failed to rename item';
-          if (error.message.includes('HTTP 403')) {
-            errorMessage = 'Access denied: Cannot rename this item';
-          } else if (error.message.includes('HTTP 404')) {
-            errorMessage = 'Item not found';
-          } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error: Please check your connection';
-          }
-          showNotification(errorMessage, 'error');
-        });
-      }
-    }
-  });
 
-  // New file interface functionality
-  const newFilenameInput = document.getElementById('new-filename-input');
-  
-  // Update Monaco language when filename changes
-  if (newFilenameInput) {
-    newFilenameInput.addEventListener('input', function() {
-      const filename = this.value.trim();
-      if (monacoNewFileEditor && filename) {
-        const language = getLanguageFromExtension(filename);
-        const model = monacoNewFileEditor.getModel();
-        if (model) {
-          monaco.editor.setModelLanguage(model, language);
-        }
-      }
-    });
-  }
-  const createNewFileBtn = document.getElementById('create-new-file');
-  const cancelNewFileBtn = document.getElementById('cancel-new-file');
-
-  if (createNewFileBtn) {
-    createNewFileBtn.addEventListener('click', function() {
-      const filename = newFilenameInput.value.trim();
-      const content = monacoNewFileEditor ? monacoNewFileEditor.getValue() : '';
-      
-      if (!filename) {
-        showNotification('Please enter a filename', 'error');
-        newFilenameInput.focus();
-        return;
-      }
-      
-      
-      const currentPath = PathUtils.getCurrentPath();
-      
-      fetch('/api/create-file', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          path: currentPath,
-          filename: filename
-        })
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          // If there's content, save it
           if (content.trim()) {
             const filePath = PathUtils.buildFilePath(currentPath, filename);
-            return fetch('/api/save-file', {
+            response = await fetch('/api/save-file', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                path: filePath,
-                content: content
-              })
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: filePath, content })
             });
           }
-          return { json: () => Promise.resolve({ success: true }) };
-        } else {
-          throw new Error(data.error);
-        }
-      })
-      .then(response => response.json ? response.json() : response)
-      .then(data => {
-        if (data.success) {
+
           showNotification(`File "${filename}" created successfully`, 'success');
-          // Navigate back to the directory or to the new file
-          const redirectPath = PathUtils.buildPathUrl('/', currentPath);
-          setTimeout(() => window.location.href = redirectPath, 800);
-        } else {
-          throw new Error(data.error);
+          setTimeout(() => {
+            window.location.href = PathUtils.buildPathUrl('/', currentPath);
+          }, 800);
+        } catch (error) {
+          showNotification('Failed to create file', 'error');
         }
-      })
-      .catch(error => {
-        console.error('Error creating file:', error);
-        let errorMessage = 'Failed to create file: ' + error.message;
-        if (error.message.includes('HTTP 403')) {
-          errorMessage = 'Access denied: Cannot create files in this directory';
-        } else if (error.message.includes('HTTP 409') || error.message.includes('already exists')) {
-          errorMessage = 'File already exists';
-        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error: Please check your connection';
-        }
-        showNotification(errorMessage, 'error');
       });
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        const currentPath = PathUtils.getCurrentPath();
+        window.location.href = PathUtils.buildPathUrl('/', currentPath);
+      });
+    }
+  }
+
+  setupFileOperations() {
+    document.addEventListener('click', async e => {
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        const itemPath = btn.dataset.path;
+        const itemName = btn.dataset.name;
+        const isDirectory = btn.dataset.isDirectory === 'true';
+
+        const message = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?`;
+        if (!confirm(message)) {
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: itemPath })
+          });
+
+          if (!response.ok) {
+            throw new Error('Delete failed');
+          }
+
+          showNotification(`${isDirectory ? 'Folder' : 'File'} deleted successfully`, 'success');
+          setTimeout(() => window.location.reload(), 600);
+        } catch (error) {
+          showNotification('Failed to delete item', 'error');
+        }
+      }
+
+      if (e.target.closest('.rename-btn')) {
+        const btn = e.target.closest('.rename-btn');
+        const itemPath = btn.dataset.path;
+        const currentName = btn.dataset.name;
+        const isDirectory = btn.dataset.isDirectory === 'true';
+
+        const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
+        if (!newName || newName.trim() === currentName) {
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/rename', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: itemPath, newName: newName.trim() })
+          });
+
+          if (!response.ok) {
+            throw new Error('Rename failed');
+          }
+
+          showNotification(`Renamed to "${newName.trim()}"`, 'success');
+          setTimeout(() => window.location.reload(), 600);
+        } catch (error) {
+          showNotification('Failed to rename item', 'error');
+        }
+      }
     });
   }
 
-  if (cancelNewFileBtn) {
-    cancelNewFileBtn.addEventListener('click', function() {
-      const currentPath = PathUtils.getCurrentPath();
-      const redirectPath = PathUtils.buildPathUrl('/', currentPath);
-      window.location.href = redirectPath;
+  setupCommitModal() {
+    document.addEventListener('click', e => {
+      if (e.target.matches('#commit-btn') || e.target.closest('#commit-btn')) {
+        e.preventDefault();
+        this.showCommitModal();
+      }
     });
   }
 
-  async function copyToClipboard(text, button) {
+  async showCommitModal() {
     try {
-      await navigator.clipboard.writeText(text);
-      
-      // Show success feedback
-      const originalIcon = button.innerHTML;
-      const checkIcon = '<svg class="quick-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>';
-      
-      button.innerHTML = checkIcon;
-      button.style.color = '#28a745';
-      
-      setTimeout(() => {
-        button.innerHTML = originalIcon;
-        button.style.color = '';
-      }, 1000);
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      
-      try {
-        document.execCommand('copy');
-        // Show success feedback (same as above)
-        const originalIcon = button.innerHTML;
-        const checkIcon = '<svg class="quick-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>';
-        
-        button.innerHTML = checkIcon;
-        button.style.color = '#28a745';
-        
-        setTimeout(() => {
-          button.innerHTML = originalIcon;
-          button.style.color = '';
-        }, 1000);
-      } catch (fallbackErr) {
-        console.error('Could not copy text: ', fallbackErr);
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentPath = urlParams.get('path') || '';
+
+      const response = await fetch(`/api/git-status?currentPath=${encodeURIComponent(currentPath)}`);
+      const data = await response.json();
+
+      if (!data.success || data.changes.length === 0) {
+        showNotification('No changes to commit', 'info');
+        return;
       }
-      
-      document.body.removeChild(textArea);
+
+      this.renderCommitModal(data.changes);
+    } catch (error) {
+      showNotification('Failed to load git changes', 'error');
     }
   }
-});
 
-// Simple commit modal functionality
-document.addEventListener('click', (e) => {
-  if (e.target.matches('#commit-btn') || e.target.closest('#commit-btn')) {
-    e.preventDefault();
-    showCommitModal();
-  }
-});
-
-async function showCommitModal() {
-  try {
-    // Get current path from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentPath = urlParams.get('path') || '';
-    
-    // Fetch git changes from current directory and subdirectories only
-    const response = await fetch(`/api/git-status?currentPath=${encodeURIComponent(currentPath)}`);
-    const data = await response.json();
-    
-    if (!data.success) {
-      showNotification('❌ Failed to load git changes', 'error');
-      return;
-    }
-    
-    const changedFiles = data.changes;
-    
-    if (changedFiles.length === 0) {
-      showNotification('ℹ️ No changes to commit', 'info');
-      return;
-    }
-    
-    showCommitModalWithFiles(changedFiles);
-  } catch (error) {
-    console.error('Error fetching git status:', error);
-    showNotification('❌ Failed to load git changes', 'error');
-  }
-}
-
-function groupFilesByDirectory(files) {
-  const groups = new Map();
-  
-  files.forEach(file => {
-    const parts = file.name.split('/');
-    if (parts.length === 1) {
-      // Root level file
-      if (!groups.has('')) {
-        groups.set('', { directory: null, files: [] });
-      }
-      groups.get('').files.push(file);
-    } else {
-      // File in subdirectory
-      const directory = PathUtils.getDirectoryPath(file.name);
-      if (!groups.has(directory)) {
-        groups.set(directory, { directory, files: [] });
-      }
-      groups.get(directory).files.push(file);
-    }
-  });
-  
-  // Convert to array and sort
-  const result = Array.from(groups.values());
-  result.sort((a, b) => {
-    if (!a.directory && b.directory) return -1; // Root files first
-    if (a.directory && !b.directory) return 1;
-    if (!a.directory && !b.directory) return 0;
-    return a.directory.localeCompare(b.directory);
-  });
-  
-  return result;
-}
-
-async function showCommitModalWithFiles(changedFiles) {
-  // Group files by directory for better display
-  const groupedFiles = groupFilesByDirectory(changedFiles);
-  
-  // Get octicons for the modal
-  const folderIcon = octicons.get('file-directory', { class: 'folder-icon' });
-
-  // Create modal
-  const modal = document.createElement('div');
-  modal.className = 'commit-modal-overlay';
-  modal.innerHTML = `
-    <div class="commit-modal">
-      <div class="commit-modal-header">
-        <h3>Commit Changes</h3>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="commit-modal-body">
-        <div class="changed-files">
-          <h4>Changed Files (${changedFiles.length})</h4>
-          <ul class="file-list">
-            ${groupedFiles.map(group => `
-              ${group.directory ? `<li class="directory-group"><strong>${folderIcon} ${group.directory}/</strong></li>` : ''}
-              ${group.files.map(file => `
-                <li class="file-item ${group.directory ? 'indented' : ''}">
+  renderCommitModal(changes) {
+    const modal = document.createElement('div');
+    modal.className = 'commit-modal-overlay';
+    modal.innerHTML = `
+      <div class="commit-modal">
+        <div class="commit-modal-header">
+          <h3>Commit Changes</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="commit-modal-body">
+          <div class="changed-files">
+            <h4>Changed Files (${changes.length})</h4>
+            <ul class="file-list">
+              ${changes.map(file => `
+                <li class="file-item">
                   <label class="file-checkbox-label">
                     <input type="checkbox" class="file-checkbox" data-file="${file.name}" checked>
                     <span class="file-status">${file.status}</span>
-                    <span class="file-name">${group.directory ? file.name.split('/').pop() : file.name}</span>
+                    <span class="file-name">${file.name}</span>
                   </label>
                 </li>
               `).join('')}
-            `).join('')}
-          </ul>
+            </ul>
+          </div>
+          <div class="commit-message-section">
+            <textarea id="modal-commit-message" placeholder="Enter commit message..." rows="4"></textarea>
+          </div>
         </div>
-        <div class="commit-message-section">
-          <textarea id="modal-commit-message" placeholder="Enter commit message..." rows="4"></textarea>
+        <div class="commit-modal-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-commit" disabled>Commit Changes</button>
         </div>
       </div>
-      <div class="commit-modal-footer">
-        <button class="btn-cancel">Cancel</button>
-        <button class="btn-commit" disabled>Commit Changes</button>
-      </div>
-    </div>
-  `;
+    `;
 
-  document.body.appendChild(modal);
+    document.body.appendChild(modal);
 
-  // Handle modal interactions
-  const messageInput = modal.querySelector('#modal-commit-message');
-  const commitBtn = modal.querySelector('.btn-commit');
-  const cancelBtn = modal.querySelector('.btn-cancel');
-  const closeBtn = modal.querySelector('.modal-close');
+    const messageInput = modal.querySelector('#modal-commit-message');
+    const commitBtn = modal.querySelector('.btn-commit');
+    const cancelBtn = modal.querySelector('.btn-cancel');
+    const closeBtn = modal.querySelector('.modal-close');
 
-  // Update commit button based on message and selected files
-  const updateCommitButton = () => {
-    const hasMessage = messageInput.value.trim();
-    const selectedFiles = modal.querySelectorAll('.file-checkbox:checked').length;
-    commitBtn.disabled = !hasMessage || selectedFiles === 0;
-    commitBtn.textContent = selectedFiles > 0 
-      ? `Commit ${selectedFiles} file${selectedFiles === 1 ? '' : 's'}` 
-      : 'No files selected';
-  };
+    const updateButton = () => {
+      const hasMessage = messageInput.value.trim();
+      const selectedCount = modal.querySelectorAll('.file-checkbox:checked').length;
+      commitBtn.disabled = !hasMessage || selectedCount === 0;
+      commitBtn.textContent = selectedCount > 0
+        ? `Commit ${selectedCount} file${selectedCount === 1 ? '' : 's'}`
+        : 'No files selected';
+    };
 
-  messageInput.addEventListener('input', updateCommitButton);
-  
-  // Handle checkbox changes
-  modal.querySelectorAll('.file-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', updateCommitButton);
-  });
-  
-  // Initial button state
-  updateCommitButton();
+    messageInput.addEventListener('input', updateButton);
+    modal.querySelectorAll('.file-checkbox').forEach(cb => {
+      cb.addEventListener('change', updateButton);
+    });
 
-  // Close modal handlers
-  const closeModal = () => {
-    document.body.removeChild(modal);
-  };
-
-  cancelBtn.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // Prevent keyboard shortcuts from interfering with the modal
-  modal.addEventListener('keydown', (e) => {
-    e.stopPropagation();
-  });
-
-  // Commit handler
-  commitBtn.addEventListener('click', async () => {
-    const message = messageInput.value.trim();
-    const selectedCheckboxes = modal.querySelectorAll('.file-checkbox:checked');
-    const selectedFiles = Array.from(selectedCheckboxes).map(cb => cb.dataset.file);
-    
-    if (!message || selectedFiles.length === 0) return;
-
-    const originalText = commitBtn.textContent;
-    commitBtn.textContent = 'Committing...';
-    commitBtn.disabled = true;
-
-    try {
-      // Commit selected files
-      const response = await fetch('/api/git-commit-selected', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, files: selectedFiles })
-      });
-
-      if (response.ok) {
-        showNotification(`✅ Successfully committed ${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'}!`, 'success');
+    const closeModal = () => modal.remove();
+    cancelBtn.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
         closeModal();
-        setTimeout(() => location.reload(), 1000);
-      } else {
-        const error = await response.text();
-        showNotification(`❌ Commit failed: ${error}`, 'error');
-        commitBtn.textContent = originalText;
+      }
+    });
+
+    commitBtn.addEventListener('click', async () => {
+      const message = messageInput.value.trim();
+      const files = Array.from(modal.querySelectorAll('.file-checkbox:checked')).map(
+        cb => cb.dataset.file
+      );
+
+      if (!message || files.length === 0) {
+        return;
+      }
+
+      commitBtn.textContent = 'Committing...';
+      commitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/git-commit-selected', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, files })
+        });
+
+        if (response.ok) {
+          showNotification(`Successfully committed ${files.length} file${files.length === 1 ? '' : 's'}!`, 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          throw new Error('Commit failed');
+        }
+      } catch (error) {
+        showNotification('Commit failed', 'error');
+        commitBtn.textContent = 'Commit Changes';
         commitBtn.disabled = false;
       }
-    } catch (err) {
-      showNotification('❌ Commit failed', 'error');
-      commitBtn.textContent = originalText;
-      commitBtn.disabled = false;
-    }
-  });
+    });
 
-  // Focus the message input
-  messageInput.focus();
+    messageInput.focus();
+  }
+
+  showDiffViewer(filePath) {
+    // Simplified - redirect to diff view
+    const url = new URL(window.location.href);
+    url.searchParams.set('path', filePath);
+    url.searchParams.set('view', 'diff');
+    window.location.href = url.toString();
+  }
+
+  handleAutoEdit() {
+    if (window.location.hash === '#edit') {
+      const editBtn = document.getElementById('edit-btn');
+      if (editBtn) {
+        window.location.hash = '';
+        setTimeout(() => editBtn.click(), 100);
+      }
+    }
+  }
 }
+
+const app = new Application();
+app.init();

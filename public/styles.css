@@ -57,8 +57,8 @@ header {
 .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  max-width: 900px;
+  align-items: center;
+  max-width: 980px;
   margin: 0 auto;
   padding: 16px 24px;
 }
@@ -88,7 +88,7 @@ header {
 }
 
 .repo-canvas-content {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 16px 24px;
 }
@@ -142,7 +142,7 @@ header {
   border: 1px solid var(--border-primary);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -233,9 +233,9 @@ header {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -363,7 +363,7 @@ header {
   color: var(--link-color);
   text-decoration: none;
   font-weight: 500;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
   transition: all 0.15s ease;
 }
@@ -385,7 +385,7 @@ main {
 }
 
 .main-content {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 16px 24px;
 }
@@ -437,7 +437,7 @@ main {
 }
 
 .file-table td {
-  padding: 8px 16px;
+  padding: 6px 16px;
   font-size: 14px;
   vertical-align: middle;
 }
@@ -462,13 +462,41 @@ main {
   vertical-align: text-bottom;
 }
 
-/* GitHub-style baby blue folder icons */
+/* Brighter, meaningful colors */
+/* Folders: GitHub-style baby blue */
 .octicon-directory {
   fill: #7dd3fc;
+  color: #7dd3fc;
 }
+[data-theme="dark"] .file-row--added .icon .octicon-directory,
+[data-theme="dark"] .file-row--added .icon .octicon-file { color: #2ea043; fill: #2ea043; }
+[data-theme="dark"] .file-row--deleted .icon .octicon-directory,
+[data-theme="dark"] .file-row--deleted .icon .octicon-file { color: #f85149; fill: #f85149; }
+[data-theme="dark"] .file-row--modified .icon .octicon-directory,
+[data-theme="dark"] .file-row--modified .icon .octicon-file { color: #d29922; fill: #d29922; }
+[data-theme="dark"] .file-row--renamed .icon .octicon-directory,
+[data-theme="dark"] .file-row--renamed .icon .octicon-file { color: #1f6feb; fill: #1f6feb; }
+[data-theme="dark"] .file-row--untracked .icon .octicon-directory,
+[data-theme="dark"] .file-row--untracked .icon .octicon-file { color: #a371f7; fill: #a371f7; }
+[data-theme="dark"] .file-row--mixed .icon .octicon-directory,
+[data-theme="dark"] .file-row--mixed .icon .octicon-file { color: #db6d28; fill: #db6d28; }
+
+[data-theme="light"] .file-row--added .icon .octicon-directory,
+[data-theme="light"] .file-row--added .icon .octicon-file { color: #1a7f37; fill: #1a7f37; }
+[data-theme="light"] .file-row--deleted .icon .octicon-directory,
+[data-theme="light"] .file-row--deleted .icon .octicon-file { color: #cf222e; fill: #cf222e; }
+[data-theme="light"] .file-row--modified .icon .octicon-directory,
+[data-theme="light"] .file-row--modified .icon .octicon-file { color: #bf8700; fill: #bf8700; }
+[data-theme="light"] .file-row--renamed .icon .octicon-directory,
+[data-theme="light"] .file-row--renamed .icon .octicon-file { color: #0969da; fill: #0969da; }
+[data-theme="light"] .file-row--untracked .icon .octicon-directory,
+[data-theme="light"] .file-row--untracked .icon .octicon-file { color: #8250df; fill: #8250df; }
+[data-theme="light"] .file-row--mixed .icon .octicon-directory,
+[data-theme="light"] .file-row--mixed .icon .octicon-file { color: #9a6700; fill: #9a6700; }
 
 [data-theme="light"] .octicon-directory {
   fill: #54adf5;
+  color: #54adf5;
 }
 
 .octicon-home {
@@ -505,9 +533,10 @@ main {
   align-items: center;
   gap: 8px;
   margin-left: 16px;
-  max-width: 300px;
-  overflow: hidden;
+  max-width: none; /* allow full content */
+  overflow: visible; /* avoid clipping at edges */
   position: relative;
+  white-space: nowrap; /* keep in a single row like GitHub */
 }
 
 .language-stats:hover {
@@ -628,7 +657,7 @@ main {
 }
 
 .readme-content {
-  padding: 48px;
+  padding: 32px;
   max-height: none;
   overflow-y: visible;
 }
@@ -736,15 +765,16 @@ main {
 
 .file-content pre {
   margin: 0;
-  padding: 20px;
+  padding: 0;
   overflow-x: auto;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 20px;
   background-color: var(--bg-primary);
 }
 
 .file-content code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 12px;
 }
 
 /* Image viewing styles */
@@ -828,31 +858,30 @@ main {
 .with-line-numbers {
   counter-reset: line;
   display: block;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
 .line-container {
   display: block;
   position: relative;
-  transition: background-color 0.15s ease;
-  padding: 2px 0;
-  line-height: 1.5;
+  transition: background-color 0.12s ease;
+  padding: 0;
+  line-height: 20px;
+  min-height: 20px;
 }
 
-.line-container::after {
-  content: '\A';
-  white-space: pre;
-}
+/* Remove pseudo-newline that created extra blank lines */
 
 .line-container:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(110, 118, 129, 0.1); /* subtle hover like GH */
 }
 
 .line-container.selected {
-  background-color: #fff5b4;
+  background-color: #fffbdd; /* GH light selection */
 }
 
 [data-theme="dark"] .line-container.selected {
-  background-color: #1c4532;
+  background-color: rgba(187, 128, 9, 0.18); /* GH-ish dark yellow */
 }
 
 /* Editor */
@@ -1012,14 +1041,16 @@ main {
 
 .line-number {
   display: inline-block;
-  width: 40px;
+  width: 56px;
   text-align: right;
-  margin-right: 16px;
-  padding-right: 8px;
+  margin-right: 0;
+  padding: 0 10px;
   color: var(--text-secondary);
-  border-right: 1px solid var(--border-secondary);
+  background: transparent;
+  border-right: 1px solid var(--border-primary);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 20px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   user-select: none;
   -webkit-user-select: none;
   text-decoration: none;
@@ -1033,7 +1064,14 @@ main {
 
 .line-content {
   white-space: pre;
+  display: inline-block;
+  padding: 0 10px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 12px;
+  line-height: 20px;
 }
+
+/* Keep gutter simple: only border-right, no per-line background */
 
 /* GitHub syntax highlighting - Dark theme */
 .hljs-comment,
@@ -1628,52 +1666,53 @@ main {
   vertical-align: middle;
 }
 
+/* Git status colors - brighter palette */
 .git-status-M {
-  color: #fb8500;
+  color: #d29922; /* modified - amber */
 }
 
 .git-status-A {
-  color: #28a745;
+  color: #2ea043; /* added - green */
 }
 
 .git-status-D {
-  color: #dc3545;
+  color: #f85149; /* deleted - red */
 }
 
 .git-status-R {
-  color: #17a2b8;
+  color: #1f6feb; /* renamed - blue */
 }
 
 .git-status-?? {
-  color: var(--text-secondary);
+  color: #a371f7; /* untracked - purple */
 }
 
 .git-status-MM,
 .git-status-AM,
 .git-status-AD {
-  color: #ffc107;
+  color: #db6d28; /* mixed - orange */
 }
 
 [data-theme="light"] .git-status-M {
-  color: #bc4c00;
+  color: #bf8700;
 }
 
 [data-theme="light"] .git-status-A {
-  color: #116329;
+  color: #1a7f37;
 }
 
 [data-theme="light"] .git-status-D {
-  color: #82071e;
+  color: #cf222e;
 }
 
 [data-theme="light"] .git-status-R {
-  color: #0550ae;
+  color: #0969da;
 }
 
 [data-theme="light"] .git-status-MM,
 [data-theme="light"] .git-status-AM,
 [data-theme="light"] .git-status-AD {
-  color: #bf8700;
+  color: #9a6700;
 }
 
 /* Git Diff Viewer */
@@ -2339,6 +2378,7 @@ main {
   position: relative !important;
   display: block !important;
   border-radius: 0 0 6px 6px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 .monaco-editor-container .monaco-editor {
