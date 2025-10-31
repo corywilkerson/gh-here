@@ -2,10 +2,13 @@
   "name": "gh-here",
   "version": "3.0.0",
   "description": "A local GitHub-like file browser for viewing code",
-  "repository": "https://github.com/corywilkerson/gh-here",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/corywilkerson/gh-here.git"
+  },
   "main": "index.js",
   "bin": {
-    "gh-here": "./bin/gh-here.js"
+    "gh-here": "bin/gh-here.js"
   },
   "scripts": {
     "start": "node bin/gh-here.js",
