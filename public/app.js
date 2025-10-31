@@ -4,20 +4,17 @@
  */
 
 import { ThemeManager } from './js/theme-manager.js';
-import { EditorManager } from './js/editor-manager.js';
 import { SearchHandler } from './js/search-handler.js';
 import { KeyboardHandler } from './js/keyboard-handler.js';
 import { FileTreeNavigator } from './js/file-tree.js';
 import { NavigationHandler } from './js/navigation.js';
 import { PathUtils } from './js/utils.js';
-import { DraftManager } from './js/draft-manager.js';
 import { showNotification } from './js/notification.js';
 import { copyToClipboard } from './js/clipboard-utils.js';
 
 class Application {
   constructor() {
     this.themeManager = null;
-    this.editorManager = null;
     this.searchHandler = null;
     this.keyboardHandler = null;
     this.fileTree = null;
@@ -33,18 +30,36 @@ class Application {
 
     // Re-initialize components after client-side navigation
     document.addEventListener('content-loaded', () => {
-      // Re-initialize components that need fresh DOM references
-      this.editorManager = new EditorManager(this.themeManager?.getCurrentTheme() || 'dark');
-      this.searchHandler = new SearchHandler();
-      this.keyboardHandler = new KeyboardHandler(this.searchHandler);
-      this.fileTree = new FileTreeNavigator();
-      this.setupGlobalEventListeners();
-      this.setupGitignoreToggle();
-      this.setupFileEditor();
-      this.setupNewFileInterface();
-      this.setupFileOperations();
-      this.setupCommitModal();
-      this.handleAutoEdit();
+      try {
+        // Re-initialize theme manager listeners (button might be re-rendered)
+        if (this.themeManager) {
+          this.themeManager.setupListeners();
+        }
+        
+        // Re-initialize components that need fresh DOM references
+        this.searchHandler = new SearchHandler();
+        this.keyboardHandler = new KeyboardHandler(this.searchHandler);
+        
+        // Re-initialize file tree when sidebar becomes visible
+        const sidebar = document.querySelector('.file-tree-sidebar');
+        const treeContainer = document.getElementById('file-tree');
+        
+        if (sidebar && treeContainer && !sidebar.classList.contains('hidden')) {
+          // Sidebar is visible - initialize or re-initialize file tree
+          if (!this.fileTree || !this.fileTree.isInitialized || this.fileTree.treeContainer !== treeContainer) {
+            this.fileTree = new FileTreeNavigator();
+          }
+        } else if (this.fileTree) {
+          // Sidebar is hidden - don't initialize but keep reference for when it becomes visible
+          this.fileTree = null;
+        }
+        
+        this.setupGlobalEventListeners();
+        this.setupGitignoreToggle();
+        this.setupFileOperations();
+      } catch (error) {
+        console.error('Error re-initializing components:', error);
+      }
     });
   }
 
@@ -55,237 +70,115 @@ class Application {
     }
 
     // Initialize components
-    this.editorManager = new EditorManager(this.themeManager.getCurrentTheme());
     this.searchHandler = new SearchHandler();
     this.keyboardHandler = new KeyboardHandler(this.searchHandler);
-    this.fileTree = new FileTreeNavigator();
+    
+    // Initialize file tree if sidebar is visible (not hidden)
+    const sidebar = document.querySelector('.file-tree-sidebar');
+    const treeContainer = document.getElementById('file-tree');
+    if (sidebar && treeContainer && !sidebar.classList.contains('hidden')) {
+      this.fileTree = new FileTreeNavigator();
+    }
 
     this.setupGlobalEventListeners();
     this.setupGitignoreToggle();
-    this.setupFileEditor();
-    this.setupNewFileInterface();
     this.setupFileOperations();
-    this.setupCommitModal();
-    this.handleAutoEdit();
   }
 
   setupGlobalEventListeners() {
-    document.addEventListener('click', e => {
-      if (e.target.closest('.copy-path-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const button = e.target.closest('.copy-path-btn');
-        copyToClipboard(button.dataset.path, button);
-      }
+    // Use event delegation - single listener for all clicks (no duplicates)
+    // This method can be called multiple times safely
+    if (!this.globalClickHandler) {
+      this.globalClickHandler = this.handleGlobalClick.bind(this);
+      document.addEventListener('click', this.globalClickHandler);
+    }
 
-      if (e.target.closest('.file-path-copy-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const button = e.target.closest('.file-path-copy-btn');
-        copyToClipboard(button.dataset.path, button);
+    // Setup file row clicks (event delegation on table)
+    if (!this.fileRowClickHandler) {
+      this.fileRowClickHandler = this.handleFileRowClick.bind(this);
+      const fileTable = document.getElementById('file-table');
+      if (fileTable) {
+        fileTable.addEventListener('click', this.fileRowClickHandler);
       }
+    }
+  }
 
-      if (e.target.closest('.copy-raw-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const button = e.target.closest('.copy-raw-btn');
-        this.copyRawContent(button.dataset.path, button);
-      }
+  handleGlobalClick(e) {
+    // Copy path button
+    const copyPathBtn = e.target.closest('.copy-path-btn, .file-path-copy-btn');
+    if (copyPathBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      copyToClipboard(copyPathBtn.dataset.path, copyPathBtn);
+      return;
+    }
 
-      if (e.target.closest('.diff-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const button = e.target.closest('.diff-btn');
-        this.showDiffViewer(button.dataset.path);
-      }
-    });
+    // Copy raw button
+    const copyRawBtn = e.target.closest('.copy-raw-btn');
+    if (copyRawBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.copyRawContent(copyRawBtn.dataset.path, copyRawBtn);
+      return;
+    }
 
-    const fileRows = document.querySelectorAll('.file-row');
-    fileRows.forEach(row => {
-      row.addEventListener('click', e => {
-        if (!e.target.closest('.quick-actions')) {
-          const link = row.querySelector('a');
-          if (link) {
-            link.click();
-          }
-        }
-      });
-    });
+    // Diff button
+    const diffBtn = e.target.closest('.diff-btn');
+    if (diffBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.showDiffViewer(diffBtn.dataset.path);
+    }
+  }
+
+  handleFileRowClick(e) {
+    const fileRow = e.target.closest('.file-row');
+    if (!fileRow || e.target.closest('.quick-actions')) {
+      return;
+    }
+
+    // Get the path from the row and navigate directly
+    const path = fileRow.dataset.path;
+    if (path !== undefined) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Dispatch navigate event which navigation handler will catch
+      document.dispatchEvent(new CustomEvent('navigate', {
+        detail: { path, isDirectory: fileRow.dataset.type === 'dir' }
+      }));
+    }
   }
 
   setupGitignoreToggle() {
     const toggle = document.getElementById('gitignore-toggle');
-    if (toggle) {
-      toggle.addEventListener('click', () => {
-        const url = new URL(window.location.href);
-        const current = url.searchParams.get('gitignore');
-        const newState = current === 'false' ? null : 'false';
+    if (!toggle) return;
 
-        if (newState) {
-          url.searchParams.set('gitignore', newState);
-        } else {
-          url.searchParams.delete('gitignore');
-        }
+    // Only setup if not already configured (check for data attribute)
+    if (toggle.dataset.configured) return;
+    toggle.dataset.configured = 'true';
 
-        window.location.href = url.toString();
-      });
-    }
-  }
-
-  async setupFileEditor() {
-    const editBtn = document.getElementById('edit-btn');
-    const editorContainer = document.getElementById('editor-container');
-    const saveBtn = document.getElementById('save-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const wordWrapBtn = document.getElementById('word-wrap-btn');
-    const fileContent = document.querySelector('.file-content');
-
-    if (!editBtn || !editorContainer) {
-      return;
+    // Set initial state from localStorage
+    const showGitignored = localStorage.getItem('gh-here-show-gitignored') === 'true';
+    if (showGitignored) {
+      toggle.classList.add('showing-ignored');
+    } else {
+      toggle.classList.remove('showing-ignored');
     }
 
-    let wordWrapEnabled = false;
+    toggle.addEventListener('click', () => {
+      // Toggle state in localStorage
+      const current = localStorage.getItem('gh-here-show-gitignored') === 'true';
+      const newState = !current;
+      localStorage.setItem('gh-here-show-gitignored', newState.toString());
 
-    if (wordWrapBtn) {
-      wordWrapBtn.addEventListener('click', () => {
-        wordWrapEnabled = this.editorManager.toggleWordWrap(this.editorManager.fileEditor);
-        wordWrapBtn.textContent = wordWrapEnabled ? '↩ Wrap ON' : '↩ Wrap OFF';
-        wordWrapBtn.classList.toggle('btn-primary', wordWrapEnabled);
-        wordWrapBtn.classList.toggle('btn-secondary', !wordWrapEnabled);
-      });
-    }
+      // Clear file tree cache since gitignore state is changing
+      sessionStorage.removeItem('gh-here-file-tree');
 
-    editBtn.addEventListener('click', async () => {
-      const filePath = PathUtils.getCurrentPath();
-
-      try {
-        const response = await fetch(`/api/file-content?path=${encodeURIComponent(filePath)}`);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const content = await response.text();
-        const container = document.getElementById('file-editor');
-
-        await this.editorManager.createFileEditor(container, filePath, content);
-
-        fileContent.style.display = 'none';
-        editorContainer.style.display = 'block';
-        this.editorManager.focus('file');
-      } catch (error) {
-        showNotification('Failed to load file for editing', 'error');
-      }
-    });
-
-    cancelBtn.addEventListener('click', () => {
-      editorContainer.style.display = 'none';
-      fileContent.style.display = 'block';
-    });
-
-    saveBtn.addEventListener('click', async () => {
-      const filePath = PathUtils.getCurrentPath();
-      const content = this.editorManager.getValue('file');
-
-      try {
-        const response = await fetch('/api/save-file', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: filePath, content })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        DraftManager.clearDraft(filePath);
-        window.location.reload();
-      } catch (error) {
-        showNotification('Failed to save file', 'error');
-      }
-    });
-
-    document.addEventListener('keydown', e => {
-      if (editorContainer.style.display !== 'none') {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-          e.preventDefault();
-          saveBtn.click();
-        }
-        if (e.altKey && e.key === 'z') {
-          e.preventDefault();
-          wordWrapBtn?.click();
-        }
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          cancelBtn.click();
-        }
-      }
+      // Reload page to apply new filter
+      window.location.reload();
     });
   }
 
-  setupNewFileInterface() {
-    const filenameInput = document.getElementById('new-filename-input');
-    const createBtn = document.getElementById('create-new-file');
-    const cancelBtn = document.getElementById('cancel-new-file');
-
-    if (filenameInput) {
-      filenameInput.addEventListener('input', () => {
-        const filename = filenameInput.value.trim();
-        if (filename) {
-          this.editorManager.updateLanguage(filename);
-        }
-      });
-    }
-
-    if (createBtn) {
-      createBtn.addEventListener('click', async () => {
-        const filename = filenameInput.value.trim();
-
-        if (!filename) {
-          showNotification('Please enter a filename', 'error');
-          filenameInput.focus();
-          return;
-        }
-
-        const content = this.editorManager.getValue('newFile');
-        const currentPath = PathUtils.getCurrentPath();
-
-        try {
-          let response = await fetch('/api/create-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: currentPath, filename })
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to create file');
-          }
-
-          if (content.trim()) {
-            const filePath = PathUtils.buildFilePath(currentPath, filename);
-            response = await fetch('/api/save-file', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ path: filePath, content })
-            });
-          }
-
-          showNotification(`File "${filename}" created successfully`, 'success');
-          setTimeout(() => {
-            window.location.href = PathUtils.buildPathUrl('/', currentPath);
-          }, 800);
-        } catch (error) {
-          showNotification('Failed to create file', 'error');
-        }
-      });
-    }
-
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => {
-        const currentPath = PathUtils.getCurrentPath();
-        window.location.href = PathUtils.buildPathUrl('/', currentPath);
-      });
-    }
-  }
 
   setupFileOperations() {
     document.addEventListener('click', async e => {
@@ -349,136 +242,6 @@ class Application {
     });
   }
 
-  setupCommitModal() {
-    document.addEventListener('click', e => {
-      if (e.target.matches('#commit-btn') || e.target.closest('#commit-btn')) {
-        e.preventDefault();
-        this.showCommitModal();
-      }
-    });
-  }
-
-  async showCommitModal() {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentPath = urlParams.get('path') || '';
-
-      const response = await fetch(`/api/git-status?currentPath=${encodeURIComponent(currentPath)}`);
-      const data = await response.json();
-
-      if (!data.success || data.changes.length === 0) {
-        showNotification('No changes to commit', 'info');
-        return;
-      }
-
-      this.renderCommitModal(data.changes);
-    } catch (error) {
-      showNotification('Failed to load git changes', 'error');
-    }
-  }
-
-  renderCommitModal(changes) {
-    const modal = document.createElement('div');
-    modal.className = 'commit-modal-overlay';
-    modal.innerHTML = `
-      <div class="commit-modal">
-        <div class="commit-modal-header">
-          <h3>Commit Changes</h3>
-          <button class="modal-close">&times;</button>
-        </div>
-        <div class="commit-modal-body">
-          <div class="changed-files">
-            <h4>Changed Files (${changes.length})</h4>
-            <ul class="file-list">
-              ${changes.map(file => `
-                <li class="file-item">
-                  <label class="file-checkbox-label">
-                    <input type="checkbox" class="file-checkbox" data-file="${file.name}" checked>
-                    <span class="file-status">${file.status}</span>
-                    <span class="file-name">${file.name}</span>
-                  </label>
-                </li>
-              `).join('')}
-            </ul>
-          </div>
-          <div class="commit-message-section">
-            <textarea id="modal-commit-message" placeholder="Enter commit message..." rows="4"></textarea>
-          </div>
-        </div>
-        <div class="commit-modal-footer">
-          <button class="btn-cancel">Cancel</button>
-          <button class="btn-commit" disabled>Commit Changes</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const messageInput = modal.querySelector('#modal-commit-message');
-    const commitBtn = modal.querySelector('.btn-commit');
-    const cancelBtn = modal.querySelector('.btn-cancel');
-    const closeBtn = modal.querySelector('.modal-close');
-
-    const updateButton = () => {
-      const hasMessage = messageInput.value.trim();
-      const selectedCount = modal.querySelectorAll('.file-checkbox:checked').length;
-      commitBtn.disabled = !hasMessage || selectedCount === 0;
-      commitBtn.textContent = selectedCount > 0
-        ? `Commit ${selectedCount} file${selectedCount === 1 ? '' : 's'}`
-        : 'No files selected';
-    };
-
-    messageInput.addEventListener('input', updateButton);
-    modal.querySelectorAll('.file-checkbox').forEach(cb => {
-      cb.addEventListener('change', updateButton);
-    });
-
-    const closeModal = () => modal.remove();
-    cancelBtn.addEventListener('click', closeModal);
-    closeBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => {
-      if (e.target === modal) {
-        closeModal();
-      }
-    });
-
-    commitBtn.addEventListener('click', async () => {
-      const message = messageInput.value.trim();
-      const files = Array.from(modal.querySelectorAll('.file-checkbox:checked')).map(
-        cb => cb.dataset.file
-      );
-
-      if (!message || files.length === 0) {
-        return;
-      }
-
-      commitBtn.textContent = 'Committing...';
-      commitBtn.disabled = true;
-
-      try {
-        const response = await fetch('/api/git-commit-selected', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, files })
-        });
-
-        if (response.ok) {
-          showNotification(`Successfully committed ${files.length} file${files.length === 1 ? '' : 's'}!`, 'success');
-          closeModal();
-          setTimeout(() => location.reload(), 1000);
-        } else {
-          throw new Error('Commit failed');
-        }
-      } catch (error) {
-        showNotification('Commit failed', 'error');
-        commitBtn.textContent = 'Commit Changes';
-        commitBtn.disabled = false;
-      }
-    });
-
-    messageInput.focus();
-  }
-
   showDiffViewer(filePath) {
     // Simplified - redirect to diff view
     const url = new URL(window.location.href);
@@ -499,16 +262,6 @@ class Application {
     } catch (error) {
       console.error('Failed to copy raw content:', error);
       showNotification('Failed to copy raw content', 'error');
-    }
-  }
-
-  handleAutoEdit() {
-    if (window.location.hash === '#edit') {
-      const editBtn = document.getElementById('edit-btn');
-      if (editBtn) {
-        window.location.hash = '';
-        setTimeout(() => editBtn.click(), 100);
-      }
     }
   }
 }

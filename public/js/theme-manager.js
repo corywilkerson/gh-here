@@ -20,25 +20,53 @@ export class ThemeManager {
     this.currentTheme = savedTheme;
     this.setTheme(savedTheme);
 
-    setTimeout(() => {
-      this.themeToggle = document.getElementById('theme-toggle');
-      this.setupListeners();
-    }, 0);
+    // Setup listeners - try immediately, then retry after DOM is ready
+    this.setupListeners();
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.setupListeners());
+    }
+    
+    // Also re-setup after content changes (navigation)
+    document.addEventListener('content-loaded', () => this.setupListeners());
   }
 
   setupListeners() {
-    if (this.themeToggle) {
-      this.themeToggle.addEventListener('click', () => this.toggleTheme());
+    // Re-find the theme toggle button (it might be replaced after navigation)
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    if (themeToggle) {
+      // Remove old listener if button was replaced
+      if (this.themeToggle && this.themeToggle !== themeToggle && this.themeToggleClickHandler) {
+        this.themeToggle.removeEventListener('click', this.themeToggleClickHandler);
+      }
+      
+      // Set up new listener if we don't have one yet or button changed
+      if (!this.themeToggle || this.themeToggle !== themeToggle || !this.themeToggleClickHandler) {
+        this.themeToggle = themeToggle;
+        this.themeToggleClickHandler = () => this.toggleTheme();
+        this.themeToggle.addEventListener('click', this.themeToggleClickHandler);
+      }
+      
+      // Update icon for current theme
+      this.updateThemeIcon(this.currentTheme);
     }
 
-    if (window.matchMedia) {
+    // Setup system theme listener (only once)
+    if (window.matchMedia && !this.mediaQueryListener) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addListener(e => {
+      this.mediaQueryListener = (e) => {
         if (!localStorage.getItem(STORAGE_KEYS.THEME)) {
           const newTheme = e.matches ? THEME.DARK : THEME.LIGHT;
           this.setTheme(newTheme);
         }
-      });
+      };
+      // Use addEventListener if available (modern), fallback to addListener
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', this.mediaQueryListener);
+      } else {
+        mediaQuery.addListener(this.mediaQueryListener);
+      }
     }
   }
 

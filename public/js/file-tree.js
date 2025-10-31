@@ -9,18 +9,41 @@ export class FileTreeNavigator {
     this.treeContainer = document.getElementById('file-tree');
     this.expandedFolders = new Set(this.loadExpandedState());
     this.currentPath = PathUtils.getCurrentPath();
+    this.abortController = null;
+    this.isInitialized = false;
 
+    // Only initialize if container exists (sidebar is only shown when not at root)
     if (this.treeContainer) {
       this.init();
     }
+    // Silently skip if container doesn't exist (expected at root directory)
   }
 
   async init() {
+    if (this.isInitialized) {
+      // Prevent double initialization
+      return;
+    }
+
+    this.isInitialized = true;
+    
+    if (!this.treeContainer) {
+      this.isInitialized = false;
+      return;
+    }
+
     this.showLoadingSkeleton();
-    await this.loadFileTree();
-    this.hideLoadingSkeleton();
-    this.setupEventListeners();
-    this.highlightCurrentPath();
+    
+    try {
+      await this.loadFileTree();
+      this.hideLoadingSkeleton();
+      this.setupEventListeners();
+      this.highlightCurrentPath();
+    } catch (error) {
+      console.error('FileTreeNavigator init failed:', error);
+      this.hideLoadingSkeleton();
+      this.isInitialized = false;
+    }
   }
 
   showLoadingSkeleton() {
@@ -45,6 +68,13 @@ export class FileTreeNavigator {
   }
 
   async loadFileTree() {
+    // Cancel any in-flight request
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+
+    this.abortController = new AbortController();
+
     try {
       // Check cache first
       const cached = this.getCachedTree();
@@ -54,8 +84,19 @@ export class FileTreeNavigator {
         this.notifySearchHandler();
       }
 
-      // Fetch fresh data
-      const response = await fetch('/api/file-tree');
+      // Get gitignore state from localStorage
+      const showGitignored = localStorage.getItem('gh-here-show-gitignored') === 'true';
+      const apiUrl = showGitignored ? '/api/file-tree?showGitignored=true' : '/api/file-tree';
+
+      // Fetch fresh data with abort signal
+      const response = await fetch(apiUrl, {
+        signal: this.abortController.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -67,8 +108,14 @@ export class FileTreeNavigator {
         }
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        // Request was cancelled, expected behavior
+        return;
+      }
       console.error('Failed to load file tree:', error);
       this.hideLoadingSkeleton();
+    } finally {
+      this.abortController = null;
     }
   }
 
@@ -148,7 +195,12 @@ export class FileTreeNavigator {
   }
 
   setupEventListeners() {
-    this.treeContainer.addEventListener('click', e => {
+    // Remove existing listener to prevent duplicates
+    if (this.treeClickHandler) {
+      this.treeContainer.removeEventListener('click', this.treeClickHandler);
+    }
+
+    this.treeClickHandler = (e) => {
       const treeItem = e.target.closest('.tree-item');
       if (!treeItem) {
         return;
@@ -163,10 +215,13 @@ export class FileTreeNavigator {
         this.toggleFolder(path);
       } else {
         e.preventDefault();
+        e.stopPropagation();
         const detail = { path, isDirectory };
         document.dispatchEvent(new CustomEvent('navigate', { detail }));
       }
-    });
+    };
+
+    this.treeContainer.addEventListener('click', this.treeClickHandler);
   }
 
   toggleFolder(path) {

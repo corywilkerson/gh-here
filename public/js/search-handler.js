@@ -1,52 +1,55 @@
 /**
- * File search and navigation
+ * Context-aware file search
+ * - Directory pages: Global repository search
+ * - File view pages: Filter sidebar tree
  */
-
-import { KEYBOARD_SHORTCUTS } from './constants.js';
 
 export class SearchHandler {
   constructor() {
-    this.searchInput = document.getElementById('file-search');
-    this.fileTable = document.getElementById('file-table');
     this.fileTree = document.getElementById('file-tree');
-    this.fileRows = [];
+    this.fileTable = document.getElementById('file-table');
+    this.debounceTimer = null;
+    this.searchOverlay = null;
     this.treeItems = [];
-    this.currentFocusIndex = -1;
+
+    // Determine context based on page elements
+    this.isFileViewContext = !!this.fileTree && !this.fileTable;
+
+    // Use correct search input for context
+    const searchId = this.isFileViewContext ? 'file-search' : 'root-file-search';
+    this.searchInput = document.getElementById(searchId);
+
     this.init();
   }
 
   init() {
-    if (!this.searchInput) {
-      return;
+    if (!this.searchInput) return;
+
+    if (this.isFileViewContext) {
+      this.updateTreeItems();
+      document.addEventListener('filetree-loaded', () => this.updateTreeItems());
     }
 
-    this.updateFileRows();
-    this.updateTreeItems();
     this.setupListeners();
   }
 
   setupListeners() {
-    this.searchInput.addEventListener('input', () => {
-      const query = this.searchInput.value.toLowerCase().trim();
-      this.filterFiles(query);
-    });
+    if (!this.searchInput) return;
 
-    document.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        this.focusSearch();
-      }
-    });
+    this.searchInput.addEventListener('input', () => this.handleSearchInput());
 
-    // Listen for file tree loaded event
-    document.addEventListener('filetree-loaded', () => {
-      this.updateTreeItems();
-    });
-  }
+    if (!this.isFileViewContext) {
+      // Global search: show results on focus
+      this.searchInput.addEventListener('focus', () => this.handleSearchFocus());
 
-  updateFileRows() {
-    if (this.fileTable) {
-      this.fileRows = Array.from(this.fileTable.querySelectorAll('.file-row'));
+      // Close results on click outside
+      document.addEventListener('click', (e) => {
+        if (this.searchOverlay &&
+            !e.target.closest('.search-container') &&
+            !e.target.closest('.search-results-overlay')) {
+          this.hideResults();
+        }
+      });
     }
   }
 
@@ -56,63 +59,173 @@ export class SearchHandler {
     }
   }
 
-  filterFiles(query) {
-    // Filter file table if it exists
-    if (this.fileTable && this.fileRows.length > 0) {
-      if (!query) {
-        this.fileRows.forEach(row => row.classList.remove('hidden'));
-        return;
-      }
+  handleSearchFocus() {
+    if (this.isFileViewContext) return;
 
-      this.fileRows.forEach(row => {
-        const fileName = row.dataset.name;
-        const isVisible = fileName.includes(query);
-        row.classList.toggle('hidden', !isVisible);
-      });
+    const query = this.searchInput.value.trim();
+    if (query) {
+      this.performGlobalSearch(query);
+    }
+  }
 
-      this.clearFocus();
-      this.currentFocusIndex = -1;
+  handleSearchInput() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
     }
 
-    // Filter file tree if it exists
-    if (this.fileTree && this.treeItems.length > 0) {
-      if (!query) {
-        this.treeItems.forEach(item => item.style.display = '');
-        // Show all parent containers too
-        const containers = this.fileTree.querySelectorAll('.tree-children');
-        containers.forEach(container => container.style.display = '');
-        return;
+    const query = this.searchInput.value.trim();
+
+    if (!query) {
+      if (this.isFileViewContext) {
+        this.clearTreeFilter();
+      } else {
+        this.hideResults();
       }
+      return;
+    }
 
-      // First hide everything
-      this.treeItems.forEach(item => item.style.display = 'none');
-      const containers = this.fileTree.querySelectorAll('.tree-children');
-      containers.forEach(container => container.style.display = 'none');
+    this.debounceTimer = setTimeout(() => {
+      if (this.isFileViewContext) {
+        this.filterTree(query);
+      } else {
+        this.performGlobalSearch(query);
+      }
+    }, 200);
+  }
 
-      // Then show matching items and their parents
-      this.treeItems.forEach(item => {
-        const label = item.querySelector('.tree-label');
-        const fileName = label ? label.textContent.toLowerCase() : '';
-        const isVisible = fileName.includes(query);
+  // File view context: Filter sidebar tree
+  filterTree(query) {
+    if (!this.fileTree || this.treeItems.length === 0) return;
 
-        if (isVisible) {
-          // Show this item
-          item.style.display = '';
+    const queryLower = query.toLowerCase();
+    const containers = this.fileTree.querySelectorAll('.tree-children');
 
-          // Show all parent folders and containers
-          let parent = item.parentElement;
-          while (parent && parent !== this.fileTree) {
-            if (parent.classList.contains('tree-children')) {
-              parent.style.display = '';
-            }
-            const parentItem = parent.previousElementSibling;
-            if (parentItem && parentItem.classList.contains('tree-item')) {
-              parentItem.style.display = '';
-            }
-            parent = parent.parentElement;
+    // Hide all items first
+    this.treeItems.forEach(item => item.style.display = 'none');
+    containers.forEach(container => container.style.display = 'none');
+
+    // Show matching items and their parent folders
+    this.treeItems.forEach(item => {
+      const label = item.querySelector('.tree-label');
+      const fileName = label?.textContent?.toLowerCase() || '';
+
+      if (fileName.includes(queryLower)) {
+        item.style.display = '';
+
+        // Show all parent folders
+        let parent = item.parentElement;
+        while (parent && parent !== this.fileTree) {
+          if (parent.classList.contains('tree-children')) {
+            parent.style.display = '';
           }
+          const parentItem = parent.previousElementSibling;
+          if (parentItem?.classList.contains('tree-item')) {
+            parentItem.style.display = '';
+          }
+          parent = parent.parentElement;
         }
+      }
+    });
+  }
+
+  clearTreeFilter() {
+    if (!this.fileTree) return;
+
+    this.treeItems.forEach(item => item.style.display = '');
+    this.fileTree.querySelectorAll('.tree-children').forEach(container => {
+      container.style.display = '';
+    });
+  }
+
+  // Directory context: Global repository search
+  async performGlobalSearch(query) {
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        this.showResults(data.results, query);
+      }
+    } catch (error) {
+      console.error('Search failed:', error);
+    }
+  }
+
+  showResults(results, query) {
+    this.hideResults();
+
+    this.searchOverlay = document.createElement('div');
+    this.searchOverlay.className = 'search-results-overlay';
+
+    if (results.length === 0) {
+      this.searchOverlay.innerHTML = `
+        <div class="search-results-container">
+          <div class="search-results-header">
+            <span class="search-results-count">No results for "${query}"</span>
+          </div>
+        </div>
+      `;
+    } else {
+      const resultsList = results.map(result => {
+        const icon = result.isDirectory
+          ? '<svg class="result-icon" viewBox="0 0 16 16" width="16" height="16"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"></path></svg>'
+          : '<svg class="result-icon file-icon" viewBox="0 0 16 16" width="16" height="16"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path></svg>';
+
+        return `
+          <a href="/?path=${encodeURIComponent(result.path)}" class="search-result-item" data-path="${result.path}">
+            ${icon}
+            <div class="search-result-content">
+              <div class="search-result-path">${this.highlightMatch(result.path, query)}</div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      this.searchOverlay.innerHTML = `
+        <div class="search-results-container">
+          <div class="search-results-header">
+            <span class="search-results-count">${results.length} result${results.length === 1 ? '' : 's'}</span>
+          </div>
+          <div class="search-results-list">
+            ${resultsList}
+          </div>
+        </div>
+      `;
+    }
+
+    const searchContainer = this.searchInput.closest('.search-container');
+    if (searchContainer) {
+      searchContainer.appendChild(this.searchOverlay);
+    }
+
+    this.searchOverlay.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = item.getAttribute('href');
       });
+    });
+  }
+
+  highlightMatch(text, query) {
+    if (!query) return text;
+
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+
+    if (index === -1) return text;
+
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + query.length);
+    const after = text.substring(index + query.length);
+
+    return `${before}<mark class="search-highlight">${match}</mark>${after}`;
+  }
+
+  hideResults() {
+    if (this.searchOverlay) {
+      this.searchOverlay.remove();
+      this.searchOverlay = null;
     }
   }
 
@@ -121,60 +234,5 @@ export class SearchHandler {
       this.searchInput.focus();
       this.searchInput.select();
     }
-  }
-
-  navigateDown() {
-    const visibleRows = this.getVisibleRows();
-    if (visibleRows.length === 0) {
-      return;
-    }
-
-    this.currentFocusIndex++;
-    if (this.currentFocusIndex >= visibleRows.length) {
-      this.currentFocusIndex = 0;
-    }
-    this.updateFocus(visibleRows);
-  }
-
-  navigateUp() {
-    const visibleRows = this.getVisibleRows();
-    if (visibleRows.length === 0) {
-      return;
-    }
-
-    this.currentFocusIndex--;
-    if (this.currentFocusIndex < 0) {
-      this.currentFocusIndex = visibleRows.length - 1;
-    }
-    this.updateFocus(visibleRows);
-  }
-
-  openFocused() {
-    const visibleRows = this.getVisibleRows();
-    if (this.currentFocusIndex >= 0 && visibleRows[this.currentFocusIndex]) {
-      const link = visibleRows[this.currentFocusIndex].querySelector('a');
-      if (link) {
-        link.click();
-      }
-    }
-  }
-
-  getVisibleRows() {
-    return this.fileRows.filter(row => !row.classList.contains('hidden'));
-  }
-
-  updateFocus(visibleRows) {
-    this.clearFocus();
-    if (this.currentFocusIndex >= 0 && visibleRows[this.currentFocusIndex]) {
-      visibleRows[this.currentFocusIndex].classList.add('focused');
-      visibleRows[this.currentFocusIndex].scrollIntoView({
-        block: 'nearest',
-        behavior: 'smooth'
-      });
-    }
-  }
-
-  clearFocus() {
-    this.fileRows.forEach(row => row.classList.remove('focused'));
   }
 }
