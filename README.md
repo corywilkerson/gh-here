@@ -62,6 +62,20 @@ npm install
 npm start
 ```
 
+### Running Tests (Optional)
+
+Tests use Playwright for smoke testing but are optional for development:
+
+```bash
+# First time only - install Chromium for testing (~210MB)
+npx playwright install chromium
+
+# Run tests
+npm test
+```
+
+**Note**: End users don't need Playwright - it's only installed when you clone the repo and run `npm install` (devDependency).
+
 ## Dependencies
 
 - express - Web server

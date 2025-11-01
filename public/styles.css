@@ -120,7 +120,16 @@ header {
   font-weight: 600;
   margin: 0;
   color: var(--text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.header-left h1::before {
+  content: '$';
+  color: var(--link-color);
+  margin-right: 8px;
+  opacity: 0.8;
+  font-weight: 400;
 }
 
 .header-path {
@@ -1623,7 +1632,7 @@ main {
 
 .line-content {
   white-space: pre;
-  display: inline-block;
+  display: inline;
   padding: 0 10px;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 12px;

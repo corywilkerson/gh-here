@@ -3,3 +3,8 @@ node_modules/
 *.log
 .DS_Store
 .env
+
+# Test artifacts (only for developers running npm test)
+test-results/
+playwright-report/
+playwright/.cache/
