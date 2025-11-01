@@ -35,6 +35,11 @@ export class NavigationHandler {
     const link = e.target.closest('a');
     if (!link) return;
 
+    // Skip line number links (hash-only navigation like #L10)
+    if (link.classList.contains('line-number')) {
+      return;
+    }
+
     // Skip if clicking inside quick actions or other interactive elements
     if (e.target.closest('.quick-actions, button, .file-action-btn')) {
       return;

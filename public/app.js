@@ -19,6 +19,7 @@ class Application {
     this.keyboardHandler = null;
     this.fileTree = null;
     this.navigationHandler = null;
+    this.lastSelectedLine = null;
   }
 
   init() {
@@ -35,15 +36,15 @@ class Application {
         if (this.themeManager) {
           this.themeManager.setupListeners();
         }
-        
+
         // Re-initialize components that need fresh DOM references
         this.searchHandler = new SearchHandler();
         this.keyboardHandler = new KeyboardHandler(this.searchHandler);
-        
+
         // Re-initialize file tree when sidebar becomes visible
         const sidebar = document.querySelector('.file-tree-sidebar');
         const treeContainer = document.getElementById('file-tree');
-        
+
         if (sidebar && treeContainer && !sidebar.classList.contains('hidden')) {
           // Sidebar is visible - initialize or re-initialize file tree
           if (!this.fileTree || !this.fileTree.isInitialized || this.fileTree.treeContainer !== treeContainer) {
@@ -53,10 +54,11 @@ class Application {
           // Sidebar is hidden - don't initialize but keep reference for when it becomes visible
           this.fileTree = null;
         }
-        
+
         this.setupGlobalEventListeners();
         this.setupGitignoreToggle();
         this.setupFileOperations();
+        this.highlightLinesFromHash();
       } catch (error) {
         console.error('Error re-initializing components:', error);
       }
@@ -72,7 +74,7 @@ class Application {
     // Initialize components
     this.searchHandler = new SearchHandler();
     this.keyboardHandler = new KeyboardHandler(this.searchHandler);
-    
+
     // Initialize file tree if sidebar is visible (not hidden)
     const sidebar = document.querySelector('.file-tree-sidebar');
     const treeContainer = document.getElementById('file-tree');
@@ -83,6 +85,7 @@ class Application {
     this.setupGlobalEventListeners();
     this.setupGitignoreToggle();
     this.setupFileOperations();
+    this.highlightLinesFromHash();
   }
 
   setupGlobalEventListeners() {
@@ -104,6 +107,16 @@ class Application {
   }
 
   handleGlobalClick(e) {
+    // Line number selection (like GitHub)
+    const lineNumber = e.target.closest('.line-number');
+    if (lineNumber) {
+      e.preventDefault();
+      e.stopPropagation();
+      const lineNum = parseInt(lineNumber.textContent.trim(), 10);
+      this.handleLineSelection(lineNum, e.shiftKey);
+      return;
+    }
+
     // Copy path button
     const copyPathBtn = e.target.closest('.copy-path-btn, .file-path-copy-btn');
     if (copyPathBtn) {
@@ -262,6 +275,61 @@ class Application {
     } catch (error) {
       console.error('Failed to copy raw content:', error);
       showNotification('Failed to copy raw content', 'error');
+    }
+  }
+
+  handleLineSelection(lineNum, shiftKey) {
+    // If shift is held and we have a previous selection, select range
+    if (shiftKey && this.lastSelectedLine) {
+      const start = Math.min(this.lastSelectedLine, lineNum);
+      const end = Math.max(this.lastSelectedLine, lineNum);
+      this.highlightLines(start, end);
+      this.updateUrlHash(start, end);
+    } else {
+      // Single line selection
+      this.highlightLines(lineNum, lineNum);
+      this.updateUrlHash(lineNum, lineNum);
+      this.lastSelectedLine = lineNum;
+    }
+  }
+
+  highlightLines(start, end) {
+    // Clear all existing selections and highlight new range in one pass
+    document.querySelectorAll('.line-container').forEach(el => {
+      const lineNum = parseInt(el.dataset.line, 10);
+      if (lineNum >= start && lineNum <= end) {
+        el.classList.add('selected');
+      } else {
+        el.classList.remove('selected');
+      }
+    });
+  }
+
+  updateUrlHash(start, end) {
+    const hash = start === end ? `L${start}` : `L${start}-L${end}`;
+    // Use history API to update URL without scrolling - preserve path and query params
+    const url = new URL(window.location);
+    url.hash = hash;
+    history.replaceState(null, null, url);
+  }
+
+  highlightLinesFromHash() {
+    const hash = window.location.hash.slice(1); // Remove #
+    if (!hash.startsWith('L')) return;
+
+    const match = hash.match(/^L(\d+)(?:-L(\d+))?$/);
+    if (!match) return;
+
+    const start = parseInt(match[1], 10);
+    const end = match[2] ? parseInt(match[2], 10) : start;
+
+    this.highlightLines(start, end);
+    this.lastSelectedLine = start;
+
+    // Scroll to the first selected line
+    const firstLine = document.querySelector(`.line-container[data-line="${start}"]`);
+    if (firstLine) {
+      firstLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 }
