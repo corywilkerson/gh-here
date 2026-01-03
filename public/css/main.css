@@ -1,0 +1,35 @@
+/**
+ * gh-here Main Stylesheet
+ * Imports all component CSS files in the correct order
+ * 
+ * File Structure:
+ * - variables.css: CSS custom properties (themes, colors, spacing)
+ * - reset.css: Base resets and body styles
+ * - layout.css: Header, main content, canvas
+ * - components/: Buttons, forms, modals, notifications
+ * - file-tree.css: Sidebar navigation
+ * - file-table.css: Directory listing
+ * - file-viewer.css: Code display, syntax, diffs
+ * - search.css: All search functionality
+ * - symbol-outline.css: Code navigation panel
+ */
+
+/* Foundation */
+@import url('variables.css');
+@import url('reset.css');
+
+/* Layout */
+@import url('layout.css');
+
+/* Components */
+@import url('components/buttons.css');
+@import url('components/forms.css');
+@import url('components/modals.css');
+@import url('components/notifications.css');
+
+/* Features */
+@import url('file-tree.css');
+@import url('file-table.css');
+@import url('file-viewer.css');
+@import url('search.css');
+@import url('symbol-outline.css');

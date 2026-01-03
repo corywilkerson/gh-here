@@ -1,0 +1,1259 @@
+/**
+ * File Viewer Styles
+ * Code viewing, line numbers, file header, images, binary files, markdown, and syntax highlighting
+ */
+
+/* ========================================
+   File Header
+   ======================================== */
+
+.file-header {
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  overflow: visible;
+  padding: 20px 28px;
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.file-header::before {
+  background: linear-gradient(90deg, transparent 0%, var(--link-color) 50%, transparent 100%);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  content: '';
+  height: 2px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: opacity var(--transition-base);
+}
+
+.file-header:hover {
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.file-header:hover::before {
+  opacity: 1;
+}
+
+.file-header-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.file-path-info {
+  align-items: center;
+  display: flex;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.file-path-text {
+  color: var(--link-color);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.file-path-copy-btn {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 24px;
+  justify-content: center;
+  opacity: 0.7;
+  padding: 5px;
+  transition: all var(--transition-base);
+  width: 24px;
+}
+
+.file-path-copy-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--link-color);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.file-path-copy-btn:active {
+  transform: scale(0.95);
+}
+
+.file-stats {
+  align-items: center;
+  color: var(--text-secondary);
+  display: flex;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.file-stat {
+  color: var(--text-secondary);
+}
+
+.file-stat-separator {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+/* ========================================
+   File Header Actions
+   ======================================== */
+
+.file-header-actions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.file-action-group {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.file-action-group:hover {
+  border-color: var(--border-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+.file-action-btn {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 6px;
+  justify-content: center;
+  padding: 7px 14px;
+  position: relative;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.file-action-btn:last-child {
+  border-right: none;
+}
+
+.file-action-btn:hover {
+  background: linear-gradient(180deg, var(--hover-bg) 0%, var(--bg-tertiary) 100%);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.file-action-btn:active {
+  background: var(--hover-bg-strong);
+  transform: translateY(0);
+}
+
+.file-action-btn .file-action-label {
+  color: inherit;
+}
+
+.file-action-icon {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.copy-raw-btn {
+  padding: 6px;
+}
+
+.file-action-btn:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.file-action-btn:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.file-action-group:has(.file-action-btn:only-child) .file-action-btn {
+  border-radius: 6px;
+  border-right: none;
+}
+
+/* ========================================
+   File Content Container
+   ======================================== */
+
+.file-content {
+  backdrop-filter: blur(10px);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: auto;
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.file-content::before {
+  background: linear-gradient(90deg, transparent 0%, var(--link-color) 50%, transparent 100%);
+  content: '';
+  height: 1px;
+  left: 0;
+  opacity: 0.3;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.file-content:hover {
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-1px);
+}
+
+.file-content pre {
+  background-color: var(--bg-primary);
+  font-size: 13px;
+  line-height: 22px;
+  margin: 0;
+  overflow-x: auto;
+  padding: 16px 0;
+}
+
+.file-content code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* ========================================
+   Line Numbers
+   ======================================== */
+
+.with-line-numbers {
+  counter-reset: line;
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 400;
+}
+
+.line-container {
+  border-left: 2px solid transparent;
+  display: block;
+  line-height: 20px;
+  min-height: 20px;
+  padding: 0;
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.line-container:hover {
+  background-color: rgba(110, 118, 129, 0.08);
+  border-left-color: var(--border-primary);
+}
+
+.line-container.selected {
+  background: linear-gradient(90deg, rgba(255, 251, 221, 0.4) 0%, rgba(255, 251, 221, 0.2) 100%);
+  border-left-color: rgba(255, 235, 59, 0.6);
+}
+
+[data-theme="dark"] .line-container.selected {
+  background: linear-gradient(90deg, rgba(187, 128, 9, 0.2) 0%, rgba(187, 128, 9, 0.1) 100%);
+  border-left-color: rgba(255, 235, 59, 0.5);
+}
+
+.line-number {
+  -webkit-user-select: none;
+  background: transparent;
+  border-right: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  margin-right: 0;
+  opacity: 0.7;
+  padding: 0 10px;
+  text-align: right;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  user-select: none;
+  width: 56px;
+}
+
+.line-number:hover {
+  background: rgba(88, 166, 255, 0.08);
+  border-right-color: var(--link-color);
+  color: var(--link-color);
+  opacity: 1;
+  text-decoration: none;
+}
+
+.line-content {
+  display: inline;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 20px;
+  padding: 0 10px;
+  white-space: pre;
+}
+
+/* Line highlight flash animation */
+.line-highlight-flash {
+  animation: lineFlash 2s ease-out;
+}
+
+@keyframes lineFlash {
+  0% {
+    background: rgba(96, 165, 250, 0.3);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+[data-theme="light"] .line-highlight-flash {
+  animation: lineFlashLight 2s ease-out;
+}
+
+@keyframes lineFlashLight {
+  0% {
+    background: rgba(37, 99, 235, 0.2);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* ========================================
+   Image Viewing
+   ======================================== */
+
+.image-container {
+  background-color: var(--bg-primary);
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+}
+
+.image-display {
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  height: auto;
+  max-height: 80vh;
+  max-width: 100%;
+}
+
+[data-theme="light"] .image-display {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.image-info {
+  border-top: 1px solid var(--border-primary);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.image-filename {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ========================================
+   Binary File Viewing
+   ======================================== */
+
+.binary-file-container {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.binary-file-info h3 {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.binary-file-info p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.binary-file-info .btn {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.binary-file-info .btn-primary {
+  background-color: var(--link-color);
+  color: white;
+}
+
+.binary-file-info .btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* ========================================
+   README Section
+   ======================================== */
+
+.readme-section {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  margin-top: 32px;
+  overflow: hidden;
+}
+
+.readme-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 12px 16px;
+}
+
+.readme-header h2 {
+  align-items: center;
+  color: var(--text-accent);
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.readme-icon {
+  fill: currentColor;
+  height: 16px;
+  margin-right: 8px;
+  width: 16px;
+}
+
+.readme-content {
+  max-height: none;
+  overflow-y: visible;
+  padding: 32px;
+}
+
+.readme-content .markdown {
+  padding: 0;
+}
+
+/* ========================================
+   Markdown Rendering
+   ======================================== */
+
+.markdown {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 100%;
+  padding: 32px;
+}
+
+.markdown h1 {
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-accent);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+}
+
+.markdown h2 {
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 32px 0 16px 0;
+  padding-bottom: 8px;
+}
+
+.markdown h3 {
+  border: none;
+  color: var(--text-accent);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 24px 0 16px 0;
+}
+
+.markdown h4 {
+  border: none;
+  color: var(--text-accent);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 24px 0 16px 0;
+}
+
+.markdown h5,
+.markdown h6 {
+  border: none;
+  color: var(--text-accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 20px 0 12px 0;
+}
+
+.markdown p {
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.markdown ul,
+.markdown ol {
+  list-style: none;
+  margin-bottom: 16px;
+  padding-left: 0;
+}
+
+.markdown li {
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.markdown ul li:before {
+  color: var(--text-secondary);
+  content: "\2022";
+  font-size: 18px;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.markdown ol {
+  counter-reset: item;
+}
+
+.markdown ol li {
+  counter-increment: item;
+  padding-left: 32px;
+}
+
+.markdown ol li:before {
+  color: var(--text-secondary);
+  content: counter(item) ".";
+  font-weight: 600;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.markdown li strong {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.markdown code {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  color: var(--text-accent);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 85%;
+  padding: 3px 6px;
+}
+
+.markdown pre {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  margin: 16px 0;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.markdown pre code {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0;
+}
+
+.markdown blockquote {
+  border-left: 4px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 16px 0;
+  padding-left: 16px;
+}
+
+.markdown a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.markdown table th,
+.markdown table td {
+  border: 1px solid var(--border-primary);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.markdown table th {
+  background-color: var(--bg-secondary);
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.markdown hr {
+  border: none;
+  border-top: 1px solid var(--border-primary);
+  margin: 24px 0;
+}
+
+/* ========================================
+   Syntax Highlighting (highlight.js)
+   Uses CSS variables for theme support
+   ======================================== */
+
+/* Base hljs container */
+.hljs {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: block;
+  overflow-x: auto;
+  padding: 0;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: var(--hljs-comment);
+  font-style: italic;
+}
+
+/* Keywords */
+.hljs-doctag,
+.hljs-keyword,
+.hljs-formula {
+  color: var(--hljs-keyword);
+}
+
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst {
+  color: var(--hljs-keyword);
+}
+
+/* Literals/Numbers */
+.hljs-literal {
+  color: var(--hljs-number);
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+  color: var(--hljs-number);
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-title {
+  color: var(--hljs-number);
+}
+
+/* Strings */
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta-string {
+  color: var(--hljs-string);
+}
+
+/* Built-ins/Classes */
+.hljs-built_in,
+.hljs-class .hljs-title {
+  color: var(--hljs-builtin);
+}
+
+.hljs-title.class_ {
+  color: var(--hljs-builtin);
+}
+
+/* Functions */
+.hljs-function,
+.hljs-params {
+  color: var(--hljs-function);
+}
+
+.hljs-title.function_ {
+  color: var(--hljs-function);
+}
+
+/* Tags (HTML/XML) */
+.hljs-tag {
+  color: var(--hljs-tag);
+}
+
+/* Properties */
+.hljs-property {
+  color: var(--hljs-number);
+}
+
+/* Text styles */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
+}
+
+/* ========================================
+   Diff Viewer
+   ======================================== */
+
+.diff-container {
+  background: var(--bg-primary);
+  display: flex;
+  height: 100%;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 0;
+  width: 100%;
+}
+
+.diff-content {
+  display: block;
+  min-width: 100%;
+  padding: 0;
+}
+
+.raw-diff-container {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  min-width: max-content;
+}
+
+.diff-side {
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.diff-side:last-child {
+  border-right: none;
+}
+
+.diff-side-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+.diff-side-content {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  overflow: auto;
+}
+
+.diff-line {
+  align-items: stretch;
+  color: var(--text-primary);
+  display: flex;
+  line-height: 20px;
+  min-height: 20px;
+  transition: background-color 0.1s ease;
+  white-space: pre;
+}
+
+.diff-line:hover {
+  background-color: var(--hover-bg);
+}
+
+.diff-line-number {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  display: inline-block;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  max-width: 50px;
+  min-width: 50px;
+  padding: 0 8px;
+  text-align: right;
+  user-select: none;
+}
+
+.diff-line-number.old {
+  border-right: none;
+}
+
+.diff-line-number.new {
+  border-right: 1px solid var(--border-primary);
+}
+
+.diff-line-number:empty::before {
+  content: '\00a0';
+}
+
+.diff-line-content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0 10px;
+  white-space: pre;
+}
+
+.diff-line-added {
+  background: rgba(46, 160, 67, 0.15);
+}
+
+.diff-line-added .diff-line-number {
+  background: rgba(46, 160, 67, 0.1);
+}
+
+.diff-line-removed {
+  background: rgba(248, 81, 73, 0.15);
+}
+
+.diff-line-removed .diff-line-number {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.diff-line-context {
+  background: var(--bg-primary);
+}
+
+.diff-line-hunk {
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.diff-line-hunk .diff-line-number {
+  background: rgba(88, 166, 255, 0.05);
+}
+
+.diff-line-header {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.diff-line-header .diff-line-number {
+  background: var(--bg-secondary);
+}
+
+[data-theme="light"] .diff-line-added {
+  background: rgba(46, 160, 67, 0.1);
+}
+
+[data-theme="light"] .diff-line-added .diff-line-number {
+  background: rgba(46, 160, 67, 0.08);
+}
+
+[data-theme="light"] .diff-line-removed {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+[data-theme="light"] .diff-line-removed .diff-line-number {
+  background: rgba(248, 81, 73, 0.08);
+}
+
+[data-theme="light"] .diff-line-hunk {
+  background: rgba(9, 105, 218, 0.1);
+  color: #0969da;
+}
+
+[data-theme="light"] .diff-line-hunk .diff-line-number {
+  background: rgba(9, 105, 218, 0.05);
+}
+
+.diff-stats {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  gap: 16px;
+}
+
+.diff-stat {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.diff-stat-added {
+  color: #28a745;
+}
+
+.diff-stat-removed {
+  color: #dc3545;
+}
+
+.no-changes {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 40px;
+  text-align: center;
+}
+
+/* ========================================
+   Octicons
+   ======================================== */
+
+.octicon-file,
+.octicon-directory,
+.octicon-breadcrumb,
+.octicon-separator,
+.octicon-home,
+.octicon-branch,
+.octicon-small,
+.octicon-chevron,
+.octicon-copy {
+  fill: currentColor;
+  height: 16px;
+  vertical-align: text-bottom;
+  width: 16px;
+}
+
+.octicon-directory {
+  color: #7dd3fc;
+  fill: #7dd3fc;
+}
+
+[data-theme="light"] .octicon-directory {
+  color: #54adf5;
+  fill: #54adf5;
+}
+
+.octicon-branch {
+  fill: var(--text-secondary);
+  height: 16px;
+  width: 16px;
+}
+
+.octicon-small {
+  fill: var(--text-secondary);
+  height: 14px;
+  width: 14px;
+}
+
+.octicon-chevron {
+  fill: var(--text-secondary);
+  height: 12px;
+  width: 12px;
+}
+
+.octicon-home {
+  margin-right: 8px;
+}
+
+.octicon-separator {
+  height: 12px;
+  margin: 0 4px;
+  opacity: 0.7;
+  width: 12px;
+}
+
+/* ========================================
+   Text Colors
+   ======================================== */
+
+.text-yellow {
+  color: #f9c513;
+  fill: #f9c513;
+}
+
+.text-blue {
+  color: #0969da;
+  fill: #0969da;
+}
+
+.text-green {
+  color: #1a7f37;
+  fill: #1a7f37;
+}
+
+.text-red {
+  color: #cf222e;
+  fill: #cf222e;
+}
+
+.text-orange {
+  color: #fb8500;
+  fill: #fb8500;
+}
+
+.text-purple {
+  color: #8250df;
+  fill: #8250df;
+}
+
+.text-gray {
+  color: var(--text-secondary);
+  fill: var(--text-secondary);
+}
+
+[data-theme="light"] .text-yellow {
+  color: #dbab09;
+  fill: #dbab09;
+}
+
+[data-theme="light"] .text-blue {
+  color: #0550ae;
+  fill: #0550ae;
+}
+
+[data-theme="light"] .text-green {
+  color: #116329;
+  fill: #116329;
+}
+
+[data-theme="light"] .text-red {
+  color: #82071e;
+  fill: #82071e;
+}
+
+[data-theme="light"] .text-orange {
+  color: #bc4c00;
+  fill: #bc4c00;
+}
+
+[data-theme="light"] .text-purple {
+  color: #6f42c1;
+  fill: #6f42c1;
+}
+
+/* ========================================
+   Git Status Colors
+   ======================================== */
+
+.git-status {
+  border-radius: 4px;
+  display: inline;
+  line-height: inherit;
+  margin-left: 8px;
+  opacity: 0.8;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.git-status-icon {
+  display: inline;
+  fill: currentColor;
+  height: 10px;
+  vertical-align: middle;
+  width: 10px;
+}
+
+.git-status-M {
+  color: #d29922;
+}
+
+.git-status-A {
+  color: #2ea043;
+}
+
+.git-status-D {
+  color: #f85149;
+}
+
+.git-status-R {
+  color: #1f6feb;
+}
+
+.git-status-\?\? {
+  color: #a371f7;
+}
+
+.git-status-MM,
+.git-status-AM,
+.git-status-AD {
+  color: #db6d28;
+}
+
+.git-status-untracked {
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] .git-status-M {
+  color: #bf8700;
+}
+
+[data-theme="light"] .git-status-A {
+  color: #1a7f37;
+}
+
+[data-theme="light"] .git-status-D {
+  color: #cf222e;
+}
+
+[data-theme="light"] .git-status-R {
+  color: #0969da;
+}
+
+[data-theme="light"] .git-status-MM,
+[data-theme="light"] .git-status-AM,
+[data-theme="light"] .git-status-AD {
+  color: #9a6700;
+}
+
+[data-theme="light"] .git-status-untracked {
+  color: #8b5cf6 !important;
+}
+
+.file-table .col-icon .git-status {
+  font-size: 12px;
+}
+
+/* Git status colored icons in file rows */
+[data-theme="dark"] .file-row--added .icon .octicon-directory,
+[data-theme="dark"] .file-row--added .icon .octicon-file {
+  color: #2ea043;
+  fill: #2ea043;
+}
+
+[data-theme="dark"] .file-row--deleted .icon .octicon-directory,
+[data-theme="dark"] .file-row--deleted .icon .octicon-file {
+  color: #f85149;
+  fill: #f85149;
+}
+
+[data-theme="dark"] .file-row--modified .icon .octicon-directory,
+[data-theme="dark"] .file-row--modified .icon .octicon-file {
+  color: #d29922;
+  fill: #d29922;
+}
+
+[data-theme="dark"] .file-row--renamed .icon .octicon-directory,
+[data-theme="dark"] .file-row--renamed .icon .octicon-file {
+  color: #1f6feb;
+  fill: #1f6feb;
+}
+
+[data-theme="dark"] .file-row--untracked .icon .octicon-directory,
+[data-theme="dark"] .file-row--untracked .icon .octicon-file {
+  color: #a371f7;
+  fill: #a371f7;
+}
+
+[data-theme="dark"] .file-row--mixed .icon .octicon-directory,
+[data-theme="dark"] .file-row--mixed .icon .octicon-file {
+  color: #db6d28;
+  fill: #db6d28;
+}
+
+[data-theme="light"] .file-row--added .icon .octicon-directory,
+[data-theme="light"] .file-row--added .icon .octicon-file {
+  color: #1a7f37;
+  fill: #1a7f37;
+}
+
+[data-theme="light"] .file-row--deleted .icon .octicon-directory,
+[data-theme="light"] .file-row--deleted .icon .octicon-file {
+  color: #cf222e;
+  fill: #cf222e;
+}
+
+[data-theme="light"] .file-row--modified .icon .octicon-directory,
+[data-theme="light"] .file-row--modified .icon .octicon-file {
+  color: #bf8700;
+  fill: #bf8700;
+}
+
+[data-theme="light"] .file-row--renamed .icon .octicon-directory,
+[data-theme="light"] .file-row--renamed .icon .octicon-file {
+  color: #0969da;
+  fill: #0969da;
+}
+
+[data-theme="light"] .file-row--untracked .icon .octicon-directory,
+[data-theme="light"] .file-row--untracked .icon .octicon-file {
+  color: #8250df;
+  fill: #8250df;
+}
+
+[data-theme="light"] .file-row--mixed .icon .octicon-directory,
+[data-theme="light"] .file-row--mixed .icon .octicon-file {
+  color: #9a6700;
+  fill: #9a6700;
+}

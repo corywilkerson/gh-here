@@ -84,6 +84,7 @@ class Application {
         this.initializeInlineSearch();
         this.initializeFocusMode();
         this.initializeContentSearch();
+        this.initializeSymbolOutline();
       } catch (error) {
         console.error('Error re-initializing components:', error);
       }

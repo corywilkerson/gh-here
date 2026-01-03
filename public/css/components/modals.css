@@ -1,0 +1,286 @@
+/**
+ * Modal and Overlay Styles
+ * Keyboard help, diff viewer, and general modal dialogs
+ */
+
+/* ========================================
+   Keyboard Help Overlay
+   ======================================== */
+
+.keyboard-help-overlay {
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 99999;
+}
+
+.keyboard-help-content {
+  animation: slideUp 0.3s ease-out;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  margin: 20px;
+  max-height: 80vh;
+  max-width: 800px;
+  overflow-y: auto;
+}
+
+.keyboard-help-header {
+  align-items: center;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 30px 16px;
+}
+
+.keyboard-help-header h2 {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.keyboard-help-close {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.keyboard-help-close:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.keyboard-help-body {
+  padding: 0;
+}
+
+.shortcuts-container {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr 1fr;
+}
+
+.shortcut-section {
+  border-right: 1px solid var(--border-primary);
+  padding: 40px 50px;
+}
+
+.shortcut-section:last-child {
+  border-right: none;
+}
+
+.shortcut-section h3 {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.shortcut-item {
+  align-items: center;
+  border-radius: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  transition: none;
+}
+
+.shortcut-keys {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.shortcut-keys kbd {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  min-width: 20px;
+  padding: 4px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.shortcut-desc {
+  color: var(--text-primary);
+  flex: 1;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* ========================================
+   Diff Viewer Modal
+   ======================================== */
+
+.diff-viewer-overlay {
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 99999;
+}
+
+.diff-viewer-modal {
+  animation: slideUp 0.3s ease-out;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  max-width: 1200px;
+  width: 90vw;
+}
+
+.diff-viewer-header {
+  align-items: center;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.diff-viewer-title {
+  align-items: center;
+  color: var(--text-primary);
+  display: flex;
+  font-size: 16px;
+  font-weight: 600;
+  gap: 8px;
+  margin: 0;
+}
+
+.diff-close-btn {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.diff-close-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.diff-viewer-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+/* ========================================
+   Draft Dialog
+   ======================================== */
+
+.draft-modal {
+  max-width: 400px;
+  text-align: center;
+}
+
+.draft-modal h3 {
+  color: var(--text-accent);
+  font-size: 18px;
+  margin: 0 0 12px 0;
+}
+
+.draft-modal p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.draft-actions .btn {
+  flex: 1;
+  max-width: 120px;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   Responsive - Mobile
+   ======================================== */
+
+@media (max-width: 768px) {
+  .keyboard-help-content {
+    margin: 20px;
+    max-width: calc(100% - 40px);
+  }
+
+  .shortcuts-container {
+    gap: 24px;
+    grid-template-columns: 1fr;
+  }
+
+  .keyboard-help-body {
+    padding: 20px;
+  }
+}

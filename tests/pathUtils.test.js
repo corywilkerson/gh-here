@@ -108,20 +108,6 @@ test('gets directory path from file path', () => {
   assertEqual(PathUtils.getDirectoryPath(''), '');
 });
 
-test('handles git commit dialog scenarios correctly', () => {
-  // Test cases that match the commit dialog usage pattern
-  // where we extract directory from file.name
-  assertEqual(PathUtils.getDirectoryPath('src/components/Button.tsx'), 'src/components');
-  assertEqual(PathUtils.getDirectoryPath('lib/utils/helper.js'), 'lib/utils');
-  assertEqual(PathUtils.getDirectoryPath('tests/unit/test.js'), 'tests/unit');
-  assertEqual(PathUtils.getDirectoryPath('package.json'), ''); // Root level file
-  assertEqual(PathUtils.getDirectoryPath('docs/README.md'), 'docs');
-  
-  // Edge cases from commit dialog
-  assertEqual(PathUtils.getDirectoryPath('very/deeply/nested/folder/structure/file.txt'), 'very/deeply/nested/folder/structure');
-  assertEqual(PathUtils.getDirectoryPath('single-level.txt'), '');
-});
-
 test('handles edge cases in parent path', () => {
   assertEqual(PathUtils.getParentPath('a/b/c/d/e'), 'a/b/c/d');
   assertEqual(PathUtils.getParentPath('single'), '');

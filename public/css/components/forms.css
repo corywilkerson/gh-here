@@ -1,0 +1,171 @@
+/**
+ * Form Styles
+ * Search inputs, file inputs, and form controls
+ */
+
+/* ========================================
+   Search Container
+   ======================================== */
+
+.search-container {
+  align-items: center;
+  display: flex;
+  flex-shrink: 1;
+  max-width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.search-input {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  flex-shrink: 1;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 280px;
+  min-width: 120px;
+  padding: 8px 38px 8px 36px;
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.search-input:hover {
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.search-input:focus {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2), var(--shadow-md), var(--shadow-glow);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .search-input:focus {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), var(--shadow-md);
+}
+
+.search-icon {
+  fill: var(--text-secondary);
+  height: 16px;
+  left: 8px;
+  pointer-events: none;
+  position: absolute;
+  width: 16px;
+}
+
+.search-hotkey {
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-tertiary) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  position: absolute;
+  right: 12px;
+  transition: all var(--transition-base);
+}
+
+.search-input:focus ~ .search-hotkey {
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2);
+  color: var(--link-color);
+}
+
+/* ========================================
+   Sidebar Search
+   ======================================== */
+
+.sidebar-search {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.sidebar-search .search-input {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-inner);
+  font-size: 12px;
+  height: 32px;
+  min-width: 0;
+  padding: 6px 32px 6px 30px;
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.sidebar-search .search-input:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-secondary);
+}
+
+.sidebar-search .search-input:focus {
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15), var(--shadow-inner);
+}
+
+.sidebar-search .search-hotkey {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 5px;
+}
+
+/* Repo controls search */
+.repo-controls .search-container:not(.sidebar-search) {
+  flex: 1;
+  max-width: 300px;
+  min-width: 150px;
+}
+
+.repo-controls .search-container:not(.sidebar-search) .search-input {
+  width: 100%;
+}
+
+/* ========================================
+   New File Input
+   ======================================== */
+
+.filename-section {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 12px;
+}
+
+.filename-label {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.new-filename-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  color: var(--text-primary);
+  flex: 1;
+  font-size: 14px;
+  outline: none;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease;
+}
+
+.new-filename-input:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 0.2em rgba(9, 105, 218, 0.3);
+}
+
+[data-theme="dark"] .new-filename-input:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 0.2em rgba(88, 166, 255, 0.3);
+}

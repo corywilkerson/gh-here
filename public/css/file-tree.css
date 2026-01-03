@@ -1,0 +1,269 @@
+/**
+ * File Tree Sidebar Styles
+ * Navigation sidebar, tree items, and sidebar controls
+ */
+
+/* ========================================
+   File Tree Sidebar Container
+   ======================================== */
+
+.file-tree-sidebar {
+  align-self: stretch;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  max-height: 100vh;
+  max-width: 300px;
+  min-width: 300px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: sticky;
+  scrollbar-color: var(--border-primary) transparent;
+  scrollbar-width: thin;
+  top: 0;
+  transition: all var(--transition-base);
+  width: 300px;
+}
+
+[data-theme="light"] .file-tree-sidebar {
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.file-tree-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-tree-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.file-tree-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+.file-tree-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.file-tree-sidebar.hidden {
+  display: none;
+}
+
+/* ========================================
+   File Tree Header
+   ======================================== */
+
+.file-tree-header {
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(19, 23, 29, 0.95) 0%, rgba(19, 23, 29, 0.85) 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  display: flex;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 12px;
+  letter-spacing: -0.01em;
+  padding: 18px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+[data-theme="light"] .file-tree-header {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(248, 250, 252, 0.85) 100%);
+}
+
+.files-icon {
+  fill: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Sidebar Controls
+   ======================================== */
+
+.sidebar-controls {
+  backdrop-filter: blur(5px);
+  background: linear-gradient(180deg, rgba(19, 23, 29, 0.4) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+}
+
+[data-theme="light"] .sidebar-controls {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.6) 0%, transparent 100%);
+}
+
+.sidebar-branch {
+  font-size: 12px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* ========================================
+   File Tree Container
+   ======================================== */
+
+.file-tree-container {
+  background: var(--bg-secondary);
+  padding: 8px 0;
+}
+
+/* ========================================
+   Tree Item
+   ======================================== */
+
+.tree-item {
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 8px;
+  line-height: 22px;
+  margin: 2px 6px;
+  padding: 8px 14px;
+  position: relative;
+  transition: all var(--transition-base);
+  user-select: none;
+}
+
+.tree-item::before {
+  background: linear-gradient(180deg, var(--link-color) 0%, var(--link-hover) 100%);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
+  content: '';
+  height: 0;
+  left: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all var(--transition-base);
+  width: 3px;
+}
+
+.tree-item:hover {
+  background: rgba(96, 165, 250, 0.08);
+  border-left: 2px solid var(--link-color);
+  padding-left: 14px;
+}
+
+.tree-item:hover::before {
+  display: none;
+}
+
+.tree-item.active {
+  background: rgba(96, 165, 250, 0.12);
+  border-left: 2px solid var(--link-color);
+  font-weight: 600;
+  padding-left: 14px;
+}
+
+.tree-item.active::before {
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+  height: 85%;
+  opacity: 1;
+}
+
+[data-theme="light"] .tree-item.active {
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.03) 100%);
+  border-color: rgba(37, 99, 235, 0.15);
+}
+
+.tree-item.hidden,
+.tree-children.hidden {
+  display: none;
+}
+
+/* ========================================
+   Tree Item Components
+   ======================================== */
+
+.tree-toggle {
+  color: var(--text-secondary);
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 10px;
+  text-align: center;
+  width: 12px;
+}
+
+.tree-spacer {
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.tree-icon {
+  fill: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.tree-icon.file-icon {
+  fill: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.tree-item .tree-icon:not(.file-icon) {
+  fill: #7dd3fc;
+}
+
+[data-theme="light"] .tree-item .tree-icon:not(.file-icon) {
+  fill: #54adf5;
+}
+
+.tree-label {
+  flex: 1;
+  font-weight: 400;
+  letter-spacing: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-children {
+  transition: none;
+}
+
+/* ========================================
+   Skeleton Loading
+   ======================================== */
+
+.tree-skeleton {
+  padding: 8px;
+}
+
+.skeleton-item {
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--hover-bg) 50%, var(--bg-secondary) 100%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+
+.skeleton-indent {
+  margin-left: 20px;
+  width: calc(100% - 20px);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
