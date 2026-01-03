@@ -1,6 +1,7 @@
 # Development files
 .claude/
 .github/
+.playwright-mcp/
 tests/
 *.test.js
 test.js
