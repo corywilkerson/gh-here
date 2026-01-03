@@ -1,0 +1,13 @@
+# Development files
+.claude/
+.github/
+tests/
+*.test.js
+test.js
+
+# Backup files
+*.backup
+public/app.js.backup
+
+# Sample files
+SAMPLE.md
