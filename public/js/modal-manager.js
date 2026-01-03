@@ -1,7 +1,14 @@
 /**
  * Modal management utilities
+ * @module modal-manager
  */
 
+/**
+ * Creates a modal overlay with content
+ * @param {string} content - HTML content for the modal
+ * @param {string} [className=''] - Additional CSS classes
+ * @returns {{element: HTMLElement, close: Function}} Modal control object
+ */
 export function createModal(content, className = '') {
   const modal = document.createElement('div');
   modal.className = `modal-overlay ${className}`;
@@ -15,34 +22,13 @@ export function createModal(content, className = '') {
   };
 }
 
-export function showDraftDialog(filePath) {
-  return new Promise(resolve => {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-      <div class="modal-content draft-modal">
-        <h3>Unsaved Changes Found</h3>
-        <p>You have unsaved changes for this file. What would you like to do?</p>
-        <div class="draft-actions">
-          <button class="btn btn-primary" data-action="load">Load Draft</button>
-          <button class="btn btn-secondary" data-action="discard">Discard Draft</button>
-          <button class="btn btn-secondary" data-action="cancel">Cancel</button>
-        </div>
-      </div>
-    `;
-
-    modal.addEventListener('click', e => {
-      if (e.target.matches('[data-action]') || e.target === modal) {
-        const action = e.target.dataset?.action || 'cancel';
-        modal.remove();
-        resolve(action);
-      }
-    });
-
-    document.body.appendChild(modal);
-  });
-}
-
+/**
+ * Shows a confirmation dialog
+ * @param {string} message - Message to display
+ * @param {string} [confirmText='Confirm'] - Confirm button text
+ * @param {string} [cancelText='Cancel'] - Cancel button text
+ * @returns {Promise<boolean>} Resolves to true if confirmed
+ */
 export function showConfirmDialog(message, confirmText = 'Confirm', cancelText = 'Cancel') {
   return new Promise(resolve => {
     const modal = document.createElement('div');

@@ -1,16 +1,30 @@
 /**
  * Main application entry point
  * Coordinates all modules and initializes the application
+ * @module app
  */
 
-import { ThemeManager } from './js/theme-manager.js';
-import { SearchHandler } from './js/search-handler.js';
-import { KeyboardHandler } from './js/keyboard-handler.js';
+// ============================================================================
+// Imports (alpha-sorted)
+// ============================================================================
+
+import { ContentSearchHandler } from './js/content-search-handler.js';
+import { copyToClipboard } from './js/clipboard-utils.js';
 import { FileTreeNavigator } from './js/file-tree.js';
+import { FileViewer } from './js/file-viewer.js';
+import { FocusMode } from './js/focus-mode.js';
+import { InlineSearch } from './js/inline-search.js';
+import { KeyboardHandler } from './js/keyboard-handler.js';
 import { NavigationHandler } from './js/navigation.js';
 import { PathUtils } from './js/utils.js';
+import { SearchHandler } from './js/search-handler.js';
 import { showNotification } from './js/notification.js';
-import { copyToClipboard } from './js/clipboard-utils.js';
+import { SymbolOutline } from './js/symbol-outline.js';
+import { ThemeManager } from './js/theme-manager.js';
+
+// ============================================================================
+// Application Class
+// ============================================================================
 
 class Application {
   constructor() {
@@ -20,6 +34,11 @@ class Application {
     this.fileTree = null;
     this.navigationHandler = null;
     this.lastSelectedLine = null;
+    this.fileViewer = null;
+    this.inlineSearch = null;
+    this.focusMode = null;
+    this.contentSearch = null;
+    this.symbolOutline = null;
   }
 
   init() {
@@ -32,6 +51,9 @@ class Application {
     // Re-initialize components after client-side navigation
     document.addEventListener('content-loaded', () => {
       try {
+        // Cleanup existing components before re-initializing
+        this.cleanupComponents();
+
         // Re-initialize theme manager listeners (button might be re-rendered)
         if (this.themeManager) {
           this.themeManager.setupListeners();
@@ -57,8 +79,11 @@ class Application {
 
         this.setupGlobalEventListeners();
         this.setupGitignoreToggle();
-        this.setupFileOperations();
         this.highlightLinesFromHash();
+        this.initializeFileViewer();
+        this.initializeInlineSearch();
+        this.initializeFocusMode();
+        this.initializeContentSearch();
       } catch (error) {
         console.error('Error re-initializing components:', error);
       }
@@ -84,8 +109,84 @@ class Application {
 
     this.setupGlobalEventListeners();
     this.setupGitignoreToggle();
-    this.setupFileOperations();
     this.highlightLinesFromHash();
+    this.initializeFileViewer();
+    this.initializeInlineSearch();
+    this.initializeFocusMode();
+    this.initializeContentSearch();
+    this.initializeSymbolOutline();
+  }
+
+  // ========================================================================
+  // Component Initialization
+  // ========================================================================
+
+  /**
+   * Check if current page is a file view page
+   */
+  isFileViewPage() {
+    const fileContent = document.querySelector('.file-content');
+    return fileContent?.querySelector('pre code.hljs.with-line-numbers') !== null;
+  }
+
+  /**
+   * Initialize Monaco-based file viewer
+   */
+  initializeFileViewer() {
+    if (!this.isFileViewPage()) return;
+
+    // Wait for Monaco to be ready
+    if (typeof require === 'undefined' || !window.monacoReady) {
+      // Wait a bit and try again
+      setTimeout(() => this.initializeFileViewer(), 100);
+      return;
+    }
+
+    if (!this.fileViewer) {
+      this.fileViewer = new FileViewer();
+    }
+  }
+
+  /**
+   * Initialize inline search component
+   * Note: Skipped when Monaco viewer is active (Monaco has built-in search)
+   */
+  initializeInlineSearch() {
+    if (!this.isFileViewPage()) return;
+    
+    // Skip if Monaco viewer is active
+    if (document.querySelector('.monaco-file-viewer')) {
+      return;
+    }
+
+    if (!this.inlineSearch) {
+      this.inlineSearch = new InlineSearch();
+    }
+    this.inlineSearch.init();
+  }
+
+  initializeFocusMode() {
+    if (!this.focusMode) {
+      this.focusMode = new FocusMode();
+    }
+    this.focusMode.init();
+  }
+
+  /**
+   * Initialize symbol outline panel
+   */
+  initializeSymbolOutline() {
+    // Cleanup previous instance
+    if (this.symbolOutline) {
+      this.symbolOutline.destroy();
+      this.symbolOutline = null;
+    }
+
+    // Only initialize on file view pages
+    if (!this.isFileViewPage()) return;
+
+    this.symbolOutline = new SymbolOutline();
+    this.symbolOutline.init();
   }
 
   setupGlobalEventListeners() {
@@ -193,68 +294,6 @@ class Application {
   }
 
 
-  setupFileOperations() {
-    document.addEventListener('click', async e => {
-      if (e.target.closest('.delete-btn')) {
-        const btn = e.target.closest('.delete-btn');
-        const itemPath = btn.dataset.path;
-        const itemName = btn.dataset.name;
-        const isDirectory = btn.dataset.isDirectory === 'true';
-
-        const message = `Are you sure you want to delete ${isDirectory ? 'folder' : 'file'} "${itemName}"?`;
-        if (!confirm(message)) {
-          return;
-        }
-
-        try {
-          const response = await fetch('/api/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: itemPath })
-          });
-
-          if (!response.ok) {
-            throw new Error('Delete failed');
-          }
-
-          showNotification(`${isDirectory ? 'Folder' : 'File'} deleted successfully`, 'success');
-          setTimeout(() => window.location.reload(), 600);
-        } catch (error) {
-          showNotification('Failed to delete item', 'error');
-        }
-      }
-
-      if (e.target.closest('.rename-btn')) {
-        const btn = e.target.closest('.rename-btn');
-        const itemPath = btn.dataset.path;
-        const currentName = btn.dataset.name;
-        const isDirectory = btn.dataset.isDirectory === 'true';
-
-        const newName = prompt(`Rename ${isDirectory ? 'folder' : 'file'}:`, currentName);
-        if (!newName || newName.trim() === currentName) {
-          return;
-        }
-
-        try {
-          const response = await fetch('/api/rename', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: itemPath, newName: newName.trim() })
-          });
-
-          if (!response.ok) {
-            throw new Error('Rename failed');
-          }
-
-          showNotification(`Renamed to "${newName.trim()}"`, 'success');
-          setTimeout(() => window.location.reload(), 600);
-        } catch (error) {
-          showNotification('Failed to rename item', 'error');
-        }
-      }
-    });
-  }
-
   showDiffViewer(filePath) {
     // Simplified - redirect to diff view
     const url = new URL(window.location.href);
@@ -331,6 +370,33 @@ class Application {
     if (firstLine) {
       firstLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  }
+
+  initializeContentSearch() {
+    if (!this.contentSearch) {
+      this.contentSearch = new ContentSearchHandler();
+    }
+    this.contentSearch.init();
+  }
+
+  /**
+   * Cleanup components before navigation/re-initialization
+   */
+  cleanupComponents() {
+    // Cleanup file viewer
+    if (this.fileViewer && typeof this.fileViewer.destroy === 'function') {
+      this.fileViewer.destroy();
+      this.fileViewer = null;
+    }
+
+    // Cleanup inline search
+    if (this.inlineSearch && typeof this.inlineSearch.destroy === 'function') {
+      this.inlineSearch.destroy();
+      this.inlineSearch = null;
+    }
+
+    // Focus mode persists across navigations, no cleanup needed
+    // Content search persists across navigations, no cleanup needed
   }
 }
 

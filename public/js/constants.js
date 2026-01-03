@@ -1,60 +1,76 @@
 /**
  * Application constants and configuration
+ * @module constants
  */
 
+// ============================================================================
+// Configuration
+// ============================================================================
+
 export const CONFIG = {
-  MONACO_CDN: 'https://unpkg.com/monaco-editor@0.45.0/min/vs',
-  MONACO_VERSION: '0.45.0',
-  EDITOR_HEIGHT: 600,
   DEFAULT_PORT: 5555,
+  MONACO_CDN: 'https://unpkg.com/monaco-editor@0.45.0/min/vs',
   NOTIFICATION_DURATION: 4000
 };
+
+// ============================================================================
+// Enums
+// ============================================================================
 
 export const THEME = {
   DARK: 'dark',
   LIGHT: 'light'
 };
 
+// ============================================================================
+// Storage Keys
+// ============================================================================
+
 export const STORAGE_KEYS = {
-  THEME: 'gh-here-theme',
-  DRAFT_PREFIX: 'gh-here-draft-'
+  THEME: 'gh-here-theme'
 };
 
+// ============================================================================
+// Keyboard Shortcuts (alpha-sorted)
+// ============================================================================
+
+export const KEYBOARD_SHORTCUTS = {
+  ESCAPE: 'Escape',
+  GO_UP: 'h',
+  HELP: '?',
+  NAV_DOWN: 'j',
+  NAV_UP: 'k',
+  OPEN: 'o',
+  REFRESH: 'r',
+  SEARCH: ['/', 's'],
+  SHOW_DIFF: 'd',
+  THEME_TOGGLE: 't',
+  TOGGLE_GITIGNORE: 'i'
+};
+
+// ============================================================================
+// Monaco Editor Options (for FileViewer read-only mode)
+// ============================================================================
+
 export const EDITOR_OPTIONS = {
-  minimap: { enabled: false },
-  lineNumbers: 'on',
-  wordWrap: 'off',
-  scrollBeyondLastLine: false,
-  fontSize: 12,
-  lineHeight: 20,
-  fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-  padding: { top: 16, bottom: 16 },
-  renderLineHighlight: 'line',
-  selectOnLineNumbers: true,
   automaticLayout: true,
+  bracketPairColorization: { enabled: true },
   folding: true,
   foldingHighlight: true,
   foldingStrategy: 'auto',
-  showFoldingControls: 'mouseover',
-  bracketPairColorization: { enabled: true },
+  fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+  fontSize: 12,
   guides: {
     bracketPairs: true,
     indentation: true
-  }
-};
-
-export const KEYBOARD_SHORTCUTS = {
-  SEARCH: ['/', 's'],
-  THEME_TOGGLE: 't',
-  HELP: '?',
-  ESCAPE: 'Escape',
-  GO_UP: 'h',
-  REFRESH: 'r',
-  CREATE_FILE: 'c',
-  EDIT_FILE: 'e',
-  SHOW_DIFF: 'd',
-  TOGGLE_GITIGNORE: 'i',
-  NAV_DOWN: 'j',
-  NAV_UP: 'k',
-  OPEN: 'o'
+  },
+  lineHeight: 20,
+  lineNumbers: 'on',
+  minimap: { enabled: false },
+  padding: { top: 16, bottom: 16 },
+  renderLineHighlight: 'line',
+  scrollBeyondLastLine: false,
+  selectOnLineNumbers: true,
+  showFoldingControls: 'mouseover',
+  wordWrap: 'off'
 };

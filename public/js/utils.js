@@ -1,102 +1,92 @@
 /**
- * Utility functions for path and URL manipulation
+ * Utility functions for path manipulation, language detection, and HTML escaping
+ * @module utils
  */
 
-export const PathUtils = {
-  getCurrentPath() {
-    const currentUrl = new URL(window.location.href);
-    return currentUrl.searchParams.get('path') || '';
-  },
+// ============================================================================
+// Language Map (alpha-sorted by key)
+// ============================================================================
 
-  getParentPath(currentPath) {
-    if (!currentPath || currentPath === '') {
-      return null;
-    }
-
-    const pathParts = currentPath.split('/').filter(p => p);
-    if (pathParts.length === 0) {
-      return null;
-    }
-
-    pathParts.pop();
-    return pathParts.join('/');
-  },
-
-  buildFilePath(currentPath, filename) {
-    return currentPath ? `${currentPath}/${filename}` : filename;
-  },
-
-  getFileName(filePath) {
-    return filePath.split('/').pop() || 'file.txt';
-  },
-
-  buildPathUrl(basePath, targetPath) {
-    return targetPath ? `${basePath}?path=${encodeURIComponent(targetPath)}` : basePath;
-  },
-
-  getDirectoryPath(filePath) {
-    const parts = filePath.split('/').filter(p => p);
-    if (parts.length <= 1) {
-      return '';
-    }
-    return parts.slice(0, -1).join('/');
-  }
+const LANGUAGE_MAP = {
+  bash: 'shell',
+  c: 'c',
+  cc: 'cpp',
+  clj: 'clojure',
+  cpp: 'cpp',
+  css: 'css',
+  cxx: 'cpp',
+  dart: 'dart',
+  fish: 'shell',
+  go: 'go',
+  groovy: 'groovy',
+  h: 'c',
+  hpp: 'cpp',
+  htm: 'html',
+  html: 'html',
+  java: 'java',
+  js: 'javascript',
+  json: 'json',
+  jsx: 'javascript',
+  kt: 'kotlin',
+  less: 'less',
+  log: 'plaintext',
+  lua: 'lua',
+  md: 'markdown',
+  mjs: 'javascript',
+  php: 'php',
+  pl: 'perl',
+  ps1: 'powershell',
+  py: 'python',
+  r: 'r',
+  rb: 'ruby',
+  rs: 'rust',
+  sass: 'sass',
+  scala: 'scala',
+  scss: 'scss',
+  sh: 'shell',
+  sql: 'sql',
+  swift: 'swift',
+  ts: 'typescript',
+  tsx: 'typescript',
+  txt: 'plaintext',
+  xml: 'xml',
+  yaml: 'yaml',
+  yml: 'yaml',
+  zsh: 'shell'
 };
 
+// ============================================================================
+// HTML Utilities
+// ============================================================================
+
 /**
- * Language detection utility
+ * Escapes HTML special characters to prevent XSS attacks
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped HTML string
+ */
+export function escapeHtml(text) {
+  if (typeof text !== 'string') return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================================
+// Language Detection
+// ============================================================================
+
+/**
+ * Detects programming language from filename extension
+ * @param {string} filename - Filename to analyze
+ * @returns {string} Language identifier for syntax highlighting
  */
 export function getLanguageFromExtension(filename) {
-  const ext = filename.split('.').pop().toLowerCase();
-  const languageMap = {
-    js: 'javascript',
-    mjs: 'javascript',
-    jsx: 'javascript',
-    ts: 'typescript',
-    tsx: 'typescript',
-    html: 'html',
-    htm: 'html',
-    css: 'css',
-    scss: 'scss',
-    sass: 'sass',
-    less: 'less',
-    json: 'json',
-    xml: 'xml',
-    yaml: 'yaml',
-    yml: 'yaml',
-    py: 'python',
-    java: 'java',
-    go: 'go',
-    rs: 'rust',
-    php: 'php',
-    rb: 'ruby',
-    swift: 'swift',
-    kt: 'kotlin',
-    dart: 'dart',
-    c: 'c',
-    cpp: 'cpp',
-    cc: 'cpp',
-    cxx: 'cpp',
-    h: 'c',
-    hpp: 'cpp',
-    sh: 'shell',
-    bash: 'shell',
-    zsh: 'shell',
-    fish: 'shell',
-    ps1: 'powershell',
-    sql: 'sql',
-    r: 'r',
-    scala: 'scala',
-    clj: 'clojure',
-    lua: 'lua',
-    pl: 'perl',
-    groovy: 'groovy',
-    md: 'markdown',
-    txt: 'plaintext',
-    log: 'plaintext'
-  };
-
+  if (!filename) return 'plaintext';
+  
   const basename = filename.toLowerCase();
+  const ext = filename.split('.').pop()?.toLowerCase();
+  
+  // Special filenames
   if (basename === 'dockerfile' || basename.startsWith('dockerfile.')) {
     return 'dockerfile';
   }
@@ -110,14 +100,82 @@ export function getLanguageFromExtension(filename) {
     return 'json';
   }
 
-  return languageMap[ext] || 'plaintext';
+  return LANGUAGE_MAP[ext] || 'plaintext';
 }
 
+// ============================================================================
+// Path Utilities
+// ============================================================================
+
 /**
- * HTML escaping utility
+ * Path manipulation utilities
  */
-export function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+export const PathUtils = {
+  /**
+   * Builds a file path from directory and filename
+   * @param {string} currentPath - Current directory path
+   * @param {string} filename - Filename to append
+   * @returns {string} Combined file path
+   */
+  buildFilePath(currentPath, filename) {
+    return currentPath ? `${currentPath}/${filename}` : filename;
+  },
+
+  /**
+   * Builds a URL with path query parameter
+   * @param {string} basePath - Base URL path
+   * @param {string} targetPath - Target file/directory path
+   * @returns {string} URL with encoded path parameter
+   */
+  buildPathUrl(basePath, targetPath) {
+    return targetPath ? `${basePath}?path=${encodeURIComponent(targetPath)}` : basePath;
+  },
+
+  /**
+   * Gets the current path from URL query parameters
+   * @returns {string} Current path or empty string
+   */
+  getCurrentPath() {
+    const currentUrl = new URL(window.location.href);
+    return currentUrl.searchParams.get('path') || '';
+  },
+
+  /**
+   * Gets the directory portion of a file path
+   * @param {string} filePath - Full file path
+   * @returns {string} Directory path
+   */
+  getDirectoryPath(filePath) {
+    const parts = filePath.split('/').filter(p => p);
+    if (parts.length <= 1) {
+      return '';
+    }
+    return parts.slice(0, -1).join('/');
+  },
+
+  /**
+   * Gets the filename from a full path
+   * @param {string} filePath - Full file path
+   * @returns {string} Filename
+   */
+  getFileName(filePath) {
+    return filePath.split('/').pop() || 'file.txt';
+  },
+
+  /**
+   * Gets the parent directory path
+   * @param {string} currentPath - Current path
+   * @returns {string|null} Parent path or null if at root
+   */
+  getParentPath(currentPath) {
+    if (!currentPath || currentPath === '') {
+      return null;
+    }
+    const pathParts = currentPath.split('/').filter(p => p);
+    if (pathParts.length === 0) {
+      return null;
+    }
+    pathParts.pop();
+    return pathParts.join('/');
+  }
+};
