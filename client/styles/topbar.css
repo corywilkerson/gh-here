@@ -1,0 +1,118 @@
+/* Top bar: a mark, an address bar, and a few quiet controls. */
+
+.topbar {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.location {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel);
+  cursor: text;
+}
+
+.location:hover {
+  border-color: var(--strong-border);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.crumbs > * {
+  flex-shrink: 0;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.crumbs .root {
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crumbs .parent,
+.crumbs .sep {
+  color: var(--muted);
+}
+
+.crumbs .sep {
+  padding: 0 6px;
+}
+
+.search-trigger {
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: 12px;
+}
+
+.topbar-actions,
+.view-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-actions:not(:empty) {
+  padding-right: 8px;
+  margin-right: 4px;
+  border-right: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .crumbs .parent {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .mark,
+  .search-trigger kbd,
+  .view-actions .segmented,
+  .view-actions [data-action='wrap'] {
+    display: none;
+  }
+
+  .view-actions:not(:empty) {
+    padding-right: 4px;
+    margin-right: 0;
+  }
+}

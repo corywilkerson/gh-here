@@ -1,88 +1,55 @@
 # gh-here
 
-A fast, local GitHub-style file browser for exploring codebases. Browse directories with a file tree, view files with syntax highlighting, and explore git diffs - all in your browser.
+Your working directory, beautifully browsable.
 
-## Installation
-
-```bash
-npx gh-here
-```
-
-Or install globally:
-
-```bash
-npm install -g gh-here
-```
+A fast, local file browser. Familiar navigation. Beautiful code, powered by [Pierre Diffs](https://diffs.com) and [Pierre Trees](https://trees.software).
 
 ## Usage
 
 ```bash
-gh-here                           # Start server on available port
-gh-here --open                    # Start and open browser (default)
-gh-here --port=8080               # Use specific port
-gh-here --open --browser=safari   # Open in Safari
+gh-here
 ```
 
-## Features
+Run from any directory. gh-here opens a read-only browser for that directory; no repository, account, or Git installation is needed.
 
-### Core
-- **File Tree Sidebar** - Navigate your repository structure with an interactive file tree
-- **Context-Aware Search** - Global repository search or filter the file tree
-- **Client-Side Navigation** - Fast page transitions without full reloads
-- **Syntax Highlighting** - Support for 30+ languages via highlight.js
-- **Git Integration** - Status indicators and diff viewer with line numbers
+```bash
+npx gh-here                      # Open the current directory
+npx gh-here --no-open            # Start without opening a browser
+npx gh-here --port=8080          # Use a particular port
+npx gh-here --browser=safari     # Choose a browser (macOS / Linux)
+```
 
-### UI/UX
-- **Gitignore Toggle** - Show/hide gitignored files (persists in localStorage)
-- **Dark/Light Themes** - Toggle between themes
-- **README Preview** - Automatic markdown rendering
-- **Language Statistics** - See breakdown of languages in your repo
-- **File Operations** - Copy file paths, download files, view raw content
+Or install globally with `npm install -g gh-here`.
 
-## Keyboard Shortcuts
+## A small, focused workspace
 
-| Key | Action |
-|-----|--------|
-| `Cmd/Ctrl + K` | Focus search |
-| `Escape` | Close search/modals |
+- **Browse** folders in a virtualized Pierre file tree. Subfolders load on demand.
+- **Read** syntax-highlighted code, Markdown previews, and images. Select line numbers to create a local line link.
+- **Find** a file by name or path with `⌘K`, `Ctrl K`, or `/`. Arrow keys move through results; Enter opens a file.
+- **Review changes** against the last local commit (HEAD) in Pierre’s split or unified diff view. Staged and unstaged edits, new files, deletions, and renames appear automatically. No paths to enter. Changes is hidden when Git is unavailable or the directory is outside a repository.
+- **Switch** between light and dark Pierre themes, wrap long code lines, copy paths or contents, and download files.
 
-## How It Works
+By default, `.git`, dependencies, build output, and files matched by `.gitignore` are hidden. Nested ignore files are supported. **Show ignored** reveals them. **Filter files** filters the loaded tree; **Go to file** searches across the working directory. Search is bounded to keep very large directories responsive.
 
-gh-here runs a local Express server that serves a read-only view of your codebase. It:
+Refresh reads the latest contents from disk. gh-here never writes to your files or changes Git state. Git commands only read local repository information; no remotes or accounts are involved. The server binds only to `127.0.0.1`; local fonts, syntax grammars, and application assets are bundled, with no CDN or telemetry. External README images are replaced by their alt text. Links to external sites open only when clicked.
 
-1. Respects your `.gitignore` (optional toggle to show ignored files)
-2. Shows git status and diffs for modified files
-3. Provides a familiar GitHub-like interface
-4. Works entirely offline - no data leaves your machine
+Text previews and comparisons support files up to 2 MB and 20,000 lines. Larger files and binary files can be downloaded. Symlinks that leave the working directory are excluded.
 
 ## Development
 
 ```bash
 npm install
-npm start
-```
-
-### Running Tests (Optional)
-
-Tests use Playwright for smoke testing but are optional for development:
-
-```bash
-# First time only - install Chromium for testing (~210MB)
-npx playwright install chromium
-
-# Run tests
+npm run build
+npm start -- --no-open
+npm run check
 npm test
+npm run test:ui
 ```
 
-**Note**: End users don't need Playwright - it's only installed when you clone the repo and run `npm install` (devDependency).
+Rebuild after changing `client/`; esbuild bundles the JavaScript and the stylesheets in `client/styles/` into `public/build/`. The frontend is vanilla JavaScript, with lazy loading for Markdown, code rendering, and individual syntax grammars. `npm pack` builds and includes the assets so installed users need no build step.
 
-## Dependencies
-
-- express - Web server
-- highlight.js - Syntax highlighting
-- marked - Markdown rendering
-- @primer/octicons - GitHub icons
+`npm test` checks filesystem behavior and local Git comparisons with temporary directories and repositories. `npm run test:ui` builds, then runs the main browser workflows with Playwright Chromium; install the test browser with `npx playwright install chromium` if needed. `npm run check` runs Prettier and ESLint.
 
 ## License
 
-MIT
+MIT. Pierre Diffs and Trees are Apache-2.0; Geist fonts are SIL Open Font License. Font licenses are included alongside the bundled fonts; bundled library licenses and notices are included in `public/licenses/`.

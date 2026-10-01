@@ -1,0 +1,269 @@
+/* The main area: directory listings, a single file, and the review. */
+
+main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  outline: none;
+}
+
+main[data-view='directory'] {
+  padding: 24px 28px 48px;
+}
+
+main[data-view='changes'] {
+  overflow: hidden;
+}
+
+.review {
+  height: 100%;
+  overflow: auto;
+}
+
+.file-list,
+.readme {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.readme {
+  margin-top: 20px;
+}
+
+.card-header {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.card-header .icon {
+  color: var(--muted);
+}
+
+.card-header .meta {
+  margin-left: auto;
+}
+
+.card-header a:hover {
+  text-decoration: underline;
+}
+
+.file-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 80px 110px;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 16px;
+}
+
+.file-row + .file-row {
+  border-top: 1px solid var(--border);
+}
+
+.file-row:hover {
+  background: var(--panel);
+}
+
+.file-row:hover .name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.file-row .icon {
+  color: var(--muted);
+}
+
+.file-row .folder-icon {
+  color: var(--fg);
+}
+
+.file-row .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-row small,
+.file-row .size,
+.file-row time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.file-row .size,
+.file-row time {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.file-row .size {
+  font-family: var(--mono);
+}
+
+/* File view: a single sticky header, like a file in a review. */
+
+.file-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px 0 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.file-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.file-identity h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.actions .segmented {
+  margin-right: 6px;
+}
+
+diffs-container {
+  --diffs-font-family: var(--mono);
+  --diffs-header-font-family: var(--sans);
+  --diffs-font-size: 13px;
+  --diffs-line-height: 22px;
+  color-scheme: inherit;
+}
+
+.review diffs-container {
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.collapse-toggle {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 2px;
+  border-radius: 5px;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.collapse-toggle:hover {
+  background: var(--hover);
+  color: var(--fg);
+}
+
+.collapse-toggle[aria-expanded='false'] {
+  transform: rotate(-90deg);
+}
+
+.image-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 40px;
+  background: var(--panel);
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.empty {
+  padding: 72px 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty > .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.empty h1,
+.empty h2 {
+  margin: 10px 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  color: var(--fg);
+}
+
+.empty p {
+  max-width: 420px;
+  margin: 10px auto 20px;
+  line-height: 1.6;
+}
+
+.error h1 {
+  color: var(--deleted);
+}
+
+@media (max-width: 900px) {
+  main[data-view='directory'] {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 720px) {
+  main[data-view='directory'] {
+    padding: 14px 12px 28px;
+  }
+
+  .file-row {
+    grid-template-columns: 16px minmax(0, 1fr) auto;
+    padding: 0 12px;
+  }
+
+  .file-row time {
+    display: none;
+  }
+
+  .file-toolbar {
+    padding: 0 6px 0 14px;
+  }
+
+  .file-identity .meta,
+  .file-toolbar [data-action='copy-path'] {
+    display: none;
+  }
+
+  diffs-container {
+    --diffs-font-size: 12px;
+    --diffs-line-height: 21px;
+  }
+}
+
+@media (pointer: coarse) {
+  .collapse-toggle {
+    width: 32px;
+    height: 32px;
+  }
+}

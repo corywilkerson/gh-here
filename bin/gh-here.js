@@ -1,193 +1,76 @@
 #!/usr/bin/env node
 
 const express = require('express');
-const { exec } = require('child_process');
-
-// Import our modularized components
-const { findGitRepo } = require('../lib/git');
+const { execFile } = require('node:child_process');
 const { setupRoutes } = require('../lib/server');
 
-// Parse command line arguments
 const args = process.argv.slice(2);
-const noOpen = args.includes('--no-open');
-const openBrowser = !noOpen; // Default is to open browser
-const helpRequested = args.includes('--help') || args.includes('-h');
+const portArg = args.find((arg) => arg.startsWith('--port='));
+const browser = args.find((arg) => arg.startsWith('--browser='))?.slice(10);
+const port = portArg ? Number(portArg.slice(7)) : 5555;
 
-// Check for port specification
-let specifiedPort = null;
-const portArg = args.find(arg => arg.startsWith('--port='));
-if (portArg) {
-  specifiedPort = parseInt(portArg.split('=')[1]);
-  if (isNaN(specifiedPort) || specifiedPort < 1 || specifiedPort > 65535) {
-    console.error('❌ Invalid port number. Port must be between 1 and 65535.');
-    process.exit(1);
-  }
-}
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`gh-here — your working directory, beautifully browsable.
 
-// Check for browser specification
-let specificBrowser = null;
-const browserArg = args.find(arg => arg.startsWith('--browser='));
-if (browserArg) {
-  specificBrowser = browserArg.split('=')[1];
-}
+Usage: gh-here [options]
 
-if (helpRequested) {
-  console.log(`
-gh-here - GitHub-like local file browser
+  --no-open          Start without opening your browser
+  --port=<number>    Listen on a specific port (default: first available from 5555)
+  --browser=<name>   Open in a particular browser
+  --help, -h         Show help
 
-Usage: npx gh-here [options]
-
-Options:
-  --no-open               Do not open browser automatically
-  --browser=<name>        Specify browser (safari, chrome, firefox, arc)
-  --port=<number>         Specify port number (default: 5555)
-  --help, -h              Show this help message
-
-Examples:
-  npx gh-here                           Start server and open browser
-  npx gh-here --no-open                 Start server without opening browser
-  npx gh-here --port=8080               Start server on port 8080 and open browser
-  npx gh-here --browser=safari          Start server and open in Safari
-  npx gh-here --browser=arc             Start server and open in Arc
-`);
+Run from any directory. No Git repository required.`);
   process.exit(0);
 }
 
-const app = express();
-const workingDir = process.cwd();
-
-// Git repository detection
-const gitRepoRoot = findGitRepo(workingDir);
-const isGitRepo = !!gitRepoRoot;
-
-// Setup all routes
-setupRoutes(app, workingDir, isGitRepo, gitRepoRoot);
-
-// Function to find an available port
-async function findAvailablePort(startPort = 5555) {
-  const net = require('net');
-  
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    
-    server.listen(startPort, () => {
-      const port = server.address().port;
-      server.close(() => resolve(port));
-    });
-    
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        // Port is in use, try next one
-        findAvailablePort(startPort + 1).then(resolve).catch(reject);
-      } else {
-        reject(err);
-      }
-    });
-  });
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  console.error('Port must be an integer between 1 and 65535.');
+  process.exit(1);
 }
 
-// Function to open browser
-function openBrowserToUrl(url) {
+function openBrowser(url) {
+  const names = {
+    safari: 'Safari',
+    chrome: 'Google Chrome',
+    firefox: 'Firefox',
+    arc: 'Arc',
+    edge: 'Microsoft Edge',
+  };
   let command;
-  
-  if (process.platform === 'win32') {
-    if (specificBrowser) {
-      // On Windows, try to use specific browser
-      const browserMap = {
-        'chrome': 'chrome.exe',
-        'firefox': 'firefox.exe',
-        'edge': 'msedge.exe',
-        'safari': 'safari.exe'
-      };
-      const browserExe = browserMap[specificBrowser.toLowerCase()] || `${specificBrowser}.exe`;
-      command = `start ${browserExe} ${url}`;
-    } else {
-      command = `start ${url}`;
-    }
-  } else if (process.platform === 'darwin') {
-    if (specificBrowser) {
-      // On macOS, use specific browser application
-      const browserMap = {
-        'safari': 'Safari',
-        'chrome': 'Google Chrome', 
-        'firefox': 'Firefox',
-        'arc': 'Arc',
-        'edge': 'Microsoft Edge'
-      };
-      const browserApp = browserMap[specificBrowser.toLowerCase()] || specificBrowser;
-      command = `open -a "${browserApp}" "${url}"`;
-      console.log(`🔗 Opening in ${browserApp}: ${url}`);
-    } else {
-      // Use default browser
-      command = `open "${url}"`;
-      console.log(`🔗 Opening in default browser: ${url}`);
-    }
+  let parameters;
+  if (process.platform === 'darwin') {
+    command = 'open';
+    parameters = browser
+      ? ['-a', names[browser.toLowerCase()] || browser, url]
+      : [url];
+  } else if (process.platform === 'win32') {
+    command = 'rundll32.exe';
+    parameters = ['url.dll,FileProtocolHandler', url];
   } else {
-    // Linux
-    if (specificBrowser) {
-      command = `${specificBrowser} ${url}`;
-    } else {
-      command = `xdg-open ${url}`;
-    }
+    command = browser || 'xdg-open';
+    parameters = [url];
   }
-  
-  exec(command, (error) => {
-    if (error) {
-      console.log(`⚠️  Could not open browser automatically: ${error.message}`);
-      if (specificBrowser) {
-        console.log(`   Make sure ${specificBrowser} is installed and accessible`);
-      }
-      console.log(`   Please open ${url} manually`);
-    } else {
-      console.log(`✅ Browser opened successfully`);
-    }
+  execFile(command, parameters, (error) => {
+    if (error) console.log(`Open ${url} in your browser.`);
   });
 }
 
-// Start server with automatic port selection
-async function startServer() {
-  try {
-    let port;
-    if (specifiedPort) {
-      // If user specified a port, try only that port
-      const net = require('net');
-      const server = net.createServer();
-      
-      try {
-        await new Promise((resolve, reject) => {
-          server.listen(specifiedPort, () => {
-            server.close(() => resolve());
-          });
-          server.on('error', reject);
-        });
-        port = specifiedPort;
-      } catch (error) {
-        if (error.code === 'EADDRINUSE') {
-          console.error(`❌ Port ${specifiedPort} is already in use. Please choose a different port.`);
-          process.exit(1);
-        } else {
-          throw error;
-        }
-      }
-    } else {
-      // Find available port starting from 5555
-      port = await findAvailablePort(5555);
-    }
-    const url = `http://localhost:${port}`;
-    
-    app.listen(port, () => {
-      console.log(`🚀 gh-here is running at ${url}`);
-      console.log(`📂 Serving files from: ${workingDir}`);
-      
-      if (openBrowser) {
-        console.log(`🌍 Opening browser...`);
-        setTimeout(() => openBrowserToUrl(url), 1000);
-      }
-    });
-  } catch (error) {
-    console.error(`❌ Failed to start server: ${error.message}`);
-    process.exit(1);
-  }
+const app = express();
+setupRoutes(app, process.cwd());
+
+function listen(candidate) {
+  const server = app.listen(candidate, '127.0.0.1');
+  server.once('listening', () => {
+    const url = `http://127.0.0.1:${candidate}`;
+    console.log(`gh-here  ${url}\n${process.cwd()}\nPress Ctrl+C to stop.`);
+    if (!args.includes('--no-open')) openBrowser(url);
+  });
+  server.once('error', (error) => {
+    if (error.code === 'EADDRINUSE' && !portArg && candidate < 65535)
+      return listen(candidate + 1);
+    console.error(`Could not start gh-here: ${error.message}`);
+    process.exitCode = 1;
+  });
 }
 
-startServer();
+listen(port);

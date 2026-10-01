@@ -1,0 +1,224 @@
+/* Sidebar: view tabs, the file tree, diff stats. A drawer on phones. */
+
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+[data-sidebar='closed'] .sidebar,
+.scrim {
+  display: none;
+}
+
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-bar {
+  height: 46px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tabs a {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.tabs a:hover,
+.tabs a.active {
+  background: var(--hover);
+  color: var(--fg);
+}
+
+.count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--hover);
+  font: 500 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ignored-toggle span {
+  display: flex;
+}
+
+.ignored-toggle {
+  position: relative;
+}
+
+.ignored-toggle input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ignored-toggle:has(input:checked) {
+  background: var(--hover);
+  color: var(--fg);
+}
+
+.ignored-toggle:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin: 0 10px 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.filter:focus-within {
+  border-color: var(--focus);
+}
+
+.filter input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 13px;
+}
+
+.tree {
+  flex: 1;
+  min-height: 0;
+  --trees-bg-override: var(--panel);
+  --trees-fg-override: var(--fg);
+  --trees-fg-muted-override: var(--muted);
+  --trees-selected-bg-override: var(--hover);
+  --trees-bg-muted-override: var(--hover);
+  --trees-border-color-override: var(--border);
+  --trees-focus-ring-color-override: var(--focus);
+  --trees-font-family-override: var(--sans);
+  --trees-font-size-override: 13.5px;
+  --trees-accent-override: var(--muted);
+}
+
+.tree file-tree-container {
+  display: block;
+  height: 100%;
+  color-scheme: inherit;
+}
+
+.stats {
+  flex-shrink: 0;
+  padding: 12px 16px 6px;
+  border-top: 1px solid var(--border);
+}
+
+.stats h2 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.stats dl {
+  margin: 0;
+}
+
+.stats dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  font-size: 13px;
+}
+
+.stats dl div + div {
+  border-top: 1px solid var(--border);
+}
+
+.stats dd {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 12.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.sidebar-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--added);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 260px;
+  }
+}
+
+@media (max-width: 720px) {
+  .sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 10;
+    width: min(300px, 86vw);
+    box-shadow: 20px 0 50px #0003;
+  }
+
+  [data-sidebar='open'] .scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    background: #0004;
+  }
+}
+
+@media (pointer: coarse) {
+  .tabs a {
+    min-width: 40px;
+    height: 40px;
+  }
+}

@@ -1,18 +1,23 @@
 {
   "name": "gh-here",
   "version": "3.2.0",
-  "description": "A local GitHub-like file browser for viewing code",
+  "description": "A fast local file browser, with code and diffs by Pierre.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/corywilkerson/gh-here.git"
   },
-  "main": "index.js",
   "bin": {
     "gh-here": "bin/gh-here.js"
   },
   "scripts": {
     "start": "node bin/gh-here.js",
-    "test": "node test.js"
+    "build": "node scripts/build.js",
+    "prepack": "npm run build",
+    "test": "node --test tests/server.test.js tests/git.test.js",
+    "test:ui": "npm run build && node --test tests/browser.test.js",
+    "format": "prettier --write client lib bin scripts tests public/index.html *.config.js",
+    "check": "prettier --check client lib bin scripts tests public/index.html *.config.js && eslint .",
+    "lint": "eslint ."
   },
   "keywords": [
     "github",
@@ -23,12 +28,35 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@primer/octicons": "^19.8.0",
-    "express": "^4.18.2",
-    "highlight.js": "^11.9.0",
-    "marked": "^12.0.0"
+    "express": "^4.22.3",
+    "ignore": "^7.0.11"
   },
   "devDependencies": {
-    "playwright": "^1.56.1"
+    "@eslint/js": "^10.0.1",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@pierre/diffs": "^1.5.1",
+    "@pierre/trees": "1.0.0-beta.6",
+    "dompurify": "^3.4.16",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "globals": "^17.13.0",
+    "marked": "^12.0.0",
+    "playwright": "^1.56.1",
+    "prettier": "^3.9.9"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "public/index.html",
+    "public/favicon.svg",
+    "public/fonts/",
+    "public/build/",
+    "README.md",
+    "public/licenses/"
+  ],
+  "engines": {
+    "node": ">=20"
   }
 }

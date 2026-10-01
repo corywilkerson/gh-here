@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>gh-here</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/build/main.css" />
+    <script type="module" src="/static/build/main.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <button
+        class="icon-button"
+        id="menu"
+        aria-label="Toggle files"
+        title="Toggle sidebar"
+        data-action="toggle-sidebar"
+        aria-expanded="false"
+      ></button>
+      <a class="mark" id="mark" href="/" data-path="" aria-label="gh-here"></a>
+      <div class="location" data-action="go-to-file">
+        <nav class="crumbs" id="crumbs" aria-label="Location"></nav>
+        <button
+          class="search-trigger"
+          id="search-trigger"
+          aria-label="Go to file"
+        >
+          <kbd>⌘K</kbd>
+        </button>
+      </div>
+      <div class="topbar-actions">
+        <div class="view-actions" id="view-actions"></div>
+        <button
+          class="icon-button"
+          id="refresh"
+          aria-label="Refresh directory"
+          title="Refresh"
+          data-action="refresh"
+        ></button>
+        <button class="icon-button" id="theme" data-action="theme"></button>
+      </div>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar" aria-label="File navigation">
+        <div class="sidebar-bar">
+          <nav class="tabs" aria-label="Views">
+            <a
+              href="/"
+              data-path=""
+              id="files-tab"
+              aria-label="Files"
+              title="Files"
+            ></a>
+            <a
+              href="/?view=changes"
+              id="changes-tab"
+              aria-label="Changes"
+              title="Changes"
+              hidden
+            ></a>
+          </nav>
+          <label class="icon-button ignored-toggle" title="Show ignored files">
+            <input type="checkbox" id="ignored" aria-label="Show ignored" />
+            <span id="ignored-icon"></span>
+          </label>
+        </div>
+        <label class="filter">
+          <span id="filter-icon"></span>
+          <input
+            id="filter"
+            type="search"
+            placeholder="Filter files"
+            aria-label="Filter visible files"
+          />
+        </label>
+        <div id="tree" class="tree"></div>
+        <section class="stats" id="stats" aria-label="Diff stats" hidden>
+          <h2>Diff stats</h2>
+          <dl id="stats-list"></dl>
+        </section>
+        <footer class="sidebar-footer">
+          <span class="status-dot"></span>
+          Local only · Powered by Diffs and Trees
+        </footer>
+      </aside>
+      <div class="scrim" id="scrim" data-action="close-drawer"></div>
+      <main id="main" tabindex="-1" aria-live="polite">
+        <div class="empty">Opening your directory…</div>
+      </main>
+    </div>
+    <dialog id="search-dialog" aria-label="Go to file">
+      <div class="dialog-search">
+        <span id="dialog-search-icon"></span>
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Find a file by name or path…"
+          aria-label="Find a file"
+          autocomplete="off"
+        />
+        <button
+          class="icon-button"
+          id="close-search"
+          aria-label="Close search"
+        ></button>
+      </div>
+      <div id="search-results" class="search-results"></div>
+      <div class="dialog-footer">
+        <span id="search-status">Search your working directory</span>
+        <span>
+          <kbd>↑</kbd>
+          <kbd>↓</kbd>
+          to move
+          <kbd>↵</kbd>
+          to open
+        </span>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>
