@@ -29,6 +29,12 @@ export function buildReview({ branch, files }) {
   };
 }
 
+/** Whether a file's change is unchanged since the last look. */
+export const sameChange = (a, b) =>
+  a?.status === b?.status &&
+  a?.oldFile?.contents === b?.oldFile?.contents &&
+  a?.newFile?.contents === b?.newFile?.contents;
+
 /** The tree lists folders before files at every level; the review follows it. */
 function treeOrder(a, b) {
   const left = a.path.split('/');

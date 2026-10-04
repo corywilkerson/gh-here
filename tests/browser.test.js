@@ -279,6 +279,13 @@ describe('reviewing changes', () => {
     await waitForCode(page, 'secondChange');
   };
 
+  test('opens on Changes when there is work in progress', async () => {
+    const { page, server } = ctx;
+    await page.goto(server.url);
+    await waitForCode(page, 'secondChange');
+    assert.equal(new URL(page.url()).searchParams.get('view'), 'changes');
+  });
+
   test('shows every changed file in one review', async () => {
     await openReview(ctx);
     const text = await codeText(ctx.page);
@@ -347,6 +354,21 @@ describe('reviewing changes', () => {
     assert.equal(await page.locator('#sidebar').isVisible(), false);
     await button(page, 'Toggle files').click();
     await treeItem(page, 'updated.js').waitFor();
+  });
+
+  test('updates live as files change, keeping collapsed files collapsed', async () => {
+    const { page, root } = ctx;
+    await openReview(ctx);
+    await button(page, 'Collapse client/original.js').click();
+    await writeFiles(root, {
+      'client/updated.js': 'export const liveEdit = true;\n',
+    });
+    await waitForCode(page, 'liveEdit');
+    await button(page, 'Expand client/original.js').waitFor();
+    await writeFiles(root, {
+      'client/updated.js': 'export const secondChange = true;\n',
+    });
+    await waitForCode(page, 'secondChange');
   });
 
   test('is all caught up once everything is committed', async () => {

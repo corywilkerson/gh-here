@@ -185,6 +185,11 @@
   font-size: 12px;
 }
 
+#version {
+  margin-left: auto;
+  font-family: var(--mono);
+}
+
 .status-dot {
   width: 6px;
   height: 6px;

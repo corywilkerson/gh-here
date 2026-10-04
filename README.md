@@ -23,11 +23,13 @@ Or install globally with `npm install -g gh-here`.
 
 ## A small, focused workspace
 
-- **Browse** folders in a virtualized Pierre file tree. Subfolders load on demand.
-- **Read** syntax-highlighted code, Markdown previews, and images. Select line numbers to create a local line link.
-- **Find** a file by name or path with `⌘K`, `Ctrl K`, or `/`. Arrow keys move through results; Enter opens a file.
-- **Review changes** against the last local commit (HEAD) in Pierre’s split or unified diff view. Staged and unstaged edits, new files, deletions, and renames appear automatically. No paths to enter. Changes is hidden when Git is unavailable or the directory is outside a repository.
-- **Switch** between light and dark Pierre themes, wrap long code lines, copy paths or contents, and download files.
+- **Review changes** like a pull request. Every file you've changed since the last commit stacks in one scrolling review, in split or unified view, with diff stats in the sidebar. Staged and unstaged edits, new files, deletions and renames all appear. When there's work in progress, gh-here opens straight to it.
+- **Watch it update live.** Edit a file, or let an agent edit it, and the review refreshes in place within a couple of seconds, keeping your scroll position and collapsed files.
+- **Move fast with the keyboard.** `j` / `k` step through changed files; `⌘K`, `Ctrl K` or `/` jumps to any file by name or path.
+- **Browse** folders in a virtualized file tree that loads subfolders on demand, and read syntax-highlighted code, Markdown previews and images. Select line numbers to create a line link.
+- **Make it yours:** light and dark themes, wrapped lines, collapsible files, and a sidebar you can hide. On a phone the sidebar becomes a drawer and diffs go unified.
+
+Changes is hidden when Git is unavailable or the directory is outside a repository.
 
 By default, `.git`, dependencies, build output, and files matched by `.gitignore` are hidden. Nested ignore files are supported. **Show ignored** reveals them. **Filter files** filters the loaded tree; **Go to file** searches across the working directory. Search is bounded to keep very large directories responsive.
 

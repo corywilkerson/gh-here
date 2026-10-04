@@ -84,6 +84,20 @@ test('handles additions, deletions, staged renames and binary files', async (t) 
   );
 });
 
+test('fingerprints changes so clients can tell when to refresh', async (t) => {
+  const { root } = await createRepository({ 'hello.js': 'one\n' }, t);
+  const get = await api(t, root);
+  const stamp = async () => (await get('changes')).stamp;
+
+  const clean = await stamp();
+  await fs.writeFile(path.join(root, 'hello.js'), 'two\n');
+  const edited = await stamp();
+  assert.notEqual(edited, clean);
+  assert.equal(await stamp(), edited, 'stable while nothing changes');
+  await fs.writeFile(path.join(root, 'hello.js'), 'three, longer\n');
+  assert.notEqual(await stamp(), edited);
+});
+
 test('scopes changes to the served subdirectory', async (t) => {
   const { root } = await createRepository(
     { 'src/file.js': 'before', 'src-other/file.js': 'before' },
