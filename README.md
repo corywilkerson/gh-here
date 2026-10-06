@@ -4,6 +4,11 @@ Your working directory, beautifully browsable.
 
 A fast, local file browser. Familiar navigation. Beautiful code, powered by [Pierre Diffs](https://diffs.com) and [Pierre Trees](https://trees.software).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/corywilkerson/gh-here/main/docs/screenshots/review-dark.png">
+  <img alt="gh-here reviewing uncommitted changes on a feature branch: a file tree with change badges, diff stats, and a split diff" src="https://raw.githubusercontent.com/corywilkerson/gh-here/main/docs/screenshots/review-light.png">
+</picture>
+
 ## Usage
 
 ```bash
@@ -28,6 +33,11 @@ Or install globally with `npm install -g gh-here`.
 - **Move fast with the keyboard.** `j` / `k` step through changed files; `⌘K`, `Ctrl K` or `/` jumps to any file by name or path.
 - **Browse** folders in a virtualized file tree that loads subfolders on demand, and read syntax-highlighted code, Markdown previews and images. Select line numbers to create a line link.
 - **Make it yours:** light and dark themes, wrapped lines, collapsible files, and a sidebar you can hide. On a phone the sidebar becomes a drawer and diffs go unified.
+
+<p>
+  <img alt="Reading a file in dark mode, with a selected line range" src="https://raw.githubusercontent.com/corywilkerson/gh-here/main/docs/screenshots/code-dark.png" width="74%">
+  <img alt="The review on a phone, with unified diffs" src="https://raw.githubusercontent.com/corywilkerson/gh-here/main/docs/screenshots/phone-dark.png" width="21%">
+</p>
 
 Changes is hidden when Git is unavailable or the directory is outside a repository.
 
